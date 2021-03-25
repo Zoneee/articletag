@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleTag", "ArticleTag\ArticleTag.csproj", "{8F526EDE-6702-4321-8891-6A93F7CEE80B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entity", "Entity\Entity.csproj", "{E3536177-12FE-441F-890A-BE778145DC0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Businesses", "Businesses\Businesses.csproj", "{A732F41A-15C8-421B-B30D-C1B462FD235A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F526EDE-6702-4321-8891-6A93F7CEE80B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F526EDE-6702-4321-8891-6A93F7CEE80B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F526EDE-6702-4321-8891-6A93F7CEE80B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F526EDE-6702-4321-8891-6A93F7CEE80B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3536177-12FE-441F-890A-BE778145DC0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3536177-12FE-441F-890A-BE778145DC0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3536177-12FE-441F-890A-BE778145DC0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3536177-12FE-441F-890A-BE778145DC0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A732F41A-15C8-421B-B30D-C1B462FD235A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A732F41A-15C8-421B-B30D-C1B462FD235A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A732F41A-15C8-421B-B30D-C1B462FD235A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A732F41A-15C8-421B-B30D-C1B462FD235A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2ED9D206-11BB-448C-BF26-996A6F991303}
+	EndGlobalSection
+EndGlobal
