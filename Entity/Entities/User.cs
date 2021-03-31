@@ -1,4 +1,5 @@
-﻿using Deepbio.Domain.Enum;
+﻿using System;
+using Deepbio.Domain.Enum;
 using Entity.Interfaces;
 using FreeSql.DataAnnotations;
 
@@ -20,7 +21,7 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
         /// <summary>
         /// 登录名
         /// </summary>
-        public string UserName { get; set; }
+        public string LoginName { get; set; }
 
         /// <summary>
         /// 登录密码
@@ -29,5 +30,6 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
 
         public string Email { get; set; }
         public string Phone { get; set; }
+        public DateTime LastLoginTime { get; set; }
     }
 }
