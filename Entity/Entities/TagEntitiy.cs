@@ -1,6 +1,7 @@
-﻿using Entity.Interfaces;
+﻿using Deepbio.Domain.Entities;
+using Entity.Interfaces;
 
-namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
+namespace Entity.Entities
 {
     /// <summary>
     /// 标记实体表

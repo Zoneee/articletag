@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Security.Principal;
+using Deepbio.Domain.Entities;
 using Deepbio.Domain.Enum;
 using Entity.Interfaces;
 using FreeSql.DataAnnotations;
 
-namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
+namespace Entity.Entities
 {
     /// <summary>
     /// 标记文章表
