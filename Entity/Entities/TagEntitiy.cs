@@ -8,11 +8,6 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
     /// <remarks>Tag 模块</remarks>
     public class TagEntitiy : EntityBase<long>, IAggregateRoot
     {
-        /// <summary>
-        /// 父级ID
-        /// </summary>
-        public long PID { get; set; }
-
         public string Name { get; set; }
     }
 }
