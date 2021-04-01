@@ -1,7 +1,7 @@
 ﻿namespace Deepbio.Domain.Enum
 {
     /// <summary>
-    /// 文章审核状态
+    /// 文章状态
     /// </summary>
     /// <remarks>Tag 模块</remarks>
     public enum TagArticleStatusEnum

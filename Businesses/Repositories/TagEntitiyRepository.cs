@@ -1,7 +1,7 @@
 ﻿using Entity.Entities;
 using FreeSql;
 
-namespace Entity.Repositories
+namespace Businesses.Repositories
 {
     /// <summary>
     /// 标记实体表

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Businesses.Dto;
@@ -9,15 +7,17 @@ using Deepbio.Domain.Enum;
 using Entity.Entities;
 using FreeSql;
 
-namespace Businesses.Commands
+namespace Businesses.Repositories
 {
-    public class ArticleBusiness : IArticleBusiness
+    /// <summary>
+    /// 文献标记记录表
+    /// </summary>
+    public class ArticleTaggedRecordRepository
+        : BaseRepository<ArticleTaggedRecord, long>,
+        IArticleTaggedRecordRepository
     {
-        private readonly IBaseRepository<ArticleTaggedRecord, long> _taggedRecordRepo;
-
-        public ArticleBusiness(IBaseRepository<ArticleTaggedRecord, long> taggedRecordRepo)
+        public ArticleTaggedRecordRepository(IFreeSql freeSql) : base(freeSql, null)
         {
-            _taggedRecordRepo = taggedRecordRepo;
         }
 
         /// <summary>
@@ -31,13 +31,13 @@ namespace Businesses.Commands
              * 最后推送未分配的
              */
 
-            var unsanctioned = await _taggedRecordRepo.Select
+            var unsanctioned = await Select
                 .Where(s => s.UserID == userid && s.Status == TagArticleStatusEnum.Unsanctioned)
                 .AnyAsync();
 
             if (unsanctioned)
             {
-                var unsanction = await _taggedRecordRepo.Select
+                var unsanction = await Select
                     .Where(s => s.UserID == userid && s.Status == TagArticleStatusEnum.Unsanctioned)
                     .ToOneAsync(s => new ArticleDto()
                     {
@@ -48,12 +48,12 @@ namespace Businesses.Commands
                 return unsanction;
             }
 
-            var tagging = await _taggedRecordRepo.Select
+            var tagging = await Select
                 .Where(s => s.UserID == userid && s.Status == TagArticleStatusEnum.Tagging)
                 .AnyAsync();
             if (tagging)
             {
-                var taggingArticle = await _taggedRecordRepo.Select
+                var taggingArticle = await Select
                 .Where(s => s.UserID == userid && s.Status == TagArticleStatusEnum.Tagging)
                 .ToOneAsync(s => new ArticleDto()
                 {
@@ -64,12 +64,12 @@ namespace Businesses.Commands
                 return taggingArticle;
             }
 
-            var untagged = await _taggedRecordRepo.Select
-                .Where(s => s.UserID == userid && s.Status == TagArticleStatusEnum.Untagged)
+            var untagged = await Select
+                .Where(s => s.Status == TagArticleStatusEnum.Untagged)
                 .ToOneAsync();
 
             untagged.Status = TagArticleStatusEnum.Tagging;
-            await _taggedRecordRepo.UpdateAsync(untagged);
+            await UpdateAsync(untagged);
 
             return new ArticleDto()
             {
