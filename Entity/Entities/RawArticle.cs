@@ -14,7 +14,7 @@ namespace CleanRawArticleTool
     {
         [Column(DbType = "varchar(max)")]
         public string RawContent { get; set; }
-        public TagContentFormatEnum? ContentFormat { get; set; }
+        public TagContentFormatEnum ContentFormat { get; set; }
         public string BatchName { get; set; }
         public DateTime ImportTime { get; set; }
         public string DOI { get; set; }

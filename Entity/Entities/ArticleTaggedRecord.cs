@@ -35,6 +35,9 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
         [Column(DbType = "nvarchar(max)")]
         public string TaggedContent { get; set; }
 
+        [Column(DbType = "nvarchar(max)")]
+        public string TaggedArray { get; set; }
+
         public TagArticleStatusEnum Status { get; set; }
         public DateTime StatusChangeTime { get; set; }
     }

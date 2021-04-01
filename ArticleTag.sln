@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entity", "Entity\Entity.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Businesses", "Businesses\Businesses.csproj", "{A732F41A-15C8-421B-B30D-C1B462FD235A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanRawArticleTool", "CleanRawArticleTool\CleanRawArticleTool.csproj", "{CFDCEC10-D018-4AF6-8A06-D53AA7DF6DF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CleanRawArticleTool", "CleanRawArticleTool\CleanRawArticleTool.csproj", "{CFDCEC10-D018-4AF6-8A06-D53AA7DF6DF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseJson", "ParseJson\ParseJson.csproj", "{6E2FBD75-9AE2-44E3-B06D-E94CB1B6A4A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{CFDCEC10-D018-4AF6-8A06-D53AA7DF6DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFDCEC10-D018-4AF6-8A06-D53AA7DF6DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFDCEC10-D018-4AF6-8A06-D53AA7DF6DF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E2FBD75-9AE2-44E3-B06D-E94CB1B6A4A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E2FBD75-9AE2-44E3-B06D-E94CB1B6A4A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E2FBD75-9AE2-44E3-B06D-E94CB1B6A4A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E2FBD75-9AE2-44E3-B06D-E94CB1B6A4A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

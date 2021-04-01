@@ -14,7 +14,6 @@ namespace CleanRawArticleTool
     {
         static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
             .UseConnectionString(FreeSql.DataType.SqlServer, @"server=192.168.1.55;database=ArticleTag;uid=sa;pwd=deepbiodb@2019")
-            .UseAutoSyncStructure(true) //自动同步实体结构到数据库，FreeSql不会扫描程序集，只有CRUD时才会生成表。
             .Build(); //请务必定义成 Singleton 单例模式 
 
         private readonly ILogger log;
@@ -23,7 +22,7 @@ namespace CleanRawArticleTool
         public void DoClean()
         {
 
-            var rawArticles = fsql.Select<RawArticle>().Where(p => p.ContentFormat == (int)TagContentFormatEnum.Html || p.ContentFormat == (int)TagContentFormatEnum.PlainTextOrXml).Where(a =>
+            var rawArticles = fsql.Select<RawArticle>().Where(p => p.ContentFormat == TagContentFormatEnum.Html || p.ContentFormat == TagContentFormatEnum.PlainTextOrXml).Where(a =>
                 !fsql.Select<CleanedArticle>().As("b").Where(b => b.RawArticleID == a.ID).Any());
             var count = rawArticles.Count();
             var rawArticle = rawArticles.First();
@@ -32,7 +31,7 @@ namespace CleanRawArticleTool
             {
                 try
                 {
-                    var cleanedContent = rawArticle.ContentFormat == (int)TagContentFormatEnum.Html ? Clean(rawArticle.RawContent, rawArticle.ID) : rawArticle.RawContent;
+                    var cleanedContent = rawArticle.ContentFormat == TagContentFormatEnum.Html ? Clean(rawArticle.RawContent, rawArticle.ID) : rawArticle.RawContent;
                     var cleanedObj = new CleanedArticle()
                     {
                         CleanedContent = cleanedContent,
