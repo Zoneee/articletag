@@ -17,6 +17,7 @@ namespace ArticleTag.Extensions
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
+                    Title = "ArticleTag"
                 });
                 var filePath = Path.Combine(AppContext.BaseDirectory, "ArticleTag.xml");
                 c.IncludeXmlComments(filePath);

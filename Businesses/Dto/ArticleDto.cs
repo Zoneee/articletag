@@ -6,6 +6,6 @@ namespace Businesses.Dto
     {
         public long ID { get; set; }
         public string Content { get; set; }
-        public IEnumerable<Tag> Tags { get; set; }
+        public ICollection<Tag> Tags { get; set; }
     }
 }

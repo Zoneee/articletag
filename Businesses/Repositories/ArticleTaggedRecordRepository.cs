@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Businesses.Dto;
 using Businesses.Interfaces;
@@ -8,6 +7,7 @@ using Businesses.ViewModels.Requsets;
 using Deepbio.Domain.Enum;
 using Entity.Entities;
 using FreeSql;
+using Newtonsoft.Json;
 
 namespace Businesses.Repositories
 {
@@ -24,14 +24,16 @@ namespace Businesses.Repositories
 
         public async Task<ArticleDto> GetArticleAsync(long id)
         {
-            var dto = await this.Select
+            var article = await this.Select
                    .Where(s => s.ID == id)
-                   .ToOneAsync(s => new ArticleDto()
-                   {
-                       ID = s.ID,
-                       Content = s.TaggedContent,
-                       Tags = JsonSerializer.Deserialize<IEnumerable<Tag>>(s.TaggedArray, null)
-                   });
+                   .ToOneAsync();
+
+            var dto = new ArticleDto()
+            {
+                ID = article.ID,
+                Content = article.TaggedContent,
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? "")
+            };
 
             return dto;
         }
@@ -41,7 +43,7 @@ namespace Businesses.Repositories
             var articles = await this.Select
                 .Page(page, size)
                 .Include(s => s.Tagger)
-                .Include(s => s.Manager)
+                //.Include(s => s.Manager)
                 .Count(out var count)
                 .ToListAsync(s => new TaggedRecordDto()
                 {
@@ -70,6 +72,9 @@ namespace Businesses.Repositories
         /// </summary>
         public async Task<ArticleDto> GetArticleByTaggerIdAsync(long taggerId)
         {
+
+            // TODO 用户角色检查
+
             /**
              * 先推送未审核通过的
              * 再推送未标记完成的
@@ -84,13 +89,15 @@ namespace Businesses.Repositories
             {
                 var unsanction = await Select
                     .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Unsanctioned)
-                    .ToOneAsync(s => new ArticleDto()
-                    {
-                        ID = s.ID,
-                        Content = s.TaggedContent,
-                        Tags = JsonSerializer.Deserialize<IEnumerable<Tag>>(s.TaggedArray, null)
-                    });
-                return unsanction;
+                    .ToOneAsync();
+
+                var dto = new ArticleDto()
+                {
+                    ID = unsanction.ID,
+                    Content = unsanction.TaggedContent,
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? "")
+                };
+                return dto;
             }
 
             var tagging = await Select
@@ -100,13 +107,15 @@ namespace Businesses.Repositories
             {
                 var taggingArticle = await Select
                 .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Tagging)
-                .ToOneAsync(s => new ArticleDto()
+                .ToOneAsync();
+
+                var dto = new ArticleDto()
                 {
-                    ID = s.ID,
-                    Content = s.TaggedContent,
-                    Tags = JsonSerializer.Deserialize<IEnumerable<Tag>>(s.TaggedArray, null)
-                });
-                return taggingArticle;
+                    ID = taggingArticle.ID,
+                    Content = taggingArticle.TaggedContent,
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? "")
+                };
+                return dto;
             }
 
             var untagged = await Select
@@ -116,13 +125,14 @@ namespace Businesses.Repositories
             if (untagged != null)
             {
                 untagged.Status = TagArticleStatusEnum.Tagging;
+                untagged.UserID = taggerId;
                 await UpdateAsync(untagged);
 
                 return new ArticleDto()
                 {
                     ID = untagged.ID,
                     Content = untagged.TaggedContent,
-                    Tags = JsonSerializer.Deserialize<IEnumerable<Tag>>(untagged.TaggedArray, null)
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? "")
                 };
             }
 
@@ -131,10 +141,11 @@ namespace Businesses.Repositories
 
         public async Task<bool> CheckCanEditAsync(long articleId)
         {
-            return await this.Select
+            var article = await this.Select
                    .Where(s => s.ID == articleId)
-                   .ToOneAsync(s => s.Status == TagArticleStatusEnum.Unaudited
-                   || s.Status == TagArticleStatusEnum.Audited);
+                   .ToOneAsync();
+            return !(article.Status == TagArticleStatusEnum.Unaudited
+                   || article.Status == TagArticleStatusEnum.Audited);
         }
 
         public async Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record)
@@ -143,7 +154,7 @@ namespace Businesses.Repositories
                 .Where(s => s.ID == record.ID)
                 .ToOneAsync();
 
-            model.TaggedArray = JsonSerializer.Serialize(record.Tags);
+            model.TaggedArray = JsonConvert.SerializeObject(record.Tags);
             model.TaggedContent = record.TaggedContent;
             model.LastChangeTime = DateTime.Now;
 

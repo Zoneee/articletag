@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleTag.Controllers
 {
-    public class ApiControllerBase: ControllerBase
+    public class ApiControllerBase : ControllerBase
     {
         protected long CurrentUserId
         {
