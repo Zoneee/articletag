@@ -34,6 +34,10 @@ namespace Entity.Entities
         /// </summary>
         [Column(DbType = "nvarchar(max)")]
         public string TaggedContent { get; set; }
+        /// <summary>
+        /// 标签数组JSON
+        /// </summary>
+        public string TaggedArray { get; set; }
 
         public TagArticleStatusEnum Status { get; set; }
         public DateTime StatusChangeTime { get; set; }
