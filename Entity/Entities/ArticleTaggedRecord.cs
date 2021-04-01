@@ -16,8 +16,15 @@ namespace Entity.Entities
         /// 标注员ID
         /// </summary>
         public long UserID { get; set; }
+        [Navigate(nameof(User.ID))]
+        public virtual User Tagger { get; set; }
 
         public long AdminID { get; set; }
+        /// <summary>
+        /// Include
+        /// </summary>
+        [Navigate(nameof(User.ID))]
+        public virtual User Manager { get; set; }
 
         /// <summary>
         /// 已格式化的文章ID
@@ -40,6 +47,6 @@ namespace Entity.Entities
         public string TaggedArray { get; set; }
 
         public TagArticleStatusEnum Status { get; set; }
-        public DateTime StatusChangeTime { get; set; }
+        public DateTime LastChangeTime { get; set; }
     }
 }
