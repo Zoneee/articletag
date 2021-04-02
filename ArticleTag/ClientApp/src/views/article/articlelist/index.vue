@@ -7,13 +7,7 @@
       empty-text="暂无"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column
-        prop="id"
-        label="文章ID"
-        sortable
-        :formatter="testFormat"
-      >
-      </el-table-column>
+      <el-table-column prop="id" label="文章ID" sortable> </el-table-column>
       <el-table-column prop="taskID" label="任务ID" sortable> </el-table-column>
       <el-table-column prop="lastTimeStr" label="最后标注时间" sortable>
       </el-table-column>
@@ -139,13 +133,15 @@ export default {
     }
   },
   methods: {
-    testFormat (row, column, cellValue, index) {
-      return cellValue.toString()
-    },
     formatDate (date) {
       var y = date.getFullYear()
       var m = date.getMonth() + 1
       var d = date.getDate()
+
+      var result = `${y}-${m}-${d}`
+      if (result === '1-1-1' || result === '1970-1-1') {
+        return ''
+      }
       return `${y}-${m}-${d}`
     },
     handleView (index, row) {
@@ -221,10 +217,10 @@ export default {
       border-top: 1px solid rgba(0, 0, 0, 0.1);
       padding: 5px;
       position: fixed;
-      background:white;
+      background: white;
     }
-    .el-table{
-      padding-bottom:39px;
+    .el-table {
+      padding-bottom: 39px;
     }
   }
 </style>

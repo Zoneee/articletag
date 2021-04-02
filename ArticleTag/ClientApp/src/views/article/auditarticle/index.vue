@@ -90,7 +90,7 @@ export default {
     }
   },
   created () {
-    this.articleId = parseInt(this.$route.params.id)
+    this.articleId = this.$route.params.id
     this.user = JSON.parse(window.localStorage.getItem('user_info') || '{}')
 
     this.checkStatus().then((flag) => {

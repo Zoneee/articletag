@@ -462,17 +462,17 @@ export default {
 
       if (tags.length) {
         this.tags.push({
-          id: this.taggedNum,
+          id: this.taggedNum.toString(),
           name: tags.map(s => s.label).join('/'),
           color: tags[1] ? tags[1].color : tags[0].color,
-          selection: this.selection
+          // selection: this.selection
         })
       } else {
         this.tags.push({
-          id: this.taggedNum,
+          id: this.taggedNum.toString(),
           name: this.imgTagContent,
           color: 'yellow',
-          selection: this.selection
+          // selection: this.selection
         })
       }
       this.selection = {}
