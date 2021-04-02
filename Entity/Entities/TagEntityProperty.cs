@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Deepbio.Domain.Entities;
+﻿using Deepbio.Domain.Entities;
 using Entity.Interfaces;
 
 namespace Entity.Entities
@@ -13,6 +8,5 @@ namespace Entity.Entities
         public long EntityID { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
-
     }
 }
