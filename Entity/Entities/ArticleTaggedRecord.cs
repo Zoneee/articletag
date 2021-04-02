@@ -50,10 +50,18 @@ namespace Entity.Entities
 
         /// <summary>
         /// 标签数组JSON
-        /// </summary>
+        /// </summary>}
+
+        [Column(DbType = "nvarchar(max)")]
         public string TaggedArray { get; set; }
 
         public TagArticleStatusEnum Status { get; set; }
         public DateTime LastChangeTime { get; set; }
+
+        public ArticleTaggedRecord SetID()
+        {
+            this.ID = NewId();
+            return this;
+        }
     }
 }

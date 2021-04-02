@@ -16,5 +16,11 @@ namespace Entity.Entities
         public string PlainArticleText { get; set; }
 
         public DateTime CleanTime { get; set; }
+
+        public CleanedArticle SetID()
+        {
+            this.ID = NewId();
+            return this;
+        }
     }
 }

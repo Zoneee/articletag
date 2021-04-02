@@ -11,6 +11,16 @@ namespace ParseJson
 {
     public class ElementMapping
     {
+        private static List<string> NotImplementNames = new List<string>();
+        private static string NotImplementNamesPath = @"notImplementNames.txt";
+        static ElementMapping()
+        {
+            if (File.Exists(NotImplementNamesPath))
+            {
+                NotImplementNames = File.ReadAllLines(NotImplementNamesPath).ToList();
+            }
+        }
+
         private ContentJson _cj;
         public ElementMapping(ContentJson contentJson)
         {
@@ -153,8 +163,18 @@ namespace ParseJson
                 case "volume-nr":
                     return GetVolumeNr(token);
                 default:
-                    throw new NotImplementedException();
+                    return DefaultDivHtml(jsonName, token);
             }
+        }
+
+        private string DefaultDivHtml(string jsonName, JToken token)
+        {
+            if (!NotImplementNames.Contains(jsonName))
+            {
+                NotImplementNames.Add(jsonName.ToLower());
+                File.AppendAllLines(NotImplementNamesPath,new []{jsonName});
+            }
+            return $"<span {ClassAndID(token)}>{TryGetDirectValue(token)}{TryGetSubHtml(token)}</span>";
         }
 
         private string GetNameHtml(JToken name)
@@ -554,18 +574,33 @@ namespace ParseJson
 
         private string ClassAndID(JToken token)
         {
+            if (token == null)
+            {
+                return "";
+            }
+
             var tokenName = token.SelectToken("$.#name");
             return $" class='{tokenName}' id='{token.SelectToken("$.$.id")}' title='{tokenName}' ";
         }
 
         private string TryGetDirectValue(JToken token)
         {
+            if (token == null)
+            {
+                return "";
+            }
+
             var val = (token["_"] as JValue)?.Value?.ToString().Replace("&", "&amp;");
             return val?.Replace("<", "&lt;")?.Replace(">", "&gt;");
         }
 
         private string TryGetSubHtml(JToken token)
         {
+            if (token == null)
+            {
+                return "";
+            }
+
             var html = "";
             var subEles = token.SelectToken("$.$$")?.Select(p => GetHtmlByToken(p));
             if (subEles?.Any() == true)

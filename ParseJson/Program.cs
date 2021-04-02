@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using CleanRawArticleTool;
+using System.Runtime.CompilerServices;
+using Entity.Entities;
+using Entity.Enum;
 using Newtonsoft.Json;
 
 namespace ParseJson
@@ -14,33 +16,59 @@ namespace ParseJson
 
         static void Main(string[] args)
         {
-            // new Sample().Load();
+            var rawArticles = fsql.Select<RawArticle>().Where(p => p.ContentFormat == TagContentFormatEnum.JsonHtml || p.ContentFormat == TagContentFormatEnum.PlainTextOrXml).Where(a =>
+                !fsql.Select<CleanedArticle>().As("b").Where(b => b.RawArticleID == a.ID).Any());
+            var total = rawArticles.Count();
+            var index = 0;
+            rawArticles.ToChunk(10, (batch =>
+             {
+                 foreach (var article in batch.Object)
+                 {
+                     try
+                     {
+                         var articleId = article.ID;
+                         var imgs = fsql.Select<RawArticleImgs>().Where(p => p.ArticleID == articleId).ToList();
 
-            // var contentJsonPart = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\jsonFormatArticleContent.json");
-            // var referenceJsonPart = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\jsonFormatArticleReferences.json");
+                         var contentJsonPart = GetContentJsonPart(article.RawContent);
+                         var referenceJsonPart = GetReferenceJsonPart(article.RawContent);
+                         var contentJson = new ContentJson(contentJsonPart, referenceJsonPart, imgs);
+                         var html = contentJson.BuildHtml();
 
+                         var cleanedArticleObj = new CleanedArticle()
+                         {
+                             CleanedContent = html,
+                             CleanTime = DateTime.Now,
+                             RawArticleID = articleId,
+                         }.SetID();
+                         fsql.Insert(cleanedArticleObj).ExecuteAffrows();
 
-            var articleId = 3918769900132;
-            var imgs = fsql.Select<RawArticleImgs>().Where(p => p.ArticleID == articleId).ToList();
-            
-            var rawArticle = fsql.Select<RawArticle>().Where(p=>p.ID == articleId).First();
-            var contentJsonPart = GetContentJsonPart(rawArticle.RawContent);
-            var referenceJsonPart = GetReferenceJsonPart(rawArticle.RawContent);
-            var contentJson = new ContentJson(contentJsonPart,referenceJsonPart,imgs); 
-            var html = contentJson.BuildHtml();
+                         var taggedRecord = new ArticleTaggedRecord()
+                         {
+                             CleanedArticleID = cleanedArticleObj.ID,
+                             Status = TagArticleStatusEnum.Tagging,
+                             TaggedContent = cleanedArticleObj.CleanedContent
+                         }.SetID();
+                         fsql.Insert(taggedRecord).ExecuteAffrows();
 
-            File.WriteAllText(@"F:\workspaces\ArticleCleanWorkspace\generatedHtml.html",html);
+                         Console.WriteLine($"cleaned {++index}/{total}");
+                     }
+                     catch (Exception e)
+                     {
+                         Console.WriteLine(e);
+                     }
+                 }
+             }));
         }
 
         private static string GetContentJsonPart(string rawHtml)
         {
-            return rawHtml.Split('\n').FirstOrDefault(p => p.StartsWith("{\"content\":[{\"#name\":\"body\""));
+            return rawHtml.Split('\n').FirstOrDefault(p => p.StartsWith("{\"content\":[{\"#name\":\"body\""))?.Replace(@"\",@"\\");
         }
 
         private static string GetReferenceJsonPart(string rawHtml)
         {
             return rawHtml.Split('\n')
-                .FirstOrDefault(p => p.StartsWith("{\"content\":[{\"#name\":\"bibliography\""));
+                .FirstOrDefault(p => p.StartsWith("{\"content\":[{\"#name\":\"bibliography\""))?.Replace(@"\", @"\\");
         }
 
     }
