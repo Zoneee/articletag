@@ -11,6 +11,7 @@ namespace Businesses
         {
             // 注册Business
             builder.RegisterType(typeof(ArticleTaggedRecordRepository)).As(typeof(IArticleTaggedRecordRepository));
+            builder.RegisterType(typeof(UserRepository)).As(typeof(IUserRepository));
 
             builder.RegisterType<IdGenerator>().As<IIdGenerator<long>>().SingleInstance();
 

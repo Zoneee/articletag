@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Compile Remove="Interfaces\IArticleBusiness.cs" />
+    <Compile Remove="ViewModels\Requsets\LoginUserRequest.cs" />
   </ItemGroup>
 
   <ItemGroup>

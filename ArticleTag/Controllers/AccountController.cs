@@ -20,6 +20,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace ArticleTag.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class AccountController : ApiControllerBase
     {
