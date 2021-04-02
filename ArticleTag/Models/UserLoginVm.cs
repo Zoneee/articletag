@@ -6,6 +6,7 @@ namespace Businesses.ViewModels.Requsets
     {
         [Required]
         public string LoginName { get; set; }
+
         [Required]
         public string Password { get; set; }
     }
