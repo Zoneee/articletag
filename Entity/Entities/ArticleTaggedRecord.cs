@@ -50,13 +50,9 @@ namespace Entity.Entities
 
         /// <summary>
         /// 标签数组JSON
-<<<<<<< HEAD
         /// </summary>}
 
         [Column(DbType = "nvarchar(max)")]
-=======
-        /// </summary>
->>>>>>> 046a72c91466ebffa86987516ddf3e1563a2fb8f
         public string TaggedArray { get; set; }
 
         public TagArticleStatusEnum Status { get; set; }

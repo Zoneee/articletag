@@ -2,10 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using CleanRawArticleTool;
-using CleanRawArticleTool.Models;
-using Deepbio.Domain.Entities.ArticleTagAggregateRoot;
-using Deepbio.Domain.Enum;
+using Entity.Entities;
+using Entity.Enum;
 using Newtonsoft.Json;
 
 namespace ParseJson

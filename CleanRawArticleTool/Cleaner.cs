@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CleanRawArticleTool.Models;
+using Entity.Entities;
+using Entity.Enum;
 using NLog;
 
 namespace CleanRawArticleTool
