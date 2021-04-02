@@ -13,11 +13,12 @@ namespace ArticleTag.Controllers
     [ApiController]
     public class ArticleController : ControllerBase
     {
-        private readonly IArticleTaggedRecordRepository _repository;
+        private readonly IArticleTaggedRecordRepository _articleRecordRepo;
 
-        public ArticleController(IArticleTaggedRecordRepository repository)
+        public ArticleController(
+            IArticleTaggedRecordRepository articleRecordRepo)
         {
-            _repository = repository;
+            _articleRecordRepo = articleRecordRepo;
         }
 
         [HttpPost("DistributeArticle")]
@@ -25,17 +26,26 @@ namespace ArticleTag.Controllers
         public async Task<IActionResult> DistributeArticle(long taggerId)
         {
             var response = JsonResponseBase<ArticleDto>.CreateDefault();
-            var article = await _repository.GetArticleByTaggerIdAsync(taggerId);
+            var article = await _articleRecordRepo.GetArticleByTaggerIdAsync(taggerId);
             response.Result = article;
             return Ok(response);
         }
 
         [HttpPost("CheckCanEdit")]
-        [SwaggerResponse(200, "输出文献编辑标识", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        [SwaggerResponse(200, "输出文献可编辑标识", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
         public async Task<IActionResult> CheckCanEdit(long articleId)
         {
             var response = JsonResponseBase<bool>.CreateDefault();
-            response.Result = await _repository.CheckCanEditAsync(articleId);
+            response.Result = await _articleRecordRepo.CheckCanEditAsync(articleId);
+            return Ok(response);
+        }
+
+        [HttpPost("CheckCanAudit")]
+        [SwaggerResponse(200, "输出文献可审核标识", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> CheckCanAudit(long articleId)
+        {
+            var response = JsonResponseBase<bool>.CreateDefault();
+            response.Result = await _articleRecordRepo.CheckCanAuditAsync(articleId);
             return Ok(response);
         }
 
@@ -44,7 +54,7 @@ namespace ArticleTag.Controllers
         public async Task<IActionResult> SaveTaggedRecord(ArticleRecordRequest record)
         {
             var response = JsonResponseBase<bool>.CreateDefault();
-            response.Result = await _repository.SaveTaggedRecordAsync(record);
+            response.Result = await _articleRecordRepo.SaveTaggedRecordAsync(record);
             return Ok(response);
         }
 
@@ -53,7 +63,7 @@ namespace ArticleTag.Controllers
         public async Task<IActionResult> SubmitAudit(long articleId)
         {
             var response = JsonResponseBase<bool>.CreateDefault();
-            response.Result = await _repository.SubmitAuditAsync(articleId);
+            response.Result = await _articleRecordRepo.SubmitAuditAsync(articleId);
             return Ok(response);
         }
 
@@ -62,7 +72,7 @@ namespace ArticleTag.Controllers
         public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size)
         {
             var response = JsonResponseBase<IEnumerable<TaggedRecordDto>>.CreateDefault();
-            var articles = await _repository.GetArticlesByPagingAsync(page, size);
+            var articles = await _articleRecordRepo.GetArticlesByPagingAsync(page, size);
             response.Result = articles;
             return Ok(response);
         }
@@ -72,7 +82,7 @@ namespace ArticleTag.Controllers
         public async Task<IActionResult> SearchArticle(long articleId)
         {
             var response = JsonResponseBase<ArticleDto>.CreateDefault();
-            var article = await _repository.GetArticleAsync(articleId);
+            var article = await _articleRecordRepo.GetArticleAsync(articleId);
             response.Result = article;
             return Ok(response);
         }
@@ -85,8 +95,8 @@ namespace ArticleTag.Controllers
             audit.AuditorID = 9999;
 #endif
             var response = JsonResponseBase<bool>.CreateDefault();
-            var flag = await _repository.AuditArticleAsync(audit);
-            response.Result = await _repository.AuditArticleAsync(audit);
+            //var articleRecordFlag = await _articleRecordRepo.AuditArticleAsync(audit);
+            response.Result = await _articleRecordRepo.AuditArticleAsync(audit);
             return Ok(response);
         }
     }

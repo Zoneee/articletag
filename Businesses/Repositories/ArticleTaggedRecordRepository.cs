@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Businesses.Dto;
 using Businesses.Interfaces;
@@ -148,6 +149,14 @@ namespace Businesses.Repositories
                    || article.Status == TagArticleStatusEnum.Audited);
         }
 
+        public async Task<bool> CheckCanAuditAsync(long articleId)
+        {
+            var article = await this.Select
+               .Where(s => s.ID == articleId)
+               .ToOneAsync();
+            return article.Status == TagArticleStatusEnum.Unaudited;
+        }
+
         public async Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record)
         {
             var model = await this.Select
@@ -180,12 +189,45 @@ namespace Businesses.Repositories
         /// </summary>
         public async Task<bool> AuditArticleAsync(AuditArticleRequest article)
         {
-            return await this.Where(s => s.ID == article.ID)
-               .ToUpdate()
-               .Set(s => s.AdminID, article.AuditorID)
-               .Set(s => s.Status, article.Status)
-               .Set(s => s.LastChangeTime, DateTime.Now)
-               .ExecuteAffrowsAsync() > 0;
+            using (var unitOfWork = this.Orm.CreateUnitOfWork())
+            {
+                try
+                {
+                    var articleRecord = (await this.Where(s => s.ID == article.ID)
+                       .ToUpdate()
+                       .Set(s => s.AdminID, article.AuditorID)
+                       .Set(s => s.Status, article.Status)
+                       .Set(s => s.LastChangeTime, DateTime.Now)
+                       .WithTransaction(unitOfWork.GetOrBeginTransaction())
+                       .ExecuteUpdatedAsync())
+                       .FirstOrDefault();
+
+                    var auditRecord = new AuditRecord()
+                    {
+                        TaggedRecordID = articleRecord.ID,
+                        CleanedArticleID = articleRecord.CleanedArticleID,
+                        TaskID = articleRecord.TaskID,
+                        TaggerID = articleRecord.UserID,
+                        AuditorID = articleRecord.AdminID,
+                        Status = article.Status,
+                        Remark = article.Remark,
+                        RecordTime = DateTime.Now,
+                    };
+
+                    var flag = await this.Orm.Insert<AuditRecord>(auditRecord)
+                        .IgnoreColumns(s => s.ID)
+                        .WithTransaction(unitOfWork.GetOrBeginTransaction())
+                        .ExecuteAffrowsAsync() > 0;
+
+                    unitOfWork.Commit();
+                    return flag;
+                }
+                catch (Exception)
+                {
+                    unitOfWork.Rollback();
+                    throw;
+                }
+            }
         }
     }
 }
