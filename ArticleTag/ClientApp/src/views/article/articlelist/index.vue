@@ -4,9 +4,16 @@
       :data="formattedData"
       style="width: 100%"
       row-key="id"
+      empty-text="暂无"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column prop="id" label="文章ID" sortable> </el-table-column>
+      <el-table-column
+        prop="id"
+        label="文章ID"
+        sortable
+        :formatter="testFormat"
+      >
+      </el-table-column>
       <el-table-column prop="taskID" label="任务ID" sortable> </el-table-column>
       <el-table-column prop="lastTimeStr" label="最后标注时间" sortable>
       </el-table-column>
@@ -132,6 +139,9 @@ export default {
     }
   },
   methods: {
+    testFormat (row, column, cellValue, index) {
+      return cellValue.toString()
+    },
     formatDate (date) {
       var y = date.getFullYear()
       var m = date.getMonth() + 1

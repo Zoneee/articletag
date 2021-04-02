@@ -44,7 +44,7 @@ export default class Tagger {
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('name')) {
                 obj['name'] = ApiClient.convertToType(data['name'], 'String');
@@ -57,7 +57,7 @@ export default class Tagger {
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
     /**

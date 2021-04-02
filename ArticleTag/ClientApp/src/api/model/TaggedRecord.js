@@ -48,13 +48,13 @@ export default class TaggedRecord {
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('cleanedArticleID')) {
-                obj['cleanedArticleID'] = ApiClient.convertToType(data['cleanedArticleID'], 'Number');
+                obj['cleanedArticleID'] = ApiClient.convertToType(data['cleanedArticleID'], 'String');
             }
             if (data.hasOwnProperty('taskID')) {
-                obj['taskID'] = ApiClient.convertToType(data['taskID'], 'Number');
+                obj['taskID'] = ApiClient.convertToType(data['taskID'], 'String');
             }
             if (data.hasOwnProperty('status')) {
                 obj['status'] = TagArticleStatusEnum.constructFromObject(data['status']);
@@ -79,15 +79,15 @@ export default class TaggedRecord {
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
     /**
-    * @member {Number} cleanedArticleID
+    * @member {String} cleanedArticleID
     */
     'cleanedArticleID' = undefined;
     /**
-    * @member {Number} taskID
+    * @member {String} taskID
     */
     'taskID' = undefined;
     /**

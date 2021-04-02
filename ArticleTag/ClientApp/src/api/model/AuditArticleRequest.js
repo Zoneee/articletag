@@ -45,7 +45,7 @@ export default class AuditArticleRequest {
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('status')) {
                 obj['status'] = TagArticleStatusEnum.constructFromObject(data['status']);
@@ -61,7 +61,7 @@ export default class AuditArticleRequest {
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
     /**

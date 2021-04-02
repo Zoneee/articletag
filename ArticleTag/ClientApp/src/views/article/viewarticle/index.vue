@@ -46,7 +46,7 @@ export default {
     }
   },
   created () {
-    this.articleId = parseInt(this.$route.params.id)
+    this.articleId = this.$route.params.id
     this.searchArticle().then((resp) => {
       this.bindTooltip()
     })

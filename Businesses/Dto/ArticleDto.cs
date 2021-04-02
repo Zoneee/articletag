@@ -6,8 +6,7 @@ namespace Businesses.Dto
 {
     public class ArticleDto
     {
-        [JsonConverter(typeof(LongConverter))]
-        public long ID { get; set; }
+        public string ID { get; set; }
 
         public string Content { get; set; }
         public ICollection<Tag> Tags { get; set; }

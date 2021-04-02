@@ -44,7 +44,7 @@ export default class Auditor {
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('name')) {
                 obj['name'] = ApiClient.convertToType(data['name'], 'String');
@@ -54,7 +54,7 @@ export default class Auditor {
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
     /**

@@ -45,7 +45,7 @@ export default class ArticleRecordRequest {
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('taggedContent')) {
                 obj['taggedContent'] = ApiClient.convertToType(data['taggedContent'], 'String');
@@ -58,7 +58,7 @@ export default class ArticleRecordRequest {
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
     /**

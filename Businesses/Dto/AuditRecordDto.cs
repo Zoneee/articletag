@@ -6,12 +6,10 @@ namespace Businesses.Dto
 {
     public class AuditRecordDto
     {
-        [JsonConverter(typeof(LongConverter))]
-        public long ID { get; set; }
+        public string ID { get; set; }
 
         public string Remark { get; set; }
 
-        [JsonConverter(typeof(DateTimeConverter))]
         public DateTime RecordTime { get; set; }
     }
 }

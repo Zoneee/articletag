@@ -18,7 +18,6 @@ import router from '../router/index'
 import Swal from 'sweetalert2'
 
 let AuthIntercept = superagentIntercept((err, res) => {
-    debugger
     if (res.status == 401) {
         Swal.fire({
             icon: 'error',
@@ -487,7 +486,7 @@ export default class ApiClient {
 
 
         request
-            // .use(AuthIntercept)
+            .use(AuthIntercept)
             .end((error, response) => {
                 if (callback) {
                     var data = null;

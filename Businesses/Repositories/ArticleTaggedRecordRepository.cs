@@ -35,7 +35,7 @@ namespace Businesses.Repositories
 
             var dto = new ArticleDto()
             {
-                ID = article.ID,
+                ID = article.ID.ToString(),
                 Content = article.TaggedContent,
                 Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? "")
             };
@@ -53,19 +53,19 @@ namespace Businesses.Repositories
              .Count(out var total)
              .ToListAsync(s => new TaggedRecord()
              {
-                 ID = s.ID,
-                 CleanedArticleID = s.CleanedArticleID,
-                 TaskID = s.TaskID,
+                 ID = s.ID.ToString(),
+                 CleanedArticleID = s.CleanedArticleID.ToString(),
+                 TaskID = s.TaskID.ToString(),
                  Status = s.Status,
                  LastChangeTime = s.LastChangeTime,
                  Auditor = new Auditor()
                  {
-                     ID = s.Manager.ID,
+                     ID = s.Manager.ID.ToString(),
                      Name = s.Manager.NickName
                  },
                  Tagger = new Tagger()
                  {
-                     ID = s.Tagger.ID,
+                     ID = s.Tagger.ID.ToString(),
                      Name = s.Tagger.NickName,
                      Email = s.Tagger.Email
                  },
@@ -111,7 +111,7 @@ namespace Businesses.Repositories
 
                 var dto = new ArticleDto()
                 {
-                    ID = unsanction.ID,
+                    ID = unsanction.ID.ToString(),
                     Content = unsanction.TaggedContent,
                     Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? "")
                 };
@@ -129,7 +129,7 @@ namespace Businesses.Repositories
 
                 var dto = new ArticleDto()
                 {
-                    ID = taggingArticle.ID,
+                    ID = taggingArticle.ID.ToString(),
                     Content = taggingArticle.TaggedContent,
                     Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? "")
                 };
@@ -149,7 +149,7 @@ namespace Businesses.Repositories
 
                 return new ArticleDto()
                 {
-                    ID = untagged.ID,
+                    ID = untagged.ID.ToString(),
                     Content = untagged.TaggedContent,
                     Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? "")
                 };
@@ -178,7 +178,7 @@ namespace Businesses.Repositories
         public async Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record)
         {
             var model = await this.Select
-                .Where(s => s.ID == record.ID)
+                .Where(s => s.ID == long.Parse(record.ID))
                 .ToOneAsync();
 
             model.TaggedArray = JsonConvert.SerializeObject(record.Tags);
@@ -211,7 +211,7 @@ namespace Businesses.Repositories
             {
                 try
                 {
-                    var articleRecord = (await this.Where(s => s.ID == article.ID)
+                    var articleRecord = (await this.Where(s => s.ID == long.Parse(article.ID))
                        .ToUpdate()
                        .Set(s => s.AdminID, article.AuditorID)
                        .Set(s => s.Status, article.Status)
