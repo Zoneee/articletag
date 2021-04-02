@@ -38,7 +38,7 @@ namespace ArticleTag.Controllers
         }
 
         [HttpPost("Login"), AllowAnonymous]
-        [SwaggerResponse(200, "用户登录", typeof(JsonResponseBase<UserLoginVm, IDictionary<string, string[]>>))]
+        [SwaggerResponse(200, "用户登录", typeof(JsonResponseBase<UserLoginResponse, IDictionary<string, string[]>>))]
         public async Task<IActionResult> Login(UserLoginVm loginUser)
         {
             var response = JsonResponseBase<UserLoginResponse>.CreateDefault();
