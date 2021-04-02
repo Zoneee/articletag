@@ -21,6 +21,7 @@ namespace ArticleTag.Controllers
             _articleRecordRepo = articleRecordRepo;
         }
 
+
         [HttpPost("DistributeArticle")]
         [SwaggerResponse(200, "标记员获取文献", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
         public async Task<IActionResult> DistributeArticle(long taggerId)
@@ -68,10 +69,10 @@ namespace ArticleTag.Controllers
         }
 
         [HttpPost("PagingAritcle")]
-        [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<IEnumerable<TaggedRecordDto>, IDictionary<string, string[]>>))]
+        [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
         public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size)
         {
-            var response = JsonResponseBase<IEnumerable<TaggedRecordDto>>.CreateDefault();
+            var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
             var articles = await _articleRecordRepo.GetArticlesByPagingAsync(page, size);
             response.Result = articles;
             return Ok(response);
@@ -92,7 +93,7 @@ namespace ArticleTag.Controllers
         public async Task<IActionResult> AuditArticle(AuditArticleRequest audit)
         {
 #if DEBUG
-            audit.AuditorID = 9999;
+            audit.AuditorID = 2;
 #endif
             var response = JsonResponseBase<bool>.CreateDefault();
             //var articleRecordFlag = await _articleRecordRepo.AuditArticleAsync(audit);

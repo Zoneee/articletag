@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Deepbio.Domain.Entities;
 using Deepbio.Domain.Enum;
 using Entity.Interfaces;
@@ -12,18 +13,23 @@ namespace Entity.Entities
     /// <remarks>Tag 模块</remarks>
     public class ArticleTaggedRecord : EntityBase<long>, IAggregateRoot
     {
+        [Navigate(nameof(AuditRecord.TaggedRecordID))]
+        public virtual ICollection<AuditRecord> AuditRecords { get; set; }
+
         /// <summary>
         /// 标注员ID
         /// </summary>
         public long UserID { get; set; }
-        [Navigate(nameof(User.ID))]
+
+        [Navigate(nameof(ArticleTaggedRecord.UserID))]
         public virtual User Tagger { get; set; }
 
         public long AdminID { get; set; }
+
         /// <summary>
         /// Include
         /// </summary>
-        [Navigate(nameof(User.ID))]
+        [Navigate(nameof(ArticleTaggedRecord.AdminID))]
         public virtual User Manager { get; set; }
 
         /// <summary>
@@ -41,6 +47,7 @@ namespace Entity.Entities
         /// </summary>
         [Column(DbType = "nvarchar(max)")]
         public string TaggedContent { get; set; }
+
         /// <summary>
         /// 标签数组JSON
         /// </summary>

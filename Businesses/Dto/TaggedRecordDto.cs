@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Deepbio.Domain.Enum;
+using Entity.Entities;
 using FreeSql.DataAnnotations;
 
 namespace Businesses.Dto
@@ -9,6 +10,12 @@ namespace Businesses.Dto
     /// 标记记录DTO
     /// </summary>
     public class TaggedRecordDto
+    {
+        public IEnumerable<TaggedRecord> Records { get; set; }
+        public long Total { get; set; }
+    }
+
+    public class TaggedRecord
     {
         public long ID { get; set; }
 
@@ -23,10 +30,12 @@ namespace Businesses.Dto
         public long TaskID { get; set; }
 
         public TagArticleStatusEnum Status { get; set; }
+        public string StatusRemark => Status.ToDescriptionOrString();
         public DateTime LastChangeTime { get; set; }
 
         public Tagger Tagger { get; set; }
-        public Manager Manager { get; set; }
+        public Auditor Auditor { get; set; }
+        public ICollection<AuditRecord> AuditRecords { get; set; }
     }
 
     public class Tagger
@@ -36,7 +45,7 @@ namespace Businesses.Dto
         public string Email { get; set; }
     }
 
-    public class Manager
+    public class Auditor
     {
         public long ID { get; set; }
         public string Name { get; set; }

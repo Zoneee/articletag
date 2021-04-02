@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Businesses.Interfaces;
 using Businesses.Repositories;
+using IdGen;
 
 namespace Businesses
 {
@@ -10,6 +11,8 @@ namespace Businesses
         {
             // 注册Business
             builder.RegisterType(typeof(ArticleTaggedRecordRepository)).As(typeof(IArticleTaggedRecordRepository));
+
+            builder.RegisterType<IdGenerator>().As<IIdGenerator<long>>().SingleInstance();
 
             return builder;
         }

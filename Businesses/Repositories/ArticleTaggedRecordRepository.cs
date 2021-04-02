@@ -8,6 +8,7 @@ using Businesses.ViewModels.Requsets;
 using Deepbio.Domain.Enum;
 using Entity.Entities;
 using FreeSql;
+using IdGen;
 using Newtonsoft.Json;
 
 namespace Businesses.Repositories
@@ -19,6 +20,8 @@ namespace Businesses.Repositories
         : BaseRepository<ArticleTaggedRecord, long>,
         IArticleTaggedRecordRepository
     {
+        private static Lazy<IdGenerator> _idGenerator = new Lazy<IdGenerator>(() => new IdGenerator(0));
+
         public ArticleTaggedRecordRepository(IFreeSql freeSql) : base(freeSql, null)
         {
         }
@@ -39,33 +42,40 @@ namespace Businesses.Repositories
             return dto;
         }
 
-        public async Task<IEnumerable<TaggedRecordDto>> GetArticlesByPagingAsync(int page, int size)
+        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(int page, int size)
         {
-            var articles = await this.Select
-                .Page(page, size)
-                .Include(s => s.Tagger)
-                //.Include(s => s.Manager)
-                .Count(out var count)
-                .ToListAsync(s => new TaggedRecordDto()
-                {
-                    ID = s.ID,
-                    CleanedArticleID = s.CleanedArticleID,
-                    TaskID = s.TaskID,
-                    Status = s.Status,
-                    LastChangeTime = s.LastChangeTime,
-                    Manager = new Manager()
-                    {
-                        ID = s.Manager.ID,
-                        Name = s.Manager.NickName
-                    },
-                    Tagger = new Tagger()
-                    {
-                        ID = s.Tagger.ID,
-                        Name = s.Tagger.NickName,
-                        Email = s.Tagger.Email
-                    }
-                });
-            return articles;
+            var records = await this.Select
+             .Page(page, size)
+             .Include(s => s.Tagger)
+             .Include(s => s.Manager)
+             .IncludeMany(s => s.AuditRecords)
+             .Count(out var total)
+             .ToListAsync(s => new TaggedRecord()
+             {
+                 ID = s.ID,
+                 CleanedArticleID = s.CleanedArticleID,
+                 TaskID = s.TaskID,
+                 Status = s.Status,
+                 LastChangeTime = s.LastChangeTime,
+                 Auditor = new Auditor()
+                 {
+                     ID = s.Manager.ID,
+                     Name = s.Manager.NickName
+                 },
+                 Tagger = new Tagger()
+                 {
+                     ID = s.Tagger.ID,
+                     Name = s.Tagger.NickName,
+                     Email = s.Tagger.Email
+                 },
+                 AuditRecords = s.AuditRecords
+             });
+
+            return new TaggedRecordDto()
+            {
+                Records = records,
+                Total = total
+            };
         }
 
         /// <summary>
@@ -73,8 +83,14 @@ namespace Businesses.Repositories
         /// </summary>
         public async Task<ArticleDto> GetArticleByTaggerIdAsync(long taggerId)
         {
-
-            // TODO 用户角色检查
+            // 用户角色检查
+            var roleFlag = await this.Orm.Select<User>()
+                .Where(s => s.ID == taggerId && s.Role == TagRoleEnum.Tagger)
+                .AnyAsync();
+            if (!roleFlag)
+            {
+                throw new Exception("非标记员角色不能标记文章！");
+            }
 
             /**
              * 先推送未审核通过的
@@ -127,6 +143,7 @@ namespace Businesses.Repositories
             {
                 untagged.Status = TagArticleStatusEnum.Tagging;
                 untagged.UserID = taggerId;
+                untagged.TaskID = _idGenerator.Value.CreateId();
                 await UpdateAsync(untagged);
 
                 return new ArticleDto()
