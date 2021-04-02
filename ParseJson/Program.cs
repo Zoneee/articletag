@@ -16,15 +16,18 @@ namespace ParseJson
         {
             // new Sample().Load();
 
-            // var jsonStr = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\jsonFormatArticleContent.json");
-            // var jsonStr = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\check1.json");
-            // var jsonStr = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\check1.json");
+            // var contentJsonPart = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\jsonFormatArticleContent.json");
+            // var referenceJsonPart = File.ReadAllText(@"F:\workspaces\ArticleCleanWorkspace\jsonFormatArticle\jsonFormatArticleReferences.json");
+
+
             var articleId = 3918769900132;
-            var rawArticle = fsql.Select<RawArticle>().Where(p=>p.ID == articleId).First();
             var imgs = fsql.Select<RawArticleImgs>().Where(p => p.ArticleID == articleId).ToList();
-            var jsonStr = GetContentJsonPart(rawArticle.RawContent);
-            var obj = new ContentJson(jsonStr,imgs);
-            var html = obj.BuildHtml();
+            
+            var rawArticle = fsql.Select<RawArticle>().Where(p=>p.ID == articleId).First();
+            var contentJsonPart = GetContentJsonPart(rawArticle.RawContent);
+            var referenceJsonPart = GetReferenceJsonPart(rawArticle.RawContent);
+            var contentJson = new ContentJson(contentJsonPart,referenceJsonPart,imgs); 
+            var html = contentJson.BuildHtml();
 
             File.WriteAllText(@"F:\workspaces\ArticleCleanWorkspace\generatedHtml.html",html);
         }
