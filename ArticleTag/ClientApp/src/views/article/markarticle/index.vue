@@ -333,7 +333,6 @@ export default {
         this.setNodeTag(this.selection.anchorNode, this.selection.anchorOffset, tags, id, '{', 'ts', false)
         this.setNodeTag(this.selection.focusNode, this.selection.focusOffset, tags, id, '}', 'te', false)
       }
-      this.bindShowTagEvent()
     },
     /**设置节点标记 */
     setNodeTag (node, nodeOffset, tags, id, content, tagType, isInner) {
@@ -422,26 +421,10 @@ export default {
 
       this.selection.anchorNode.replaceWith(beforeNode, ts, selectedNode, te, afterNode)
     },
-    /**绑定标记节点Tip事件 */
-    bindShowTagEvent () {
-      var taggeds = document.getElementsByClassName('tagged')
-      for (var e of taggeds) {
-        var content = []
-        if (e.getAttribute('c-name')) {
-          content.push(e.getAttribute('c-name'))
-        }
-        if (e.getAttribute('c-attribute')) {
-          content.push(e.getAttribute('c-attribute'))
-        }
-
-        tippy(e, {
-          content: content.join(' / ')
-        })
-      }
-    },
     /**绑定历史标记节点Tip事件 */
     bindTooltip () {
       var elements = document.getElementsByClassName('tagged')
+
       for (var element of elements) {
         var name = element.getAttribute('c-name')
         var attribute = element.getAttribute('c-attribute')
@@ -551,6 +534,8 @@ export default {
           alert(error)
           return
         }
+
+        this.bindTooltip()
       })
     },
     submitAudit () {
@@ -589,6 +574,7 @@ export default {
             this.articleId = result.id
             this.article = result.content
             this.tags = result.tags || []
+            this.taggedNum = this.tags.length
             resolve(data)
           } else {
             alert(data.errorMsg)

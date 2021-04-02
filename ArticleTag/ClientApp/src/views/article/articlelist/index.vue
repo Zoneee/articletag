@@ -1,14 +1,14 @@
 <template>
   <div class="container">
     <el-table
-      :data="data"
+      :data="formattedData"
       style="width: 100%"
       row-key="id"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
       <el-table-column prop="id" label="文章ID" sortable> </el-table-column>
       <el-table-column prop="taskID" label="任务ID" sortable> </el-table-column>
-      <el-table-column prop="lastChangeTime" label="最后标注时间" sortable>
+      <el-table-column prop="lastTimeStr" label="最后标注时间" sortable>
       </el-table-column>
       <el-table-column label="标记者">
         <template slot-scope="scope">
@@ -35,7 +35,7 @@
             <div v-for="record in scope.row.auditRecords" :key="record.id">
               <p>></p>
               <p>审核ID: {{ record.id }}</p>
-              <p>审核时间: {{ record.recordTime }}</p>
+              <p>审核时间: {{ record.recordTimeStr }}</p>
               <p>审核内容: {{ record.remark }}</p>
             </div>
             <div slot="reference" class="name-wrapper">
@@ -117,7 +117,27 @@ export default {
     var userInfo = JSON.parse(window.localStorage.getItem('user_info') || '{}')
     this.role = userInfo.role
   },
+  computed: {
+    formattedData () {
+      for (var t of this.data) {
+        t.lastTimeStr = this.formatDate(t.lastChangeTime)
+        if (t.auditRecords) {
+          for (var a of t.auditRecords) {
+            a.recordTimeStr = this.formatDate(a.recordTime)
+          }
+        }
+      }
+      console.log(this.data)
+      return this.data
+    }
+  },
   methods: {
+    formatDate (date) {
+      var y = date.getFullYear()
+      var m = date.getMonth() + 1
+      var d = date.getDate()
+      return `${y}-${m}-${d}`
+    },
     handleView (index, row) {
       this.$router.push({
         path: `/article/viewarticle/${row.id}`
@@ -143,7 +163,6 @@ export default {
           return
         }
 
-        console.log(data)
         if (data.success) {
           this.data = data.result.records
           this.pager.total = data.result.total
