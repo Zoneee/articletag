@@ -20,8 +20,8 @@ namespace ParseJson
         public ContentJson(string contentJsonPart, string referenceJsonPart, List<RawArticleImgs> rawArticleImgsList)
         {
             _imgs = rawArticleImgsList;
-            _cotentRoot = JObject.Parse(contentJsonPart);
-            _referenceRoot = JObject.Parse(referenceJsonPart);
+            _cotentRoot = string.IsNullOrWhiteSpace(contentJsonPart) ? null : JObject.Parse(contentJsonPart);
+            _referenceRoot = string.IsNullOrWhiteSpace(referenceJsonPart) ? null : JObject.Parse(referenceJsonPart);
             _em = new ElementMapping(this);
         }
 
@@ -31,11 +31,11 @@ namespace ParseJson
             var formatedHtml = System.Xml.Linq.XElement.Parse(html).ToString();
             return formatedHtml;
         }
-
+        
         private string BuildContentHtml()
         {
             var contentHtml = "";
-            var body = _cotentRoot.SelectToken("$..content[?(@.#name == 'body')]");
+            var body = _cotentRoot?.SelectToken("$..content[?(@.#name == 'body')]");
             if (body != null)
             {
                 contentHtml = _em.GetHtmlByToken(body);
@@ -46,7 +46,7 @@ namespace ParseJson
         private string BuildReferenceHtml()
         {
             var referenceHtml = "";
-            var bibliography = _referenceRoot.SelectToken("$..[?(@.#name == 'bibliography')]");
+            var bibliography = _referenceRoot?.SelectToken("$..[?(@.#name == 'bibliography')]");
             if (bibliography != null)
             {
                 referenceHtml = _em.GetHtmlByToken(bibliography);

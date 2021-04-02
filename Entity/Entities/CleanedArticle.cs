@@ -18,5 +18,11 @@ namespace CleanRawArticleTool
         [Column(DbType = "varchar(max)")]
         public string PlainArticleText { get; set; }
         public DateTime CleanTime { get; set; }
+
+        public CleanedArticle SetID()
+        {
+            this.ID = NewId();
+            return this;
+        }
     }
 }

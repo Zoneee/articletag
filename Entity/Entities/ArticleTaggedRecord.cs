@@ -39,6 +39,12 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
         public string TaggedArray { get; set; }
 
         public TagArticleStatusEnum Status { get; set; }
-        public DateTime StatusChangeTime { get; set; }
+        public DateTime LastChangeTime { get; set; }
+
+        public ArticleTaggedRecord SetID()
+        {
+            this.ID = NewId();
+            return this;
+        }
     }
 }
