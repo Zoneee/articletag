@@ -30,3 +30,5 @@ msbuild.log
 msbuild.err
 msbuild.wrn
 ArticleTag/ArticleTag.xml
+node_modules
+build
