@@ -104,7 +104,7 @@ export default {
       taggerName: '',
       pager: {
         index: 1,
-        size: 10,
+        size: 100,
         total: 0
       },
       data: [],
