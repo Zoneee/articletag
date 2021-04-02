@@ -1,6 +1,6 @@
 ﻿using System;
 using Deepbio.Domain.Entities;
-using Deepbio.Domain.Enum;
+using Entity.Enum;
 using Entity.Interfaces;
 
 namespace Entity.Entities

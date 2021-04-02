@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Deepbio.Domain.Entities;
-using Deepbio.Domain.Enum;
+using Entity.Enum;
 using Entity.Interfaces;
 using FreeSql.DataAnnotations;
 

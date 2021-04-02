@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Deepbio.Domain.Enum;
 using Entity.Entities;
+using Entity.Enum;
 using FreeSql.DataAnnotations;
 
 namespace Businesses.Dto

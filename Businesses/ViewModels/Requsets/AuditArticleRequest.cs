@@ -1,4 +1,4 @@
-﻿using Deepbio.Domain.Enum;
+﻿using Entity.Enum;
 
 namespace Businesses.ViewModels.Requsets
 {

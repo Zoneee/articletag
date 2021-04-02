@@ -10,7 +10,7 @@ namespace Businesses.ViewModels
         /// <summary>
         /// Erro code, it will return 0 when no error
         /// </summary>
-        public int ErrorCode { get; set; } = 0;
+        public HttpCodeEnum ErrorCode { get; set; } = HttpCodeEnum.Success;
 
         public string ErrorMsg { get; set; }
         public T Result { get; set; }
@@ -25,5 +25,13 @@ namespace Businesses.ViewModels
     public class JsonResponseBase<TResult, TErrorMessage> : JsonResponseBase<TResult>
     {
         public TErrorMessage ErrorMsgModel { get; set; } = default;
+    }
+
+    public enum HttpCodeEnum
+    {
+        Info = 100,
+        Success = 200,
+        Warn = 300,
+        Error = 500,
     }
 }

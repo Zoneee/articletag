@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Businesses.Dto;
+using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Businesses.ViewModels.Requsets;
-using Deepbio.Domain.Enum;
 using Entity.Entities;
+using Entity.Enum;
 using FreeSql;
 using IdGen;
 using Newtonsoft.Json;
@@ -89,7 +90,7 @@ namespace Businesses.Repositories
                 .AnyAsync();
             if (!roleFlag)
             {
-                throw new Exception("非标记员角色不能标记文章！");
+                throw new WarnException("非标记员角色不能标记文章！");
             }
 
             /**
@@ -239,10 +240,10 @@ namespace Businesses.Repositories
                     unitOfWork.Commit();
                     return flag;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     unitOfWork.Rollback();
-                    throw;
+                    throw new ErrorException("保存标记记录时异常！", ex);
                 }
             }
         }

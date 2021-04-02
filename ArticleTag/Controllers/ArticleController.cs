@@ -11,7 +11,7 @@ namespace ArticleTag.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ArticleController : ControllerBase
+    public class ArticleController : ApiControllerBase
     {
         private readonly IArticleTaggedRecordRepository _articleRecordRepo;
 
@@ -20,7 +20,6 @@ namespace ArticleTag.Controllers
         {
             _articleRecordRepo = articleRecordRepo;
         }
-
 
         [HttpPost("DistributeArticle")]
         [SwaggerResponse(200, "标记员获取文献", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]

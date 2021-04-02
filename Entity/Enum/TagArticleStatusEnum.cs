@@ -1,4 +1,4 @@
-﻿namespace Deepbio.Domain.Enum
+﻿namespace Entity.Enum
 {
     /// <summary>
     /// 文章状态

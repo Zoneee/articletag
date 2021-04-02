@@ -1,4 +1,4 @@
-﻿namespace Deepbio.Domain.Enum
+﻿namespace Entity.Enum
 {
     /// <summary>
     /// 用户角色
