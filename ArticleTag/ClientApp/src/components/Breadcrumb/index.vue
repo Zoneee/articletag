@@ -57,9 +57,7 @@ export default {
         this.$router.push(redirect)
         return
       }
-      if(item.path !== "/dashboard"){
-        this.$router.push(this.pathCompile(path))
-      }
+      this.$router.push(this.pathCompile(path))
     }
   }
 }
