@@ -1,9 +1,9 @@
 ﻿using System;
-using Deepbio.Domain.Enum;
+using Deepbio.Domain.Entities;
+using Entity.Enum;
 using Entity.Interfaces;
-using FreeSql.DataAnnotations;
 
-namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
+namespace Entity.Entities
 {
     /// <summary>
     /// 用户表

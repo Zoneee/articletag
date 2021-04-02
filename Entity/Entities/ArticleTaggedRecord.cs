@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Security.Principal;
-using Deepbio.Domain.Enum;
+using System.Collections.Generic;
+using Deepbio.Domain.Entities;
+using Entity.Enum;
 using Entity.Interfaces;
 using FreeSql.DataAnnotations;
 
-namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
+namespace Entity.Entities
 {
     /// <summary>
     /// 标记文章表
@@ -12,12 +13,24 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
     /// <remarks>Tag 模块</remarks>
     public class ArticleTaggedRecord : EntityBase<long>, IAggregateRoot
     {
+        [Navigate(nameof(AuditRecord.TaggedRecordID))]
+        public virtual ICollection<AuditRecord> AuditRecords { get; set; }
+
         /// <summary>
         /// 标注员ID
         /// </summary>
         public long UserID { get; set; }
 
+        [Navigate(nameof(ArticleTaggedRecord.UserID))]
+        public virtual User Tagger { get; set; }
+
         public long AdminID { get; set; }
+
+        /// <summary>
+        /// Include
+        /// </summary>
+        [Navigate(nameof(ArticleTaggedRecord.AdminID))]
+        public virtual User Manager { get; set; }
 
         /// <summary>
         /// 已格式化的文章ID
@@ -34,6 +47,10 @@ namespace Deepbio.Domain.Entities.ArticleTagAggregateRoot
         /// </summary>
         [Column(DbType = "nvarchar(max)")]
         public string TaggedContent { get; set; }
+
+        /// <summary>
+        /// 标签数组JSON
+        /// </summary>}
 
         [Column(DbType = "nvarchar(max)")]
         public string TaggedArray { get; set; }

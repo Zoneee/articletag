@@ -1,15 +1,16 @@
-﻿namespace Deepbio.Domain.Enum
+﻿namespace Entity.Enum
 {
     /// <summary>
-    /// 文章审核状态
+    /// 文章状态
     /// </summary>
     /// <remarks>Tag 模块</remarks>
     public enum TagArticleStatusEnum
     {
-        Tagging = 0,
-        Tagged = 1,
-        UnAudited = 2,
-        Audited = 3,
-        Unsanctioned = 4,
+        Untagged = 0,
+        Tagging = 1,
+        Tagged = 2,
+        Unaudited = 3,
+        Audited = 4,
+        Unsanctioned = 5,
     }
 }
