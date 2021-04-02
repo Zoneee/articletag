@@ -187,10 +187,15 @@ export default {
     display: contents;
     #pagination {
       position: absolute;
-      bottom: 5px;
+      bottom: 0px;
       width: 100%;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
       padding: 5px;
+      position: fixed;
+      background:white;
+    }
+    .el-table{
+      padding-bottom:39px;
     }
   }
 </style>

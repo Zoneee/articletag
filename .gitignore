@@ -33,3 +33,4 @@ ArticleTag/ArticleTag.xml
 node_modules
 build
 .vs/
+.vs/ArticleTag/DesignTimeBuild/.dtbcache.v2
