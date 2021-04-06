@@ -31,6 +31,7 @@
       </div>
       <div class="btns">
         <el-button type="success" @click="submitAudit">提交审核</el-button>
+        <el-button type="danger" @click="skipArticle">跳过文章</el-button>
       </div>
     </div>
 
@@ -338,8 +339,12 @@ export default {
     setNodeTag (node, nodeOffset, tags, id, content, tagType, isInner) {
       switch (node.nodeType) {
         case 1:
-          // 设置图片
-          this.setImgTag(node, nodeOffset, tags, id)
+          // 设置y元素
+          if (node.tagName.toLowerCase() === 'img') {
+            this.setImgTag(node, nodeOffset, tags, id)
+          } else {
+            this.setElementTag(node, nodeOffset, tags, id, content, tagType)
+          }
           break
         case 3:
           // 设置内容
@@ -350,6 +355,14 @@ export default {
           this.setTextTag(node, nodeOffset, tags, id, content, tagType)
           break
       }
+    },
+    /**
+     * 单个节点的文本标记
+     * 节点尾部的换行标记
+     */
+    setElementTag (node, length, tags, id, content, tagType) {
+      var targetElement = node.childNodes[length]
+      this.setTextTag(targetElement, length, tags, id, content, tagType)
     },
     /**
      * 单个节点的文本标记
@@ -584,6 +597,47 @@ export default {
       })
 
       return p
+    },
+    skipArticle () {
+      var h = this.$createElement
+      this.$msgbox({
+        title: '提示',
+        message: h('p', null, [
+          h('p', null, '此操作将跳过该论文, 是否继续?'),
+          h('p', { style: 'color:red' }, '被跳过的文章将会被审核，请勿恶意跳过文章')
+        ]),
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.api.apiArticleSetUnavailArticlePost({
+          articleId: this.articleId
+        }, (error, data, resp) => {
+          if (error) {
+            alert(error)
+            return
+          }
+
+          if (data.success) {
+            this.$message({
+              type: 'success',
+              message: '跳过成功!'
+            })
+            this.searchArticle()
+          } else {
+            this.$message({
+              type: 'warning',
+              message: '跳过失败!'
+            })
+          }
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消操作'
+        });
+      })
     }
   }
 }
