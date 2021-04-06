@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Businesses.Dto;
 using Businesses.Exceptions;
@@ -43,9 +44,15 @@ namespace Businesses.Repositories
             return dto;
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(int page, int size)
+        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size)
         {
+            var user = await this.Orm.GetRepository<User>()
+                .Select
+                .Where(s => s.ID == userid)
+                .ToOneAsync();
+
             var records = await this.Select
+             .WhereIf(user.Role == TagRoleEnum.Tagger, s => s.UserID == userid)
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
@@ -200,6 +207,18 @@ namespace Businesses.Repositories
                       .Set(s => s.Status, TagArticleStatusEnum.Unaudited)
                       .Set(s => s.LastChangeTime, DateTime.Now)
                       .ExecuteAffrowsAsync() > 0;
+        }
+
+        /// <summary>
+        /// 标记无效文章
+        /// </summary>
+        public async Task<bool> SetUnavailArticleAsync(long articleId)
+        {
+            return await this.Where(s => s.ID == articleId)
+              .ToUpdate()
+              .Set(s => s.Status, TagArticleStatusEnum.Unavail)
+              .Set(s => s.LastChangeTime, DateTime.Now)
+              .ExecuteAffrowsAsync() > 0;
         }
 
         /// <summary>

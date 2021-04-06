@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Businesses.Dto;
 using Businesses.ViewModels.Requsets;
+using Entity.Enum;
 
 namespace Businesses.Interfaces
 {
@@ -16,10 +17,10 @@ namespace Businesses.Interfaces
 
         Task<ArticleDto> GetArticleByTaggerIdAsync(long taggerId);
 
-        Task<TaggedRecordDto> GetArticlesByPagingAsync(int page, int size);
+        Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size);
 
         Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record);
-
+        Task<bool> SetUnavailArticleAsync(long articleId);
         Task<bool> SubmitAuditAsync(long articleId);
     }
 }
