@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Businesses.Dto;
 using Businesses.Exceptions;
@@ -38,7 +37,8 @@ namespace Businesses.Repositories
             {
                 ID = article.ID.ToString(),
                 Content = article.TaggedContent,
-                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? "")
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? ""),
+                Review = article.Review
             };
 
             return dto;
@@ -76,7 +76,8 @@ namespace Businesses.Repositories
                      Name = s.Tagger.NickName,
                      Email = s.Tagger.Email
                  },
-                 AuditRecords = s.AuditRecords
+                 AuditRecords = s.AuditRecords,
+                 Review = s.Review
              });
 
             return new TaggedRecordDto()
@@ -120,7 +121,8 @@ namespace Businesses.Repositories
                 {
                     ID = unsanction.ID.ToString(),
                     Content = unsanction.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? "")
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? ""),
+                    Review = unsanction.Review
                 };
                 return dto;
             }
@@ -138,7 +140,8 @@ namespace Businesses.Repositories
                 {
                     ID = taggingArticle.ID.ToString(),
                     Content = taggingArticle.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? "")
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? ""),
+                    Review = taggingArticle.Review
                 };
                 return dto;
             }
@@ -158,7 +161,8 @@ namespace Businesses.Repositories
                 {
                     ID = untagged.ID.ToString(),
                     Content = untagged.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? "")
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? ""),
+                    Review = untagged.Review
                 };
             }
 
@@ -265,6 +269,14 @@ namespace Businesses.Repositories
                     throw new ErrorException("保存标记记录时异常！", ex);
                 }
             }
+        }
+
+        public async Task<bool> SetReviewArticleAsync(long articleId, bool review)
+        {
+            return await this.UpdateDiy
+                      .Where(s => s.ID == articleId)
+                      .Set(s => s.Review, review)
+                      .ExecuteAffrowsAsync() > 0;
         }
     }
 }

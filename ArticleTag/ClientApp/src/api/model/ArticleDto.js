@@ -53,6 +53,9 @@ export default class ArticleDto {
             if (data.hasOwnProperty('tags')) {
                 obj['tags'] = ApiClient.convertToType(data['tags'], [Tag]);
             }
+            if (data.hasOwnProperty('review')) {
+                obj['review'] = ApiClient.convertToType(data['review'], 'Boolean');
+            }
         }
         return obj;
     }
@@ -69,6 +72,10 @@ export default class ArticleDto {
     * @member {Array.<module:model/Tag>} tags
     */
     'tags' = undefined;
+    /**
+    * @member {Boolean} review
+    */
+    'review' = undefined;
 
 
 

@@ -302,6 +302,45 @@ export default class ArticleApi {
       );
     }
     /**
+     * Callback function to receive the result of the apiArticleSetReviewArticlePost operation.
+     * @callback module:api/ArticleApi~apiArticleSetReviewArticlePostCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/BooleanResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/ArticleApi~apiArticleSetReviewArticlePostCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/BooleanResponse}
+     */
+    apiArticleSetReviewArticlePost(opts, callback) {
+      opts = opts || {};
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+        'articleId': opts['articleId'],
+        'review': opts['review']
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = [];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = BooleanResponse;
+
+      return this.apiClient.callApi(
+        '/api/Article/SetReviewArticle', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
      * Callback function to receive the result of the apiArticleSetUnavailArticlePost operation.
      * @callback module:api/ArticleApi~apiArticleSetUnavailArticlePostCallback
      * @param {String} error Error message, if any.

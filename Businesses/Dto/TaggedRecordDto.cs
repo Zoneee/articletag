@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using Businesses.JsonConverters;
 using Entity.Entities;
 using Entity.Enum;
 
@@ -38,6 +36,7 @@ namespace Businesses.Dto
         public Tagger Tagger { get; set; }
         public Auditor Auditor { get; set; }
         public ICollection<AuditRecord> AuditRecords { get; set; }
+        public bool Review { get; set; }
     }
 
     public class Tagger

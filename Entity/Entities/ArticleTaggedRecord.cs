@@ -58,6 +58,8 @@ namespace Entity.Entities
         public TagArticleStatusEnum Status { get; set; }
         public DateTime LastChangeTime { get; set; }
 
+        public bool Review { get; set; }
+
         public ArticleTaggedRecord SetID()
         {
             this.ID = NewId();

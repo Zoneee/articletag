@@ -1,12 +1,4 @@
 <template>
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- double Tag -->
-
   <el-container class="index-container">
     <el-main>
       <div>
@@ -26,6 +18,14 @@
         >
           {{ tag.name }}
         </el-tag>
+      </div>
+      <div class="check-box">
+        <el-checkbox v-model="review" disabled>
+          <el-tooltip placement="top">
+            <div slot="content">综述文献内容较多，文献标记量按照三倍计算</div>
+            <el-link type="primary">这是一篇综述性文章</el-link>
+          </el-tooltip>
+        </el-checkbox>
       </div>
       <div class="btns">
         <el-button type="success" @click="audited" :disabled="!canAudit"
@@ -86,6 +86,7 @@ export default {
       tags: [],
       dialogVisible: false,
       canAudit: false,
+      review: false,
       user: {}
     }
   },
@@ -185,6 +186,7 @@ export default {
             var result = data.result
             this.articleId = result.id
             this.article = result.content
+            this.review = result.review
             this.tags = result.tags || []
             resolve(data)
           }
@@ -230,37 +232,40 @@ export default {
       }
     }
 
+    @footheight: 330px;
     .footer {
       position: fixed;
-      height: 300px;
+      height: @footheight;
       width: 100%;
       bottom: 0px;
       // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
       background-color: #fff;
+      padding: 1rem;
 
       .mark-history {
-        height: 220px;
+        height: 200px;
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        padding: 1rem;
 
         .tags {
           margin: 5px;
         }
       }
 
+      .check-box {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
       .btns {
         position: absolute;
         bottom: 10px;
-        // border-top: 1px solid rgba(0, 0, 0, 0.1);
-        padding: 1rem;
       }
     }
 
     .footer-placeholder {
-      height: 300px;
+      height: @footheight;
       width: 100%;
-      // border: 1px solid rgb(236, 12, 150);
     }
   }
 </style>

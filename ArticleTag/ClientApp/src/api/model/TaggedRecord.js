@@ -74,6 +74,9 @@ export default class TaggedRecord {
             if (data.hasOwnProperty('auditRecords')) {
                 obj['auditRecords'] = ApiClient.convertToType(data['auditRecords'], [AuditRecord]);
             }
+            if (data.hasOwnProperty('review')) {
+                obj['review'] = ApiClient.convertToType(data['review'], 'Boolean');
+            }
         }
         return obj;
     }
@@ -114,6 +117,10 @@ export default class TaggedRecord {
     * @member {Array.<module:model/AuditRecord>} auditRecords
     */
     'auditRecords' = undefined;
+    /**
+    * @member {Boolean} review
+    */
+    'review' = undefined;
 
 
 

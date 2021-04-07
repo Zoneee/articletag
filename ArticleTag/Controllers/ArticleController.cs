@@ -213,5 +213,25 @@ namespace ArticleTag.Controllers
                 return Ok(response);
             }
         }
+
+        [HttpPost("SetReviewArticle")]
+        [SwaggerResponse(200, "设置文章为综述文章", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> SetReviewArticle(long articleId, bool review)
+        {
+            var response = JsonResponseBase<bool>.CreateDefault();
+            try
+            {
+                response.Result = await _articleRecordRepo.SetReviewArticleAsync(articleId, review);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("设置文章为综述文章异常！", ex);
+                return Ok(response);
+            }
+        }
     }
 }

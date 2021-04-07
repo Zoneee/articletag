@@ -1,12 +1,4 @@
 <template>
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- double Tag -->
-
   <el-container class="index-container">
     <el-main>
       <div>
@@ -28,6 +20,14 @@
         >
           {{ tag.name }}
         </el-tag>
+      </div>
+      <div class="check-box">
+        <el-checkbox v-model="review" @change="setReview">
+          <el-tooltip placement="top">
+            <div slot="content">综述文献内容较多，文献标记量按照三倍计算</div>
+            <el-link type="primary">这是一篇综述性文章</el-link>
+          </el-tooltip>
+        </el-checkbox>
       </div>
       <div class="btns">
         <el-button type="success" @click="submitAudit">提交审核</el-button>
@@ -60,11 +60,19 @@
         </div>
 
         <div class="inputer" ref="inputer" v-show="inputerVisible">
+          <el-checkbox v-model="result">
+            <el-tooltip placement="top">
+              <div slot="content">表现适配体性能的图片</div>
+              <el-link type="primary">这是一张表征图片</el-link>
+            </el-tooltip>
+          </el-checkbox>
+
           <el-input
             type="textarea"
             :autosize="{ minRows: 6, maxRows: 20 }"
             placeholder="请输入内容"
             v-model="imgTagContent"
+            :disabled="result"
           >
           </el-input>
         </div>
@@ -194,7 +202,9 @@ export default {
         color: '#CC9966',
         type: 'T'
       }],
-      user: {}
+      user: {},
+      review: false,
+      result: false
     }
   },
   created () {
@@ -249,22 +259,34 @@ export default {
       window.t = t
       console.log(t.anchorOffset)
       console.log(t.focusOffset)
-      if (t.isCollapsed) {
-        console.log('未选中内容')
-        alert('未选中内容')
-        return
-      }
       console.log(`选中：${t.toString()}`)
 
-      var r = t.getRangeAt(0)
-      this.selection.anchorNode = r.startContainer
-      this.selection.anchorOffset = r.startOffset
-      this.selection.focusNode = r.endContainer
-      this.selection.focusOffset = r.endOffset
-      this.selection.isCollapsed = t.isCollapsed
-      this.selection.rangeCount = t.rangeCount
-      this.selection.type = t.type
-      this.selection.content = t.toString()
+      try {
+        // 鼠标划中了一片区域
+        // 或者鼠标在文字上点击右键
+        var r = t.getRangeAt(0)
+        this.selection.anchorNode = r.startContainer
+        this.selection.anchorOffset = r.startOffset
+        this.selection.focusNode = r.endContainer
+        this.selection.focusOffset = r.endOffset
+        this.selection.isCollapsed = t.isCollapsed
+        this.selection.rangeCount = t.rangeCount
+        this.selection.type = t.type
+        this.selection.content = t.toString()
+      } catch (error) {
+        // 鼠标没有划中区域。
+        // 或者鼠标在图片上点击右键
+        // 需要为判断是否是右击图片提供数据
+        this.selection.anchorNode = t.anchorNode
+        this.selection.anchorOffset = t.anchorOffset
+        this.selection.focusNode = t.focusNode
+        this.selection.focusOffset = t.focusOffset
+        this.selection.isCollapsed = t.isCollapsed
+        this.selection.rangeCount = t.rangeCount
+        this.selection.type = t.type
+        this.selection.content = t.toString()
+        return null
+      }
 
       return t
     },
@@ -281,11 +303,12 @@ export default {
     /**弹出标记菜单Dialog */
     openMenus (mouse) {
       var t = this.getSelection()
-      if (!t) {
+      if (!t || (t.isCollapsed && mouse.target.tagName.toLowerCase() != 'img')) {
         return
       }
 
-      if (this.selection.anchorNode === this.selection.focusNode && !this.selection.content && !this.selection.isCollapsed) {
+
+      if (this.selection.anchorNode === this.selection.focusNode && !this.selection.content && !this.selection.isCollapsed || mouse.target.tagName.toLowerCase() === 'img') {
         // 打开输入菜单
         this.openInputer(mouse)
       } else {
@@ -313,10 +336,18 @@ export default {
       this.inputerVisible = true
       this.dilaogTitle = '请输入序列'
 
-      var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
-      var targetElement = this.selection.anchorNode.childNodes[i]
+      if (!this.selection.isCollapsed) {
+        var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
+        var targetElement = this.selection.anchorNode.childNodes[i]
 
-      this.dialogTippyContent = targetElement.id || '暂无ID'
+        this.dialogTippyContent = targetElement.id || '暂无ID'
+      } else {
+        var target = mouse.target
+        if (target.tagName.toLowerCase() === 'img') {
+          this.dialogTippyContent = target.id || '暂无ID'
+          this.selection.anchorNode = target
+        }
+      }
     },
     /**设置标记 */
     setTag (tags) {
@@ -324,7 +355,9 @@ export default {
 
       if (this.selection.isCollapsed) {
         // 未选中内容
-        return
+        // 或者右键了图片
+        this.imgTagContent = '检测效果图片'
+        this.setNodeTag(this.selection.anchorNode, 0, tags, id, null, null, false)
       } else if (this.selection.anchorNode === this.selection.focusNode) {
         // 选中一个标签
         var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
@@ -341,7 +374,12 @@ export default {
         case 1:
           // 设置y元素
           if (node.tagName.toLowerCase() === 'img') {
-            this.setImgTag(node, nodeOffset, tags, id)
+            if (this.result) {
+              this.setImgTag(node, 0, tags, id, this.imgTagContent)
+            } else {
+              var targetElement = node.childNodes[nodeOffset]
+              this.setImgTag(targetElement, nodeOffset, tags, id, this.imgTagContent)
+            }
           } else {
             this.setElementTag(node, nodeOffset, tags, id, content, tagType)
           }
@@ -386,26 +424,23 @@ export default {
      * 单个节点的图片标记
      * 图片标记不区分起始和结束节点
      */
-    setImgTag (node, nodeIndex, tags, id) {
-      // var markElement = this.createMark('', tags)
-      // markElement.classList.add('tagged', 'tagged-img')
-      // markElement.setAttribute('c-id', id)
-      // markElement.setAttribute('c-type', 'IMG')
-      // markElement.setAttribute('c-name', this.imgTagContent)
-
+    setImgTag (node, nodeIndex, tags, id, content) {
       // var targetElement = node.childNodes[nodeIndex]
+      // targetElement.classList.add('tagged', 'tagged-img')
+      // targetElement.setAttribute('c-id', id)
+      // targetElement.setAttribute('c-type', 'IMG')
+      // targetElement.setAttribute('c-name', content)
+      // targetElement.style.borderStyle = 'solid'
+      // targetElement.style.borderColor = 'yellow'
+      // targetElement.style.borderWidth = '5px'
 
-      // targetElement.replaceWith(markElement)
-      // markElement.appendChild(targetElement)
-
-      var targetElement = node.childNodes[nodeIndex]
-      targetElement.classList.add('tagged', 'tagged-img')
-      targetElement.setAttribute('c-id', id)
-      targetElement.setAttribute('c-type', 'IMG')
-      targetElement.setAttribute('c-name', this.imgTagContent)
-      targetElement.style.borderStyle = 'solid'
-      targetElement.style.borderColor = 'yellow'
-      targetElement.style.borderWidth = '5px'
+      node.classList.add('tagged', 'tagged-img')
+      node.setAttribute('c-id', id)
+      node.setAttribute('c-type', 'IMG')
+      node.setAttribute('c-name', content)
+      node.style.borderStyle = 'solid'
+      node.style.borderColor = 'yellow'
+      node.style.borderWidth = '5px'
     },
     /**
      * 单个节点内部的文本标记
@@ -586,6 +621,7 @@ export default {
             var result = data.result
             this.articleId = result.id
             this.article = result.content
+            this.review = result.review
             this.tags = result.tags || []
             this.taggedNum = this.tags.length
             resolve(data)
@@ -638,6 +674,18 @@ export default {
           message: '已取消操作'
         });
       })
+    },
+    setReview () {
+      // 设置为综述标志
+      this.api.apiArticleSetReviewArticlePost({
+        articleId: this.articleId,
+        review: this.review
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+      })
     }
   }
 }
@@ -663,37 +711,40 @@ export default {
       }
     }
 
+    @footheight: 330px;
     .footer {
       position: fixed;
-      height: 300px;
+      height: @footheight;
       width: 100%;
       bottom: 0px;
       // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
       background-color: #fff;
+      padding: 1rem;
 
       .mark-history {
-        height: 220px;
+        height: 200px;
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        padding: 1rem;
 
         .tags {
           margin: 5px;
         }
       }
 
+      .check-box {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
       .btns {
         position: absolute;
         bottom: 10px;
-        // border-top: 1px solid rgba(0, 0, 0, 0.1);
-        padding: 1rem;
       }
     }
 
     .footer-placeholder {
-      height: 300px;
+      height: @footheight;
       width: 100%;
-      // border: 1px solid rgb(236, 12, 150);
     }
   }
 </style>
