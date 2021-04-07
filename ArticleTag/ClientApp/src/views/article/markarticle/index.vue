@@ -103,7 +103,8 @@ export default {
         isCollapsed: false,
         rangeCount: 0,
         type: '',
-        content: ''
+        content: '',
+        isImg: false
       },
       value: [],
       imgTagContent: '',
@@ -285,7 +286,6 @@ export default {
         this.selection.rangeCount = t.rangeCount
         this.selection.type = t.type
         this.selection.content = t.toString()
-        return null
       }
 
       return t
@@ -307,6 +307,8 @@ export default {
         return
       }
 
+      // 设置图片标记
+      this.selection.isImg = mouse.target.tagName.toLowerCase() === 'img'
 
       if (this.selection.anchorNode === this.selection.focusNode && !this.selection.content && !this.selection.isCollapsed || mouse.target.tagName.toLowerCase() === 'img') {
         // 打开输入菜单
@@ -356,8 +358,9 @@ export default {
       if (this.selection.isCollapsed) {
         // 未选中内容
         // 或者右键了图片
-        this.imgTagContent = '检测效果图片'
-        this.setNodeTag(this.selection.anchorNode, 0, tags, id, null, null, false)
+        if (this.selection.isImg) {
+          this.setNodeTag(this.selection.anchorNode, 0, tags, id, null, null, false)
+        }
       } else if (this.selection.anchorNode === this.selection.focusNode) {
         // 选中一个标签
         var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
@@ -375,6 +378,9 @@ export default {
           // 设置y元素
           if (node.tagName.toLowerCase() === 'img') {
             if (this.result) {
+              this.imgTagContent = '检测效果图片'
+              this.setImgTag(node, 0, tags, id, this.imgTagContent)
+            } else if (this.selection.isCollapsed) {
               this.setImgTag(node, 0, tags, id, this.imgTagContent)
             } else {
               var targetElement = node.childNodes[nodeOffset]
