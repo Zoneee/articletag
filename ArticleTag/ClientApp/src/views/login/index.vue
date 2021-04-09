@@ -57,7 +57,7 @@
         >Login</el-button
       >
 
-      <div class="tips">
+      <div class="tips" v-if="false">
         <span style="margin-right: 20px">username: admin</span>
         <span> password: any</span>
       </div>
