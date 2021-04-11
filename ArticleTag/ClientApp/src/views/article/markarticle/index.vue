@@ -16,6 +16,7 @@
           :key="tag.id"
           :color="tag.color"
           @close="removeTags"
+          @click="scrollToView"
           closable
         >
           {{ tag.name }}
@@ -419,6 +420,7 @@ export default {
       var beforeNode = document.createTextNode(beforeText)
       var afterNode = document.createTextNode(afterText)
       var tagElement = this.createMark(content, id)
+      tagElement.id = `mark-id-${id}`
       tagElement.classList.add('tagged', 'tagged-node')
       tagElement.style.backgroundColor = tags[1] ? tags[1].color : tags[0].color
       tagElement.setAttribute('tagType', tagType)
@@ -441,6 +443,7 @@ export default {
       // targetElement.style.borderWidth = '5px'
 
       node.classList.add('tagged', 'tagged-img')
+      node.id = `mark-id-${id}`
       node.setAttribute('c-id', id)
       node.setAttribute('c-type', 'IMG')
       node.setAttribute('c-name', content)
@@ -462,6 +465,7 @@ export default {
       var selectedNode = document.createTextNode(selectedText)
 
       var ts = this.createMark('{', tags)
+      ts.id = `mark-id-${id}`
       ts.classList.add('tagged', 'tagged-node')
       ts.style.backgroundColor = tags[1] ? tags[1].color : tags[0].color
       ts.setAttribute('c-type', 'ts')
@@ -572,6 +576,11 @@ export default {
           mark.remove()
         }
       }
+    },
+    scrollToView (e) {
+      // 滚动到固定元素
+      var id = e.target.getAttribute('c-id')
+      document.querySelector(`#mark-id-${id}`).scrollIntoView();
     },
     /**保存标记信息 */
     saveTags () {

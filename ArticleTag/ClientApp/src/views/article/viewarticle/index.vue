@@ -15,6 +15,7 @@
           :c-id="tag.id"
           :key="tag.id"
           :color="tag.color"
+          @click="scrollToView"
         >
           {{ tag.name }}
         </el-tag>
@@ -53,6 +54,11 @@ export default {
     })
   },
   methods: {
+    scrollToView (e) {
+      // 滚动到固定元素
+      var id = e.target.getAttribute('c-id')
+      document.querySelector(`#mark-id-${id}`).scrollIntoView();
+    },
     searchArticle () {
       var p = new Promise((resolve, reject) => {
         // 调用API查询 文章和标记
