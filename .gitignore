@@ -29,3 +29,12 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+ArticleTag/ArticleTag.xml
+node_modules
+build
+.vs/
+<<<<<<< HEAD
+.vs/ArticleTag/DesignTimeBuild/.dtbcache.v2
+=======
+/.vs
+>>>>>>> 3e4b10e1b9abe4af68c7a9479a9a2d36bec5886f
