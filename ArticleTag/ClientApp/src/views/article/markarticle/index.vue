@@ -7,7 +7,7 @@
       <div class="footer-placeholder"></div>
     </el-main>
 
-    <div class="footer" v-if="true">
+    <div class="footer">
       <div class="mark-history">
         <el-tag
           class="tags"
@@ -355,6 +355,7 @@ export default {
     /**设置标记 */
     setTag (tags) {
       var id = ++this.taggedNum
+      console.log(`增加计数：${id}`)
 
       if (this.selection.isCollapsed) {
         // 未选中内容
@@ -533,6 +534,8 @@ export default {
           // selection: this.selection
         })
       }
+      console.log(`当前Tag数组：`)
+      console.log(this.tags)
       this.selection = {}
       this.value = []
       this.imgTagContent = ''
@@ -547,6 +550,9 @@ export default {
       var id = tag.getAttribute('c-id')
       var i = this.tags.findIndex(s => s.id == id)
       this.tags.splice(i, 1)
+      // 减少计数器
+      this.taggedNum -= 1
+      console.log(`减少计数：${this.taggedNum}`)
       // 移除页面元素
       this.removeImgTags(id)
       this.removeTextTags(id)
@@ -738,8 +744,9 @@ export default {
       padding: 1rem;
 
       .mark-history {
+        // max-width: 104rem;
+        width: 85%;
         height: 200px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
         .tags {
           margin: 5px;
@@ -748,6 +755,7 @@ export default {
 
       .check-box {
         padding: 0.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       }
 

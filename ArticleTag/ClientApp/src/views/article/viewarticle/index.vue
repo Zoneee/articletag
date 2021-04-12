@@ -131,8 +131,8 @@ export default {
       padding: 1rem;
 
       .mark-history {
+        width: 85%;
         height: 200px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
         .tags {
           margin: 5px;
@@ -141,6 +141,7 @@ export default {
 
       .check-box {
         padding: 0.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       }
 
