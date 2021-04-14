@@ -63,7 +63,8 @@
             v-model="taggerName"
             size="mini"
             placeholder="输入标记者姓名搜索"
-            @change="searchByTaggerName"
+            @change="searchTableData"
+            v-if="role === 1"
           />
         </template>
         <template slot-scope="scope">
@@ -157,8 +158,15 @@ export default {
       console.log(index, row);
     },
     searchTableData () {
-      // 翻页查询
-      console.log('翻页查询')
+      if (this.taggerName) {
+        this.searchByTaggerName(this.taggerName)
+      } else {
+        this.searchByPaging()
+      }
+    },
+    searchByPaging () {
+      // 分页查询
+      console.log('分页查询')
 
       this.api.apiArticlePagingAritclePost({
         page: this.pager.index,
@@ -174,7 +182,6 @@ export default {
           this.pager.total = data.result.total
         }
       })
-
     },
     searchByTaggerName (value) {
       // 根据标记者名称查询
@@ -190,8 +197,8 @@ export default {
         }
 
         if (data.success) {
-          this.data = data.result.records
-          this.pager.total = data.result.total
+          this.data = data.result.records || []
+          this.pager.total = data.result.total || 0
         }
       })
     },
