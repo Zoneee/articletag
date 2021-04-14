@@ -108,6 +108,7 @@ export default {
         isImg: false
       },
       value: [],
+      currentEditId: 0,
       imgTagContent: '',
       dialogTitle: '',
       dialogVisible: false,
@@ -324,6 +325,7 @@ export default {
       this.dialogVisible = false
       this.cascaderVisible = false
       this.inputerVisible = false
+      this.currentEditId = 0
     },
     /**打开选择行为的标记菜单Dialog */
     openCascader (mouse) {
@@ -342,13 +344,16 @@ export default {
       if (!this.selection.isCollapsed) {
         var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
         var targetElement = this.selection.anchorNode.childNodes[i]
-
         this.dialogTippyContent = targetElement.id || '暂无ID'
       } else {
         var target = mouse.target
         if (target.tagName.toLowerCase() === 'img') {
           this.dialogTippyContent = target.id || '暂无ID'
           this.selection.anchorNode = target
+          var id = target.getAttribute('c-id')
+          var content = target.getAttribute('c-name')
+          this.imgTagContent = content
+          this.currentEditId = id
         }
       }
     },
@@ -443,9 +448,15 @@ export default {
       // targetElement.style.borderColor = 'yellow'
       // targetElement.style.borderWidth = '5px'
 
+      var sourceId = node.getAttribute('c-id')
       node.classList.add('tagged', 'tagged-img')
-      node.id = `mark-id-${id}`
-      node.setAttribute('c-id', id)
+      if (!sourceId) {
+        node.id = `mark-id-${id}`
+        node.setAttribute('c-id', id)
+      } else {
+        this.taggedNum--
+        console.log(`更新img内容，计数减一：${this.taggedNum}`)
+      }
       node.setAttribute('c-type', 'IMG')
       node.setAttribute('c-name', content)
       node.style.borderStyle = 'solid'
@@ -519,6 +530,23 @@ export default {
 
       this.setTag(tags)
 
+      var index = this.tags.findIndex(s => s.id == this.currentEditId)
+      if (index === -1) {
+        this.addTagsItem(tags)
+      } else {
+        this.editTags(this.currentEditId)
+      }
+
+      console.log(`当前Tag数组：`)
+      console.log(this.tags)
+      this.selection = {}
+      this.value = []
+      this.imgTagContent = ''
+
+      this.saveTags()
+      this.closeMenus()
+    },
+    addTagsItem (tags) {
       if (tags.length) {
         this.tags.push({
           id: this.taggedNum.toString(),
@@ -534,22 +562,51 @@ export default {
           // selection: this.selection
         })
       }
-      console.log(`当前Tag数组：`)
-      console.log(this.tags)
-      this.selection = {}
-      this.value = []
-      this.imgTagContent = ''
-
-      this.saveTags()
-      this.closeMenus()
+    },
+    editTags (id) {
+      var elements = document.querySelectorAll(`mark[c-id="${id}"],img[c-id="${id}"]`)
+      if (elements.length <= 0) {
+        // 无效操作
+        return false
+      }
+      var tagName = elements[0].tagName
+      if (tagName.toLowerCase() === 'mark') {
+        // 文字操作
+        // 只操作第一个元素
+        var element = elements[0]
+      } else if (tagName.toLowerCase() === 'img') {
+        // 图片元素
+        var element = elements[0]
+        // 修改文中标签内容
+        this.editImgTags(id, this.imgTagContent)
+        // 修改下方Tag
+        var id = element.getAttribute('c-id')
+        this.editTagsItem(id, this.imgTagContent)
+      }
+    },
+    /**修改页面下方Tag */
+    editTagsItem (id, content) {
+      var index = this.tags.findIndex(s => s.id == id)
+      var tag = this.tags[index]
+      tag.name = content
+    },
+    /**修改文章中对应的标记标签。图片标签 */
+    editImgTags (id, content) {
+      // 找到元素
+      var img = document.querySelector(`img[c-id="${id}"]`)
+      if (img) {
+        img.setAttribute('c-name', content)
+        return true
+      } else {
+        return false
+      }
     },
     /**删除页面下方Tag，同时移除文章中对应的标记标签 */
     removeTags (mouse) {
       var tag = mouse.target.parentElement
       // 移除tag
       var id = tag.getAttribute('c-id')
-      var i = this.tags.findIndex(s => s.id == id)
-      this.tags.splice(i, 1)
+      this.removeTagsItem(id)
       // 减少计数器
       this.taggedNum -= 1
       console.log(`减少计数：${this.taggedNum}`)
@@ -559,7 +616,7 @@ export default {
       // 保存操作
       this.saveTags()
     },
-    /**删除页面下方Tag，同时移除文章中对应的标记标签。图片标签 */
+    /**删除文章中对应的标记标签。图片标签 */
     removeImgTags (id) {
       // 找到元素
       var img = document.querySelector(`img[c-id="${id}"]`)
@@ -572,7 +629,7 @@ export default {
         img.style.borderWidth = '0px'
       }
     },
-    /**删除页面下方Tag，同时移除文章中对应的标记标签。文字标签 */
+    /**删除文章中对应的标记标签。文字标签 */
     removeTextTags (id) {
       // 找到元素
       var marks = document.querySelectorAll(`mark[c-id="${id}"]`)
@@ -582,6 +639,11 @@ export default {
           mark.remove()
         }
       }
+    },
+    /**移除Tag 数组项 */
+    removeTagsItem (id) {
+      var i = this.tags.findIndex(s => s.id == id)
+      this.tags.splice(i, 1)
     },
     scrollToView (e) {
       // 滚动到固定元素

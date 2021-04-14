@@ -87,6 +87,54 @@ namespace Businesses.Repositories
             };
         }
 
+        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size)
+        {
+            var tagger = await this.Orm.GetRepository<User>()
+               .Select
+               .Where(s => s.NickName.Contains(taggerName))
+               .ToOneAsync();
+
+            if (tagger == null)
+            {
+                return new TaggedRecordDto();
+            }
+
+            var records = await Select
+                 .Where(s => s.UserID == tagger.ID)
+                 .Page(page, size)
+                 .Include(s => s.Tagger)
+                 .Include(s => s.Manager)
+                 .IncludeMany(s => s.AuditRecords)
+                 .Count(out var total)
+                 .ToListAsync(s => new TaggedRecord()
+                 {
+                     ID = s.ID.ToString(),
+                     CleanedArticleID = s.CleanedArticleID.ToString(),
+                     TaskID = s.TaskID.ToString(),
+                     Status = s.Status,
+                     LastChangeTime = s.LastChangeTime,
+                     Auditor = new Auditor()
+                     {
+                         ID = s.Manager.ID.ToString(),
+                         Name = s.Manager.NickName
+                     },
+                     Tagger = new Tagger()
+                     {
+                         ID = s.Tagger.ID.ToString(),
+                         Name = s.Tagger.NickName,
+                         Email = s.Tagger.Email
+                     },
+                     AuditRecords = s.AuditRecords,
+                     Review = s.Review
+                 });
+
+            return new TaggedRecordDto()
+            {
+                Records = records,
+                Total = total
+            };
+        }
+
         /// <summary>
         /// 标记者获取文献
         /// </summary>

@@ -179,7 +179,21 @@ export default {
     searchByTaggerName (value) {
       // 根据标记者名称查询
       this.pager.index = 1
-      this.searchTableData()
+      this.api.apiArticleSearchArticleByTaggerPost({
+        tagger: value,
+        page: this.pager.index,
+        size: this.pager.size
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          this.data = data.result.records
+          this.pager.total = data.result.total
+        }
+      })
     },
     handleSizeChange (size) {
       this.pager.index = 1

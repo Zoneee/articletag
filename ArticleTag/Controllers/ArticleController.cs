@@ -195,9 +195,6 @@ namespace ArticleTag.Controllers
         [SwaggerResponse(200, "审核文章", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
         public async Task<IActionResult> AuditArticle(AuditArticleRequest audit)
         {
-#if DEBUG
-            audit.AuditorID = 2;
-#endif
             var response = JsonResponseBase<bool>.CreateDefault();
             try
             {
@@ -230,6 +227,26 @@ namespace ArticleTag.Controllers
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
                 _logger.LogError("设置文章为综述文章异常！", ex);
+                return Ok(response);
+            }
+        }
+
+        [HttpPost("SearchArticleByTagger")]
+        [SwaggerResponse(200, "根据标记员名称查询文献", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> SearchArticleByTagger(string tagger, int page, int size)
+        {
+            var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
+            try
+            {
+                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(tagger, page, size);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("根据标记员名称查询文献异常！", ex);
                 return Ok(response);
             }
         }
