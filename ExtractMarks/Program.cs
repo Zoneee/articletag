@@ -78,11 +78,12 @@ namespace ExtractMarks
 
         static void Main(string[] args)
         {
+            var no = 2;
             // var path_plain = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1_plain.txt";
             // var path_mark = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\demo_mark.txt";
-            var path_mark = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1_mark.txt";
-            var path_plain_v2 = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1_plain_v2.txt";
-            var path_output = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1_output.txt";
+            var path_mark = $@"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\{no}_mark.txt";
+            var path_plain_v2 = $@"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\{no}_plain_v2.txt";
+            var path_output = $@"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\{no}_output.txt";
             var markReg = new Regex("<mark.*?>(\\{|\\})</mark>");
             var cidReg = new Regex("(?<=c-id=\")\\d+(?=\")");
             var ctypeReg = new Regex("(?<=c-type=\").+?(?=\")");

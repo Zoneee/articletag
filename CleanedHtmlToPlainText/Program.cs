@@ -11,9 +11,10 @@ namespace CleanedHtmlToPlainText
         static void Main(string[] args)
         {
             // var htmlPath = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\demo.html";
-            var htmlPath = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1.html";
-            var plainTextPath_mark = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1_mark.txt";
-            var plainTextPath_plain = @"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\1_plain.txt";
+            var no = 2;
+            var htmlPath = $@"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\{no}.html";
+            var plainTextPath_mark = $@"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\{no}_mark.txt";
+            var plainTextPath_plain = $@"F:\workspaces\ArticleCleanWorkspace\Plain Clean And Extract\{no}_plain.txt";
             var html = "<html>" + File.ReadAllText(htmlPath) + "</html>";
             html = html.Replace("<sup>", "**").Replace("</sup>", "**").Replace("<sub>", "*").Replace("</sub>", "*");
             var text_mark = new PlainTextConverter(new List<string>() { "mark" }, null).Convert(html);
