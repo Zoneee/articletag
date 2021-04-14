@@ -16,9 +16,13 @@ namespace Businesses.Interfaces
 
         Task<ArticleDto> GetArticleByTaggerIdAsync(long taggerId);
 
-        Task<TaggedRecordDto> GetArticlesByPagingAsync(int page, int size);
-
+        Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size);
+        Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size);
         Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record);
+
+        Task<bool> SetReviewArticleAsync(long articleId, bool review);
+
+        Task<bool> SetUnavailArticleAsync(long articleId);
 
         Task<bool> SubmitAuditAsync(long articleId);
     }

@@ -1,12 +1,4 @@
 <template>
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- 不允许跨标签标记 -->
-  <!-- double Tag -->
-
   <el-container class="index-container">
     <el-main>
       <div>
@@ -15,7 +7,7 @@
       <div class="footer-placeholder"></div>
     </el-main>
 
-    <div class="footer" v-if="true">
+    <div class="footer">
       <div class="mark-history">
         <el-tag
           class="tags"
@@ -24,13 +16,23 @@
           :key="tag.id"
           :color="tag.color"
           @close="removeTags"
+          @click="scrollToView"
           closable
         >
           {{ tag.name }}
         </el-tag>
       </div>
+      <div class="check-box">
+        <el-checkbox v-model="review" @change="setReview">
+          <el-tooltip placement="top">
+            <div slot="content">综述文献内容较多，文献标记量按照三倍计算</div>
+            <el-link type="primary">这是一篇综述性文章</el-link>
+          </el-tooltip>
+        </el-checkbox>
+      </div>
       <div class="btns">
         <el-button type="success" @click="submitAudit">提交审核</el-button>
+        <el-button type="danger" @click="skipArticle">跳过文章</el-button>
       </div>
     </div>
 
@@ -59,11 +61,19 @@
         </div>
 
         <div class="inputer" ref="inputer" v-show="inputerVisible">
+          <el-checkbox v-model="result">
+            <el-tooltip placement="top">
+              <div slot="content">表现适配体性能的图片</div>
+              <el-link type="primary">这是一张表征图片</el-link>
+            </el-tooltip>
+          </el-checkbox>
+
           <el-input
             type="textarea"
             :autosize="{ minRows: 6, maxRows: 20 }"
             placeholder="请输入内容"
             v-model="imgTagContent"
+            :disabled="result"
           >
           </el-input>
         </div>
@@ -94,9 +104,11 @@ export default {
         isCollapsed: false,
         rangeCount: 0,
         type: '',
-        content: ''
+        content: '',
+        isImg: false
       },
       value: [],
+      currentEditId: 0,
       imgTagContent: '',
       dialogTitle: '',
       dialogVisible: false,
@@ -193,7 +205,9 @@ export default {
         color: '#CC9966',
         type: 'T'
       }],
-      user: {}
+      user: {},
+      review: false,
+      result: false
     }
   },
   created () {
@@ -248,22 +262,33 @@ export default {
       window.t = t
       console.log(t.anchorOffset)
       console.log(t.focusOffset)
-      if (t.isCollapsed) {
-        console.log('未选中内容')
-        alert('未选中内容')
-        return
-      }
       console.log(`选中：${t.toString()}`)
 
-      var r = t.getRangeAt(0)
-      this.selection.anchorNode = r.startContainer
-      this.selection.anchorOffset = r.startOffset
-      this.selection.focusNode = r.endContainer
-      this.selection.focusOffset = r.endOffset
-      this.selection.isCollapsed = t.isCollapsed
-      this.selection.rangeCount = t.rangeCount
-      this.selection.type = t.type
-      this.selection.content = t.toString()
+      try {
+        // 鼠标划中了一片区域
+        // 或者鼠标在文字上点击右键
+        var r = t.getRangeAt(0)
+        this.selection.anchorNode = r.startContainer
+        this.selection.anchorOffset = r.startOffset
+        this.selection.focusNode = r.endContainer
+        this.selection.focusOffset = r.endOffset
+        this.selection.isCollapsed = t.isCollapsed
+        this.selection.rangeCount = t.rangeCount
+        this.selection.type = t.type
+        this.selection.content = t.toString()
+      } catch (error) {
+        // 鼠标没有划中区域。
+        // 或者鼠标在图片上点击右键
+        // 需要为判断是否是右击图片提供数据
+        this.selection.anchorNode = t.anchorNode
+        this.selection.anchorOffset = t.anchorOffset
+        this.selection.focusNode = t.focusNode
+        this.selection.focusOffset = t.focusOffset
+        this.selection.isCollapsed = t.isCollapsed
+        this.selection.rangeCount = t.rangeCount
+        this.selection.type = t.type
+        this.selection.content = t.toString()
+      }
 
       return t
     },
@@ -280,11 +305,14 @@ export default {
     /**弹出标记菜单Dialog */
     openMenus (mouse) {
       var t = this.getSelection()
-      if (!t) {
+      if (!t || (t.isCollapsed && mouse.target.tagName.toLowerCase() != 'img')) {
         return
       }
 
-      if (this.selection.anchorNode === this.selection.focusNode && !this.selection.content && !this.selection.isCollapsed) {
+      // 设置图片标记
+      this.selection.isImg = mouse.target.tagName.toLowerCase() === 'img'
+
+      if (this.selection.anchorNode === this.selection.focusNode && !this.selection.content && !this.selection.isCollapsed || mouse.target.tagName.toLowerCase() === 'img') {
         // 打开输入菜单
         this.openInputer(mouse)
       } else {
@@ -297,6 +325,7 @@ export default {
       this.dialogVisible = false
       this.cascaderVisible = false
       this.inputerVisible = false
+      this.currentEditId = 0
     },
     /**打开选择行为的标记菜单Dialog */
     openCascader (mouse) {
@@ -312,18 +341,33 @@ export default {
       this.inputerVisible = true
       this.dilaogTitle = '请输入序列'
 
-      var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
-      var targetElement = this.selection.anchorNode.childNodes[i]
-
-      this.dialogTippyContent = targetElement.id || '暂无ID'
+      if (!this.selection.isCollapsed) {
+        var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
+        var targetElement = this.selection.anchorNode.childNodes[i]
+        this.dialogTippyContent = targetElement.id || '暂无ID'
+      } else {
+        var target = mouse.target
+        if (target.tagName.toLowerCase() === 'img') {
+          this.dialogTippyContent = target.id || '暂无ID'
+          this.selection.anchorNode = target
+          var id = target.getAttribute('c-id')
+          var content = target.getAttribute('c-name')
+          this.imgTagContent = content
+          this.currentEditId = id
+        }
+      }
     },
     /**设置标记 */
     setTag (tags) {
       var id = ++this.taggedNum
+      console.log(`增加计数：${id}`)
 
       if (this.selection.isCollapsed) {
         // 未选中内容
-        return
+        // 或者右键了图片
+        if (this.selection.isImg) {
+          this.setNodeTag(this.selection.anchorNode, 0, tags, id, null, null, false)
+        }
       } else if (this.selection.anchorNode === this.selection.focusNode) {
         // 选中一个标签
         var i = this.selection.anchorOffset < this.selection.focusOffset ? this.selection.anchorOffset : this.selection.focusOffset
@@ -338,8 +382,20 @@ export default {
     setNodeTag (node, nodeOffset, tags, id, content, tagType, isInner) {
       switch (node.nodeType) {
         case 1:
-          // 设置图片
-          this.setImgTag(node, nodeOffset, tags, id)
+          // 设置y元素
+          if (node.tagName.toLowerCase() === 'img') {
+            if (this.result) {
+              this.imgTagContent = '检测效果图片'
+              this.setImgTag(node, 0, tags, id, this.imgTagContent)
+            } else if (this.selection.isCollapsed) {
+              this.setImgTag(node, 0, tags, id, this.imgTagContent)
+            } else {
+              var targetElement = node.childNodes[nodeOffset]
+              this.setImgTag(targetElement, nodeOffset, tags, id, this.imgTagContent)
+            }
+          } else {
+            this.setElementTag(node, nodeOffset, tags, id, content, tagType)
+          }
           break
         case 3:
           // 设置内容
@@ -353,6 +409,14 @@ export default {
     },
     /**
      * 单个节点的文本标记
+     * 节点尾部的换行标记
+     */
+    setElementTag (node, length, tags, id, content, tagType) {
+      var targetElement = node.childNodes[length]
+      this.setTextTag(targetElement, length, tags, id, content, tagType)
+    },
+    /**
+     * 单个节点的文本标记
      * 跨标签的文本标记
      */
     setTextTag (node, length, tags, id, content, tagType) {
@@ -362,6 +426,7 @@ export default {
       var beforeNode = document.createTextNode(beforeText)
       var afterNode = document.createTextNode(afterText)
       var tagElement = this.createMark(content, id)
+      tagElement.id = `mark-id-${id}`
       tagElement.classList.add('tagged', 'tagged-node')
       tagElement.style.backgroundColor = tags[1] ? tags[1].color : tags[0].color
       tagElement.setAttribute('tagType', tagType)
@@ -373,26 +438,30 @@ export default {
      * 单个节点的图片标记
      * 图片标记不区分起始和结束节点
      */
-    setImgTag (node, nodeIndex, tags, id) {
-      // var markElement = this.createMark('', tags)
-      // markElement.classList.add('tagged', 'tagged-img')
-      // markElement.setAttribute('c-id', id)
-      // markElement.setAttribute('c-type', 'IMG')
-      // markElement.setAttribute('c-name', this.imgTagContent)
-
+    setImgTag (node, nodeIndex, tags, id, content) {
       // var targetElement = node.childNodes[nodeIndex]
+      // targetElement.classList.add('tagged', 'tagged-img')
+      // targetElement.setAttribute('c-id', id)
+      // targetElement.setAttribute('c-type', 'IMG')
+      // targetElement.setAttribute('c-name', content)
+      // targetElement.style.borderStyle = 'solid'
+      // targetElement.style.borderColor = 'yellow'
+      // targetElement.style.borderWidth = '5px'
 
-      // targetElement.replaceWith(markElement)
-      // markElement.appendChild(targetElement)
-
-      var targetElement = node.childNodes[nodeIndex]
-      targetElement.classList.add('tagged', 'tagged-img')
-      targetElement.setAttribute('c-id', id)
-      targetElement.setAttribute('c-type', 'IMG')
-      targetElement.setAttribute('c-name', this.imgTagContent)
-      targetElement.style.borderStyle = 'solid'
-      targetElement.style.borderColor = 'yellow'
-      targetElement.style.borderWidth = '5px'
+      var sourceId = node.getAttribute('c-id')
+      node.classList.add('tagged', 'tagged-img')
+      if (!sourceId) {
+        node.id = `mark-id-${id}`
+        node.setAttribute('c-id', id)
+      } else {
+        this.taggedNum--
+        console.log(`更新img内容，计数减一：${this.taggedNum}`)
+      }
+      node.setAttribute('c-type', 'IMG')
+      node.setAttribute('c-name', content)
+      node.style.borderStyle = 'solid'
+      node.style.borderColor = 'yellow'
+      node.style.borderWidth = '5px'
     },
     /**
      * 单个节点内部的文本标记
@@ -408,6 +477,7 @@ export default {
       var selectedNode = document.createTextNode(selectedText)
 
       var ts = this.createMark('{', tags)
+      ts.id = `mark-id-${id}`
       ts.classList.add('tagged', 'tagged-node')
       ts.style.backgroundColor = tags[1] ? tags[1].color : tags[0].color
       ts.setAttribute('c-type', 'ts')
@@ -460,21 +530,15 @@ export default {
 
       this.setTag(tags)
 
-      if (tags.length) {
-        this.tags.push({
-          id: this.taggedNum,
-          name: tags.map(s => s.label).join('/'),
-          color: tags[1] ? tags[1].color : tags[0].color,
-          selection: this.selection
-        })
+      var index = this.tags.findIndex(s => s.id == this.currentEditId)
+      if (index === -1) {
+        this.addTagsItem(tags)
       } else {
-        this.tags.push({
-          id: this.taggedNum,
-          name: this.imgTagContent,
-          color: 'yellow',
-          selection: this.selection
-        })
+        this.editTags(this.currentEditId)
       }
+
+      console.log(`当前Tag数组：`)
+      console.log(this.tags)
       this.selection = {}
       this.value = []
       this.imgTagContent = ''
@@ -482,20 +546,77 @@ export default {
       this.saveTags()
       this.closeMenus()
     },
+    addTagsItem (tags) {
+      if (tags.length) {
+        this.tags.push({
+          id: this.taggedNum.toString(),
+          name: tags.map(s => s.label).join('/'),
+          color: tags[1] ? tags[1].color : tags[0].color,
+          // selection: this.selection
+        })
+      } else {
+        this.tags.push({
+          id: this.taggedNum.toString(),
+          name: this.imgTagContent,
+          color: 'yellow',
+          // selection: this.selection
+        })
+      }
+    },
+    editTags (id) {
+      var elements = document.querySelectorAll(`mark[c-id="${id}"],img[c-id="${id}"]`)
+      if (elements.length <= 0) {
+        // 无效操作
+        return false
+      }
+      var tagName = elements[0].tagName
+      if (tagName.toLowerCase() === 'mark') {
+        // 文字操作
+        // 只操作第一个元素
+        var element = elements[0]
+      } else if (tagName.toLowerCase() === 'img') {
+        // 图片元素
+        var element = elements[0]
+        // 修改文中标签内容
+        this.editImgTags(id, this.imgTagContent)
+        // 修改下方Tag
+        var id = element.getAttribute('c-id')
+        this.editTagsItem(id, this.imgTagContent)
+      }
+    },
+    /**修改页面下方Tag */
+    editTagsItem (id, content) {
+      var index = this.tags.findIndex(s => s.id == id)
+      var tag = this.tags[index]
+      tag.name = content
+    },
+    /**修改文章中对应的标记标签。图片标签 */
+    editImgTags (id, content) {
+      // 找到元素
+      var img = document.querySelector(`img[c-id="${id}"]`)
+      if (img) {
+        img.setAttribute('c-name', content)
+        return true
+      } else {
+        return false
+      }
+    },
     /**删除页面下方Tag，同时移除文章中对应的标记标签 */
     removeTags (mouse) {
       var tag = mouse.target.parentElement
       // 移除tag
       var id = tag.getAttribute('c-id')
-      var i = this.tags.findIndex(s => s.id == id)
-      this.tags.splice(i, 1)
+      this.removeTagsItem(id)
+      // 减少计数器
+      this.taggedNum -= 1
+      console.log(`减少计数：${this.taggedNum}`)
       // 移除页面元素
       this.removeImgTags(id)
       this.removeTextTags(id)
       // 保存操作
       this.saveTags()
     },
-    /**删除页面下方Tag，同时移除文章中对应的标记标签。图片标签 */
+    /**删除文章中对应的标记标签。图片标签 */
     removeImgTags (id) {
       // 找到元素
       var img = document.querySelector(`img[c-id="${id}"]`)
@@ -508,7 +629,7 @@ export default {
         img.style.borderWidth = '0px'
       }
     },
-    /**删除页面下方Tag，同时移除文章中对应的标记标签。文字标签 */
+    /**删除文章中对应的标记标签。文字标签 */
     removeTextTags (id) {
       // 找到元素
       var marks = document.querySelectorAll(`mark[c-id="${id}"]`)
@@ -518,6 +639,16 @@ export default {
           mark.remove()
         }
       }
+    },
+    /**移除Tag 数组项 */
+    removeTagsItem (id) {
+      var i = this.tags.findIndex(s => s.id == id)
+      this.tags.splice(i, 1)
+    },
+    scrollToView (e) {
+      // 滚动到固定元素
+      var id = e.target.getAttribute('c-id')
+      document.querySelector(`#mark-id-${id}`).scrollIntoView();
     },
     /**保存标记信息 */
     saveTags () {
@@ -573,6 +704,7 @@ export default {
             var result = data.result
             this.articleId = result.id
             this.article = result.content
+            this.review = result.review
             this.tags = result.tags || []
             this.taggedNum = this.tags.length
             resolve(data)
@@ -584,6 +716,59 @@ export default {
       })
 
       return p
+    },
+    skipArticle () {
+      var h = this.$createElement
+      this.$msgbox({
+        title: '提示',
+        message: h('p', null, [
+          h('p', null, '此操作将跳过该论文, 是否继续?'),
+          h('p', { style: 'color:red' }, '被跳过的文章将会被审核，请勿恶意跳过文章')
+        ]),
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.api.apiArticleSetUnavailArticlePost({
+          articleId: this.articleId
+        }, (error, data, resp) => {
+          if (error) {
+            alert(error)
+            return
+          }
+
+          if (data.success) {
+            this.$message({
+              type: 'success',
+              message: '跳过成功!'
+            })
+            this.searchArticle()
+          } else {
+            this.$message({
+              type: 'warning',
+              message: '跳过失败!'
+            })
+          }
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消操作'
+        });
+      })
+    },
+    setReview () {
+      // 设置为综述标志
+      this.api.apiArticleSetReviewArticlePost({
+        articleId: this.articleId,
+        review: this.review
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+      })
     }
   }
 }
@@ -609,37 +794,42 @@ export default {
       }
     }
 
+    @footheight: 330px;
     .footer {
       position: fixed;
-      height: 300px;
+      height: @footheight;
       width: 100%;
       bottom: 0px;
       // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
       background-color: #fff;
+      padding: 1rem;
 
       .mark-history {
-        height: 220px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        padding: 1rem;
+        // max-width: 104rem;
+        width: 85%;
+        height: 200px;
 
         .tags {
           margin: 5px;
         }
       }
 
+      .check-box {
+        padding: 0.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
       .btns {
         position: absolute;
         bottom: 10px;
-        // border-top: 1px solid rgba(0, 0, 0, 0.1);
-        padding: 1rem;
       }
     }
 
     .footer-placeholder {
-      height: 300px;
+      height: @footheight;
       width: 100%;
-      // border: 1px solid rgb(236, 12, 150);
     }
   }
 </style>

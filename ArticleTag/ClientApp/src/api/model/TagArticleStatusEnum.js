@@ -54,13 +54,19 @@ export default class TagArticleStatusEnum {
      */
     Unsanctioned = 5;
 
+        /**
+         * value: 6
+         * @const
+         */
+        Unavail = 6;
+
 
     /**
     * Returns a <code>TagArticleStatusEnum</code> enum value from a Javascript object name.
     * @param {Object} data The plain JavaScript object containing the name of the enum value.
     * @return {module:model/TagArticleStatusEnum} The enum <code>TagArticleStatusEnum</code> value.
     */
-    static constructFromObject (object) {
+    static constructFromObject(object) {
         return object;
     }
 }

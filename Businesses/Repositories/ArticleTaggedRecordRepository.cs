@@ -37,15 +37,22 @@ namespace Businesses.Repositories
             {
                 ID = article.ID.ToString(),
                 Content = article.TaggedContent,
-                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? "")
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? ""),
+                Review = article.Review
             };
 
             return dto;
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(int page, int size)
+        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size)
         {
+            var user = await this.Orm.GetRepository<User>()
+                .Select
+                .Where(s => s.ID == userid)
+                .ToOneAsync();
+
             var records = await this.Select
+             .WhereIf(user.Role == TagRoleEnum.Tagger, s => s.UserID == userid)
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
@@ -69,8 +76,57 @@ namespace Businesses.Repositories
                      Name = s.Tagger.NickName,
                      Email = s.Tagger.Email
                  },
-                 AuditRecords = s.AuditRecords
+                 AuditRecords = s.AuditRecords,
+                 Review = s.Review
              });
+
+            return new TaggedRecordDto()
+            {
+                Records = records,
+                Total = total
+            };
+        }
+
+        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size)
+        {
+            var tagger = await this.Orm.GetRepository<User>()
+               .Select
+               .Where(s => s.NickName.Contains(taggerName))
+               .ToOneAsync();
+
+            if (tagger == null)
+            {
+                return new TaggedRecordDto();
+            }
+
+            var records = await Select
+                 .Where(s => s.UserID == tagger.ID)
+                 .Page(page, size)
+                 .Include(s => s.Tagger)
+                 .Include(s => s.Manager)
+                 .IncludeMany(s => s.AuditRecords)
+                 .Count(out var total)
+                 .ToListAsync(s => new TaggedRecord()
+                 {
+                     ID = s.ID.ToString(),
+                     CleanedArticleID = s.CleanedArticleID.ToString(),
+                     TaskID = s.TaskID.ToString(),
+                     Status = s.Status,
+                     LastChangeTime = s.LastChangeTime,
+                     Auditor = new Auditor()
+                     {
+                         ID = s.Manager.ID.ToString(),
+                         Name = s.Manager.NickName
+                     },
+                     Tagger = new Tagger()
+                     {
+                         ID = s.Tagger.ID.ToString(),
+                         Name = s.Tagger.NickName,
+                         Email = s.Tagger.Email
+                     },
+                     AuditRecords = s.AuditRecords,
+                     Review = s.Review
+                 });
 
             return new TaggedRecordDto()
             {
@@ -113,7 +169,8 @@ namespace Businesses.Repositories
                 {
                     ID = unsanction.ID.ToString(),
                     Content = unsanction.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? "")
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? ""),
+                    Review = unsanction.Review
                 };
                 return dto;
             }
@@ -131,7 +188,8 @@ namespace Businesses.Repositories
                 {
                     ID = taggingArticle.ID.ToString(),
                     Content = taggingArticle.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? "")
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? ""),
+                    Review = taggingArticle.Review
                 };
                 return dto;
             }
@@ -151,7 +209,8 @@ namespace Businesses.Repositories
                 {
                     ID = untagged.ID.ToString(),
                     Content = untagged.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? "")
+                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? ""),
+                    Review = untagged.Review
                 };
             }
 
@@ -203,6 +262,18 @@ namespace Businesses.Repositories
         }
 
         /// <summary>
+        /// 标记无效文章
+        /// </summary>
+        public async Task<bool> SetUnavailArticleAsync(long articleId)
+        {
+            return await this.Where(s => s.ID == articleId)
+              .ToUpdate()
+              .Set(s => s.Status, TagArticleStatusEnum.Unavail)
+              .Set(s => s.LastChangeTime, DateTime.Now)
+              .ExecuteAffrowsAsync() > 0;
+        }
+
+        /// <summary>
         /// 审核文章
         /// </summary>
         public async Task<bool> AuditArticleAsync(AuditArticleRequest article)
@@ -246,6 +317,14 @@ namespace Businesses.Repositories
                     throw new ErrorException("保存标记记录时异常！", ex);
                 }
             }
+        }
+
+        public async Task<bool> SetReviewArticleAsync(long articleId, bool review)
+        {
+            return await this.UpdateDiy
+                      .Where(s => s.ID == articleId)
+                      .Set(s => s.Review, review)
+                      .ExecuteAffrowsAsync() > 0;
         }
     }
 }

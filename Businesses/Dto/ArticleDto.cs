@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using Businesses.JsonConverters;
 
 namespace Businesses.Dto
 {
@@ -10,5 +8,6 @@ namespace Businesses.Dto
 
         public string Content { get; set; }
         public ICollection<Tag> Tags { get; set; }
+        public bool Review { get; set; }
     }
 }

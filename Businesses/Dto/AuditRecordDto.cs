@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
-using Businesses.JsonConverters;
 
 namespace Businesses.Dto
 {
@@ -11,5 +9,7 @@ namespace Businesses.Dto
         public string Remark { get; set; }
 
         public DateTime RecordTime { get; set; }
+
+        public bool Review { get; set; }
     }
 }
