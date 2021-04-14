@@ -37,7 +37,7 @@ namespace ExtractOutput
                 var taskId = taskIdList[index];
                 var record = fsql.Select<ArticleTaggedRecord>().Where(p => p.TaskID == taskId).First();
                 var html = record.TaggedContent;
-                var htmlFilePath = $"{folder}\\{taskId}_raw.html";
+                var htmlFilePath = $"{folder}\\raw_{taskId}.html";
                 File.WriteAllText(htmlFilePath, html);
 
                 html = $"<html>{html}</html>";
@@ -49,8 +49,8 @@ namespace ExtractOutput
                 string output;
                 extractor.Extract(out plain, out output);
 
-                var plainFilePath = $"{folder}\\{taskId}_plain.txt";
-                var outputFilePath = $"{folder}\\{taskId}_output.txt";
+                var plainFilePath = $"{folder}\\plain_{taskId}.txt";
+                var outputFilePath = $"{folder}\\output_{taskId}.txt";
 
                 File.WriteAllText(plainFilePath, plain);
                 File.WriteAllText(outputFilePath, output);
