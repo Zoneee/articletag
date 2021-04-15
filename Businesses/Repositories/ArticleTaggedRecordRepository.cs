@@ -44,7 +44,7 @@ namespace Businesses.Repositories
             return dto;
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size)
+        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size, TagArticleStatusEnum? status)
         {
             var user = await this.Orm.GetRepository<User>()
                 .Select
@@ -53,6 +53,7 @@ namespace Businesses.Repositories
 
             var records = await this.Select
              .WhereIf(user.Role == TagRoleEnum.Tagger, s => s.UserID == userid)
+             .WhereIf(status != null, s => s.Status == status)
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
@@ -87,7 +88,7 @@ namespace Businesses.Repositories
             };
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size)
+        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size, TagArticleStatusEnum? status)
         {
             var tagger = await this.Orm.GetRepository<User>()
                .Select
@@ -101,6 +102,7 @@ namespace Businesses.Repositories
 
             var records = await Select
                  .Where(s => s.UserID == tagger.ID)
+                 .WhereIf(status != null, s => s.Status == status)
                  .Page(page, size)
                  .Include(s => s.Tagger)
                  .Include(s => s.Manager)

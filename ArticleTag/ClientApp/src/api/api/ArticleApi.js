@@ -16,6 +16,7 @@ import ArticleDtoResponse from '../model/ArticleDtoResponse';
 import ArticleRecordRequest from '../model/ArticleRecordRequest';
 import AuditArticleRequest from '../model/AuditArticleRequest';
 import BooleanResponse from '../model/BooleanResponse';
+import TagArticleStatusEnum from '../model/TagArticleStatusEnum';
 import TaggedRecordDtoResponse from '../model/TaggedRecordDtoResponse';
 
 /**
@@ -243,7 +244,8 @@ export default class ArticleApi {
       };
       let queryParams = {
         'page': opts['page'],
-        'size': opts['size']
+        'size': opts['size'],
+        'status': opts['status']
       };
       let headerParams = {
       };
@@ -320,7 +322,8 @@ export default class ArticleApi {
       let queryParams = {
         'tagger': opts['tagger'],
         'page': opts['page'],
-        'size': opts['size']
+        'size': opts['size'],
+        'status': opts['status']
       };
       let headerParams = {
       };

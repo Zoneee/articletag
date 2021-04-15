@@ -5,6 +5,7 @@ using Businesses.Dto;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
 using Businesses.ViewModels.Requsets;
+using Entity.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -151,12 +152,12 @@ namespace ArticleTag.Controllers
 
         [HttpPost("PagingAritcle")]
         [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size)
+        public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size, TagArticleStatusEnum? status = null)
         {
             var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
             try
             {
-                var articles = await _articleRecordRepo.GetArticlesByPagingAsync(CurrentUserId, page, size);
+                var articles = await _articleRecordRepo.GetArticlesByPagingAsync(CurrentUserId, page, size, status);
                 response.Result = articles;
                 return Ok(response);
             }
@@ -233,12 +234,12 @@ namespace ArticleTag.Controllers
 
         [HttpPost("SearchArticleByTagger")]
         [SwaggerResponse(200, "根据标记员名称查询文献", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> SearchArticleByTagger(string tagger, int page, int size)
+        public async Task<IActionResult> SearchArticleByTagger(string tagger, int page, int size, TagArticleStatusEnum? status = null)
         {
             var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
             try
             {
-                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(tagger, page, size);
+                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(tagger, page, size, status);
                 return Ok(response);
             }
             catch (Exception ex)

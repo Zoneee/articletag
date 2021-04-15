@@ -2,6 +2,7 @@
   <div class="container">
     <el-table
       :data="formattedData"
+      @filter-change="filterChangeHandler"
       style="width: 100%"
       row-key="id"
       empty-text="暂无"
@@ -23,7 +24,12 @@
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="文章状态">
+      <el-table-column
+        label="文章状态"
+        :filters="audtiStatusArray"
+        filter-placement="bottom-end"
+        :filter-multiple="false"
+      >
         <template slot-scope="scope">
           <el-tag size="medium" :type="statusStyle(scope.row)">{{
             scope.row.statusRemark
@@ -103,6 +109,16 @@ export default {
     return {
       api: new ArticleApi(ApiClient.instance),
       auditStatusEnum: new TagArticleStatusEnum(),
+      audtiStatusArray: [
+        { text: '未标记', value: '0' },
+        { text: '标记中', value: '1' },
+        { text: '已标记', value: '2' },
+        { text: '未审核', value: '3' },
+        { text: '审核通过', value: '4' },
+        { text: '审核不通过', value: '5' },
+        { text: '无效的', value: '6' }
+      ],
+      filter: null,
       taggerName: '',
       pager: {
         index: 1,
@@ -157,20 +173,29 @@ export default {
       })
       console.log(index, row);
     },
+    filterChangeHandler (filters) {
+      // 获得筛选类型
+      var filter = filters[Object.keys(filters)[0]][0]
+      this.filter = filter
+      console.log(filter)
+      // 后端筛选
+      this.searchTableData(filter)
+    },
     searchTableData () {
       if (this.taggerName) {
-        this.searchByTaggerName(this.taggerName)
+        this.searchByTaggerName(this.taggerName, this.filter)
       } else {
-        this.searchByPaging()
+        this.searchByPaging(this.filter)
       }
     },
-    searchByPaging () {
+    searchByPaging (status) {
       // 分页查询
       console.log('分页查询')
 
       this.api.apiArticlePagingAritclePost({
         page: this.pager.index,
-        size: this.pager.size
+        size: this.pager.size,
+        status: status
       }, (error, data, resp) => {
         if (error) {
           alert(error)
@@ -183,13 +208,14 @@ export default {
         }
       })
     },
-    searchByTaggerName (value) {
+    searchByTaggerName (value, status) {
       // 根据标记者名称查询
       this.pager.index = 1
       this.api.apiArticleSearchArticleByTaggerPost({
         tagger: value,
         page: this.pager.index,
-        size: this.pager.size
+        size: this.pager.size,
+        status: status
       }, (error, data, resp) => {
         if (error) {
           alert(error)
