@@ -328,5 +328,26 @@ namespace Businesses.Repositories
                       .ExecuteAffrowsAsync() > 0;
         }
 
+        public async Task<ArticleDto> GetCanAuditArticleAsync()
+        {
+            var article = await Select
+                .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Unavail)
+                .ToOneAsync();
+
+            if (article == null)
+            {
+                throw new Exception("未查询到可审核的文章！");
+            }
+
+            var dto = new ArticleDto()
+            {
+                ID = article.ID.ToString(),
+                Content = article.TaggedContent,
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? ""),
+                Review = article.Review
+            };
+
+            return dto;
+        }
     }
 }

@@ -137,7 +137,31 @@ export default {
     },
     audited () {
       // 通过
-      this.checkStatus().then((flag) => {
+      this.checkStatus()
+        .then(async () => {
+          await this.submitAudited()
+        })
+        .catch((flag) => {
+          alert('禁止审核')
+        }).finally(() => {
+          this.getNextArticle()
+        })
+    },
+    unaudited () {
+      // 不通过
+      this.checkStatus()
+        .then(async () => {
+          await this.submitUnaudited()
+        })
+        .catch((flag) => {
+          alert('禁止审核')
+        }).finally(() => {
+          this.closeMenus()
+          this.getNextArticle()
+        })
+    },
+    submitAudited () {
+      var p = new Promise((resolve, reject) => {
         this.api.apiArticleAuditArticlePost({
           body: {
             id: this.articleId,
@@ -146,17 +170,19 @@ export default {
           }
         }, (error, data, resp) => {
           if (error) {
+            reject(error)
             alert(error)
             return
           }
+
+          resolve(data)
         })
-      }).catch((flag) => {
-        alert('禁止审核')
       })
+
+      return p
     },
-    unaudited () {
-      // 不通过
-      this.checkStatus().then((flag) => {
+    submitUnaudited () {
+      var p = new Promise((resolve, reject) => {
         this.api.apiArticleAuditArticlePost({
           body: {
             id: this.articleId,
@@ -166,15 +192,16 @@ export default {
           }
         }, (error, data, resp) => {
           if (error) {
+            reject(error)
             alert(error)
             return
           }
+
+          resolve(data)
         })
-      }).catch((flag) => {
-        alert('禁止审核')
-      }).finally(() => {
-        this.closeMenus()
       })
+
+      return p
     },
     searchArticle () {
       // 调用API查询 文章和标记
@@ -213,6 +240,23 @@ export default {
           content: name + (attribute ? `/${attribute}` : '')
         })
       }
+    },
+    getNextArticle () {
+      this.api.apiArticleGetCanAuditArticlePost((error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          var result = data.result
+          alert(`获取下一篇`)
+          this.$router.push(`/article/auditarticle/${result.id}`)
+        } else {
+          alert(`没有可审核文献`)
+          this.$router.push(`/article/articlelist`)
+        }
+      })
     }
   }
 }

@@ -702,6 +702,10 @@ export default {
 
           if (data.success) {
             var result = data.result
+            if (result === null) {
+              this.$router.push('/article/articlelist')
+              resolve(data)
+            }
             this.articleId = result.id
             this.article = result.content
             this.review = result.review
@@ -710,6 +714,8 @@ export default {
             resolve(data)
           } else {
             alert(data.errorMsg)
+            this.$router.push('/article/articlelist')
+            reject(data)
           }
           reject(data)
         })

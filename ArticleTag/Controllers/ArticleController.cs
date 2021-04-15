@@ -250,5 +250,25 @@ namespace ArticleTag.Controllers
                 return Ok(response);
             }
         }
+
+        [HttpPost("GetCanAuditArticle")]
+        [SwaggerResponse(200, "获取可审核的文献", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> GetCanAuditArticle()
+        {
+            var response = JsonResponseBase<ArticleDto>.CreateDefault();
+            try
+            {
+                response.Result = await _articleRecordRepo.GetCanAuditArticleAsync();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("获取可审核的文献异常！", ex);
+                return Ok(response);
+            }
+        }
     }
 }

@@ -188,6 +188,41 @@ export default class ArticleApi {
       );
     }
     /**
+     * Callback function to receive the result of the apiArticleGetCanAuditArticlePost operation.
+     * @callback module:api/ArticleApi~apiArticleGetCanAuditArticlePostCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/ArticleDtoResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {module:api/ArticleApi~apiArticleGetCanAuditArticlePostCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/ArticleDtoResponse}
+     */
+    apiArticleGetCanAuditArticlePost(callback) {
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = [];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = ArticleDtoResponse;
+
+      return this.apiClient.callApi(
+        '/api/Article/GetCanAuditArticle', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
      * Callback function to receive the result of the apiArticlePagingAritclePost operation.
      * @callback module:api/ArticleApi~apiArticlePagingAritclePostCallback
      * @param {String} error Error message, if any.
