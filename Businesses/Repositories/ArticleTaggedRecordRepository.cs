@@ -231,7 +231,8 @@ namespace Businesses.Repositories
             var article = await this.Select
                .Where(s => s.ID == articleId)
                .ToOneAsync();
-            return article.Status == TagArticleStatusEnum.Unaudited;
+            return article.Status == TagArticleStatusEnum.Unaudited
+                || article.Status == TagArticleStatusEnum.Unavail;
         }
 
         public async Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record)
@@ -326,5 +327,6 @@ namespace Businesses.Repositories
                       .Set(s => s.Review, review)
                       .ExecuteAffrowsAsync() > 0;
         }
+
     }
 }
