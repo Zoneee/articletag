@@ -21,7 +21,7 @@ namespace Businesses.Interfaces
 
         Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size, TagArticleStatusEnum? status);
 
-        Task<ArticleDto> GetCanAuditArticleAsync();
+        Task<ArticleDto> GetCanAuditArticleAsync(long taggerId);
 
         Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record);
 

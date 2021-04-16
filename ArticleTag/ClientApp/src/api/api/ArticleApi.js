@@ -189,23 +189,26 @@ export default class ArticleApi {
       );
     }
     /**
-     * Callback function to receive the result of the apiArticleGetCanAuditArticlePost operation.
-     * @callback module:api/ArticleApi~apiArticleGetCanAuditArticlePostCallback
+     * Callback function to receive the result of the apiArticleGetTaggersCanAuditArticlePost operation.
+     * @callback module:api/ArticleApi~apiArticleGetTaggersCanAuditArticlePostCallback
      * @param {String} error Error message, if any.
      * @param {module:model/ArticleDtoResponse} data The data returned by the service call.
      * @param {String} response The complete HTTP response.
      */
 
     /**
-     * @param {module:api/ArticleApi~apiArticleGetCanAuditArticlePostCallback} callback The callback function, accepting three arguments: error, data, response
+     * @param {Object} opts Optional parameters
+     * @param {module:api/ArticleApi~apiArticleGetTaggersCanAuditArticlePostCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/ArticleDtoResponse}
      */
-    apiArticleGetCanAuditArticlePost(callback) {
+    apiArticleGetTaggersCanAuditArticlePost(opts, callback) {
+      opts = opts || {};
       let postBody = null;
 
       let pathParams = {
       };
       let queryParams = {
+        'taggerId': opts['taggerId']
       };
       let headerParams = {
       };
@@ -218,7 +221,7 @@ export default class ArticleApi {
       let returnType = ArticleDtoResponse;
 
       return this.apiClient.callApi(
-        '/api/Article/GetCanAuditArticle', 'POST',
+        '/api/Article/GetTaggersCanAuditArticle', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,
         authNames, contentTypes, accepts, returnType, callback
       );

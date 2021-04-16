@@ -74,12 +74,13 @@
 <script>
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
-import { ApiClient, ArticleApi, TagArticleStatusEnum } from '@/api'
+import { ApiClient, ArticleApi, AccountApi, TagArticleStatusEnum } from '@/api'
 
 export default {
   data: function () {
     return {
-      api: new ArticleApi(ApiClient.instance),
+      articleApi: new ArticleApi(ApiClient.instance),
+      accountApi: new AccountApi(ApiClient.instance),
       auditStatusEnum: new TagArticleStatusEnum(),
       remark: '',
       article: '',
@@ -88,7 +89,12 @@ export default {
       dialogVisible: false,
       canAudit: false,
       review: false,
-      user: {}
+      user: {},
+      tagger: {
+        id: 0,
+        email: '',
+        name: ''
+      }
     }
   },
   created () {
@@ -104,6 +110,8 @@ export default {
     this.searchArticle().then((resp) => {
       this.bindTooltip()
     })
+
+    this.getTaggerInfo()
   },
   methods: {
     openMenus (mouse) {
@@ -119,7 +127,7 @@ export default {
     },
     checkStatus () {
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleCheckCanAuditPost({
+        this.articleApi.apiArticleCheckCanAuditPost({
           articleId: this.articleId
         }, (error, data, resp) => {
           if (error) {
@@ -162,7 +170,7 @@ export default {
     },
     submitAudited () {
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleAuditArticlePost({
+        this.articleApi.apiArticleAuditArticlePost({
           body: {
             id: this.articleId,
             status: this.auditStatusEnum.Audited,
@@ -183,7 +191,7 @@ export default {
     },
     submitUnaudited () {
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleAuditArticlePost({
+        this.articleApi.apiArticleAuditArticlePost({
           body: {
             id: this.articleId,
             status: this.auditStatusEnum.Unsanctioned,
@@ -206,7 +214,7 @@ export default {
     searchArticle () {
       // 调用API查询 文章和标记
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleSearchArticlePost({
+        this.articleApi.apiArticleSearchArticlePost({
           articleId: this.articleId
         }, (error, data, resp) => {
           if (error) {
@@ -242,7 +250,9 @@ export default {
       }
     },
     getNextArticle () {
-      this.api.apiArticleGetCanAuditArticlePost((error, data, resp) => {
+      this.articleApi.apiArticleGetTaggersCanAuditArticlePost({
+        taggerId: this.tagger.id
+      }, (error, data, resp) => {
         if (error) {
           alert(error)
           return
@@ -255,6 +265,22 @@ export default {
         } else {
           alert(`没有可审核文献`)
           this.$router.push(`/article/articlelist`)
+        }
+      })
+    },
+    getTaggerInfo () {
+      this.accountApi.apiAccountGetTaggerInfoByArticleTaggedRecordIdPost({
+        recordId: this.articleId
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          this.tagger.id = data.result.id
+          this.tagger.name = data.result.name
+          this.tagger.email = data.result.email
         }
       })
     }

@@ -19,6 +19,7 @@ namespace Entity.Entities
         /// <summary>
         /// 标注员ID
         /// </summary>
+        //[Navigate(nameof(User.ID))]
         public long UserID { get; set; }
 
         [Navigate(nameof(ArticleTaggedRecord.UserID))]

@@ -71,7 +71,7 @@ namespace Businesses.Repositories
                      ID = s.Manager.ID.ToString(),
                      Name = s.Manager.NickName
                  },
-                 Tagger = new Tagger()
+                 Tagger = new TaggerDto()
                  {
                      ID = s.Tagger.ID.ToString(),
                      Name = s.Tagger.NickName,
@@ -120,7 +120,7 @@ namespace Businesses.Repositories
                          ID = s.Manager.ID.ToString(),
                          Name = s.Manager.NickName
                      },
-                     Tagger = new Tagger()
+                     Tagger = new TaggerDto()
                      {
                          ID = s.Tagger.ID.ToString(),
                          Name = s.Tagger.NickName,
@@ -330,10 +330,11 @@ namespace Businesses.Repositories
                       .ExecuteAffrowsAsync() > 0;
         }
 
-        public async Task<ArticleDto> GetCanAuditArticleAsync()
+        public async Task<ArticleDto> GetCanAuditArticleAsync(long taggerId)
         {
             var article = await Select
                 .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Unavail)
+                .Where(s => s.UserID == taggerId)
                 .ToOneAsync();
 
             if (article == null)
