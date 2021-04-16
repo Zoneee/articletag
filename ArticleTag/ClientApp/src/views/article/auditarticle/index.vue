@@ -1,8 +1,9 @@
 <template>
   <el-container class="index-container">
     <el-main>
-      <div>
+      <div class="content-container">
         <div class="article" v-html="article"></div>
+        <div class="information el-icon-info" @click="openNotification"></div>
       </div>
       <div class="footer-placeholder"></div>
     </el-main>
@@ -282,19 +283,21 @@ export default {
           this.tagger.name = data.result.name
           this.tagger.email = data.result.email
 
-          var h = this.$createElement
-          this.$notify({
-            title: '标记员信息',
-            message: h('p', null, [
-              h('p', null, `标记员ID：${this.tagger.id}`),
-              h('p', null, `标记员名称：${this.tagger.name}`),
-              h('p', null, `标记员邮箱：${this.tagger.email}`),
-            ]),
-            offset: 50,
-            duration: 0
-          });
+          this.openNotification()
         }
       })
+    },
+    openNotification () {
+      var h = this.$createElement
+      this.$notify({
+        title: '标记员信息',
+        message: h('p', null, [
+          h('p', null, `标记员ID：${this.tagger.id}`),
+          h('p', null, `标记员名称：${this.tagger.name}`),
+          h('p', null, `标记员邮箱：${this.tagger.email}`),
+        ]),
+        offset: 60
+      });
     }
   }
 }
@@ -308,15 +311,29 @@ export default {
 
   .index-container {
     position: relative;
-    .article {
-      .one {
-        border: 1px solid rgb(204, 45, 45);
+
+    .content-container {
+      position: relative;
+
+      .article {
+        .one {
+          border: 1px solid rgb(204, 45, 45);
+        }
+        .two {
+          border: 1px solid rgb(162, 204, 45);
+        }
+        .three {
+          border: 1px solid rgb(45, 74, 204);
+        }
       }
-      .two {
-        border: 1px solid rgb(162, 204, 45);
-      }
-      .three {
-        border: 1px solid rgb(45, 74, 204);
+
+      .information {
+        position: absolute;
+        height: 16px;
+        width: 16px;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
       }
     }
 
