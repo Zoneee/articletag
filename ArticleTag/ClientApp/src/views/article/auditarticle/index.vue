@@ -281,6 +281,18 @@ export default {
           this.tagger.id = data.result.id
           this.tagger.name = data.result.name
           this.tagger.email = data.result.email
+
+          var h = this.$createElement
+          this.$notify({
+            title: '标记员信息',
+            message: h('p', null, [
+              h('p', null, `标记员ID：${this.tagger.id}`),
+              h('p', null, `标记员名称：${this.tagger.name}`),
+              h('p', null, `标记员邮箱：${this.tagger.email}`),
+            ]),
+            offset: 50,
+            duration: 0
+          });
         }
       })
     }
