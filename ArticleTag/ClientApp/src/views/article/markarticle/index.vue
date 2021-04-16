@@ -1,4 +1,7 @@
 <template>
+  <!-- 标记计数从 1 开始 -->
+  <!-- 标记计数从 1 开始 -->
+  <!-- 标记计数从 1 开始 -->
   <el-container class="index-container">
     <el-main>
       <div>
@@ -108,7 +111,9 @@ export default {
         isImg: false
       },
       value: [],
+      /**记录当前编辑元素的TagId */
       currentEditId: 0,
+      currentEditFlag: false,
       imgTagContent: '',
       dialogTitle: '',
       dialogVisible: false,
@@ -232,6 +237,23 @@ export default {
       })
     }
   },
+  computed: {
+    nextTagId () {
+      var ids = this.tags.map(s => parseInt(s.id))
+      var next = ids.length ? Math.max.apply(Math, ids) + 1 : 1
+      return next
+    },
+    currentTagId () {
+      var ids = this.tags.map(s => parseInt(s.id))
+      var current = ids.length ? Math.max.apply(Math, ids) : 1
+      return current
+    },
+    lastTagId () {
+      var ids = this.tags.map(s => parseInt(s.id)).sort()
+      var last = ids.length ? ids[ids.length - 2] : 1
+      return last
+    }
+  },
   methods: {
     /**根据字符串获取下拉列表中value相等的对象 */
     getCascaderObj (val, opt) {
@@ -326,6 +348,7 @@ export default {
       this.cascaderVisible = false
       this.inputerVisible = false
       this.currentEditId = 0
+      this.currentEditFlag = false
     },
     /**打开选择行为的标记菜单Dialog */
     openCascader (mouse) {
@@ -359,8 +382,9 @@ export default {
     },
     /**设置标记 */
     setTag (tags) {
-      var id = ++this.taggedNum
-      console.log(`增加计数：${id}`)
+      // var id = ++this.taggedNum
+      var id = this.nextTagId
+      console.log(`计数加一。当前：${this.currentTagId}，使用：${this.nextTagId}`)
 
       if (this.selection.isCollapsed) {
         // 未选中内容
@@ -454,8 +478,9 @@ export default {
         node.id = `mark-id-${id}`
         node.setAttribute('c-id', id)
       } else {
-        this.taggedNum--
-        console.log(`更新img内容，计数减一：${this.taggedNum}`)
+        // this.taggedNum--
+        this.currentEditFlag = true
+        console.log(`更新img内容，计数应该减一。当前：${this.currentTagId}，应当：${this.lastTagId}`)
       }
       node.setAttribute('c-type', 'IMG')
       node.setAttribute('c-name', content)
@@ -530,9 +555,10 @@ export default {
 
       this.setTag(tags)
 
+      // 判断是否有是修改
       var index = this.tags.findIndex(s => s.id == this.currentEditId)
       if (index === -1) {
-        this.addTagsItem(tags)
+        this.addTagsItem(this.nextTagId, tags)
       } else {
         this.editTags(this.currentEditId)
       }
@@ -546,17 +572,21 @@ export default {
       this.saveTags()
       this.closeMenus()
     },
-    addTagsItem (tags) {
+    addTagsItem (id, tags) {
       if (tags.length) {
         this.tags.push({
-          id: this.taggedNum.toString(),
+          // id: this.taggedNum.toString(),
+          // id: this.selection.isImg ? this.lastTagId : this.currentEditId,
+          id: id.toString(),
           name: tags.map(s => s.label).join('/'),
           color: tags[1] ? tags[1].color : tags[0].color,
           // selection: this.selection
         })
       } else {
         this.tags.push({
-          id: this.taggedNum.toString(),
+          // id: this.taggedNum.toString(),
+          // id: this.selection.isImg ? this.lastTagId : this.currentEditId,
+          id: id.toString(),
           name: this.imgTagContent,
           color: 'yellow',
           // selection: this.selection
@@ -608,8 +638,9 @@ export default {
       var id = tag.getAttribute('c-id')
       this.removeTagsItem(id)
       // 减少计数器
-      this.taggedNum -= 1
-      console.log(`减少计数：${this.taggedNum}`)
+      // this.taggedNum -= 1
+      // console.log(`减少计数：${this.taggedNum}`)
+      console.log(`计数减一。当前：${this.currentTagId}`)
       // 移除页面元素
       this.removeImgTags(id)
       this.removeTextTags(id)
@@ -710,7 +741,8 @@ export default {
             this.article = result.content
             this.review = result.review
             this.tags = result.tags || []
-            this.taggedNum = this.tags.length
+            console.log(`当前计数：${this.currentTagId}`)
+            // this.taggedNum = this.tags.length
             resolve(data)
           } else {
             alert(data.errorMsg)
