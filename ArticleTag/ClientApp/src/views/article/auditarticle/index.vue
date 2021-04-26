@@ -1,8 +1,9 @@
 <template>
   <el-container class="index-container">
     <el-main>
-      <div>
+      <div class="content-container">
         <div class="article" v-html="article"></div>
+        <div class="information el-icon-info" @click="openNotification"></div>
       </div>
       <div class="footer-placeholder"></div>
     </el-main>
@@ -15,7 +16,9 @@
           :c-id="tag.id"
           :key="tag.id"
           :color="tag.color"
+          @close="removeTags"
           @click="scrollToView"
+          closable
         >
           {{ tag.name }}
         </el-tag>
@@ -74,12 +77,13 @@
 <script>
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
-import { ApiClient, ArticleApi, TagArticleStatusEnum } from '@/api'
+import { ApiClient, ArticleApi, AccountApi, TagArticleStatusEnum } from '@/api'
 
 export default {
   data: function () {
     return {
-      api: new ArticleApi(ApiClient.instance),
+      articleApi: new ArticleApi(ApiClient.instance),
+      accountApi: new AccountApi(ApiClient.instance),
       auditStatusEnum: new TagArticleStatusEnum(),
       remark: '',
       article: '',
@@ -88,7 +92,12 @@ export default {
       dialogVisible: false,
       canAudit: false,
       review: false,
-      user: {}
+      user: {},
+      tagger: {
+        id: 0,
+        email: '',
+        name: ''
+      }
     }
   },
   created () {
@@ -104,6 +113,8 @@ export default {
     this.searchArticle().then((resp) => {
       this.bindTooltip()
     })
+
+    this.getTaggerInfo()
   },
   methods: {
     openMenus (mouse) {
@@ -117,9 +128,73 @@ export default {
       var id = e.target.getAttribute('c-id')
       document.querySelector(`#mark-id-${id}`).scrollIntoView();
     },
+    /**删除页面下方Tag，同时移除文章中对应的标记标签 */
+    removeTags (mouse) {
+      var tag = mouse.target.parentElement
+      // 移除tag
+      var id = tag.getAttribute('c-id')
+      this.removeTagsItem(id)
+      // 减少计数器
+      // this.taggedNum -= 1
+      // console.log(`减少计数：${this.taggedNum}`)
+      console.log(`计数减一。当前：${this.currentTagId}`)
+      // 移除页面元素
+      this.removeImgTags(id)
+      this.removeTextTags(id)
+      // 保存操作
+      this.saveTags()
+    },
+    /**删除文章中对应的标记标签。图片标签 */
+    removeImgTags (id) {
+      // 找到元素
+      var img = document.querySelector(`img[c-id="${id}"]`)
+      if (img) {
+        // 删除属性
+        img.classList.remove('tagged', 'tagged-img')
+        img.removeAttribute('c-id')
+        img.removeAttribute('c-type')
+        img.removeAttribute('c-name')
+        img.style.borderWidth = '0px'
+      }
+    },
+    /**删除文章中对应的标记标签。文字标签 */
+    removeTextTags (id) {
+      // 找到元素
+      var marks = document.querySelectorAll(`mark[c-id="${id}"]`)
+      if (marks.length) {
+        // 删除元素
+        for (var mark of marks) {
+          mark.remove()
+        }
+      }
+    },
+    /**移除Tag 数组项 */
+    removeTagsItem (id) {
+      var i = this.tags.findIndex(s => s.id == id)
+      this.tags.splice(i, 1)
+    },
+    /**保存标记信息 */
+    saveTags () {
+      // 调用API保存标记信息
+      this.article = document.querySelector('.article').innerHTML
+      this.articleApi.apiArticleSaveTaggedRecordPost({
+        body: {
+          id: this.articleId,
+          taggedContent: this.article,
+          tags: this.tags
+        }
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        this.bindTooltip()
+      })
+    },
     checkStatus () {
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleCheckCanAuditPost({
+        this.articleApi.apiArticleCheckCanAuditPost({
           articleId: this.articleId
         }, (error, data, resp) => {
           if (error) {
@@ -137,8 +212,32 @@ export default {
     },
     audited () {
       // 通过
-      this.checkStatus().then((flag) => {
-        this.api.apiArticleAuditArticlePost({
+      this.checkStatus()
+        .then(async () => {
+          await this.submitAudited()
+        })
+        .catch((flag) => {
+          alert('禁止审核')
+        }).finally(() => {
+          this.getNextArticle()
+        })
+    },
+    unaudited () {
+      // 不通过
+      this.checkStatus()
+        .then(async () => {
+          await this.submitUnaudited()
+        })
+        .catch((flag) => {
+          alert('禁止审核')
+        }).finally(() => {
+          this.closeMenus()
+          this.getNextArticle()
+        })
+    },
+    submitAudited () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleAuditArticlePost({
           body: {
             id: this.articleId,
             status: this.auditStatusEnum.Audited,
@@ -146,18 +245,20 @@ export default {
           }
         }, (error, data, resp) => {
           if (error) {
+            reject(error)
             alert(error)
             return
           }
+
+          resolve(data)
         })
-      }).catch((flag) => {
-        alert('禁止审核')
       })
+
+      return p
     },
-    unaudited () {
-      // 不通过
-      this.checkStatus().then((flag) => {
-        this.api.apiArticleAuditArticlePost({
+    submitUnaudited () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleAuditArticlePost({
           body: {
             id: this.articleId,
             status: this.auditStatusEnum.Unsanctioned,
@@ -166,20 +267,21 @@ export default {
           }
         }, (error, data, resp) => {
           if (error) {
+            reject(error)
             alert(error)
             return
           }
+
+          resolve(data)
         })
-      }).catch((flag) => {
-        alert('禁止审核')
-      }).finally(() => {
-        this.closeMenus()
       })
+
+      return p
     },
     searchArticle () {
       // 调用API查询 文章和标记
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleSearchArticlePost({
+        this.articleApi.apiArticleSearchArticlePost({
           articleId: this.articleId
         }, (error, data, resp) => {
           if (error) {
@@ -213,6 +315,55 @@ export default {
           content: name + (attribute ? `/${attribute}` : '')
         })
       }
+    },
+    getNextArticle () {
+      this.articleApi.apiArticleGetTaggersCanAuditArticlePost({
+        taggerId: this.tagger.id
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          var result = data.result
+          alert(`获取下一篇`)
+          this.$router.push(`/article/auditarticle/${result.id}`)
+        } else {
+          alert(`没有可审核文献`)
+          this.$router.push(`/article/articlelist`)
+        }
+      })
+    },
+    getTaggerInfo () {
+      this.accountApi.apiAccountGetTaggerInfoByArticleTaggedRecordIdPost({
+        recordId: this.articleId
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          this.tagger.id = data.result.id
+          this.tagger.name = data.result.name
+          this.tagger.email = data.result.email
+
+          this.openNotification()
+        }
+      })
+    },
+    openNotification () {
+      var h = this.$createElement
+      this.$notify({
+        title: '标记员信息',
+        message: h('p', null, [
+          h('p', null, `标记员ID：${this.tagger.id}`),
+          h('p', null, `标记员名称：${this.tagger.name}`),
+          h('p', null, `标记员邮箱：${this.tagger.email}`),
+        ]),
+        offset: 60
+      });
     }
   }
 }
@@ -226,15 +377,29 @@ export default {
 
   .index-container {
     position: relative;
-    .article {
-      .one {
-        border: 1px solid rgb(204, 45, 45);
+
+    .content-container {
+      position: relative;
+
+      .article {
+        .one {
+          border: 1px solid rgb(204, 45, 45);
+        }
+        .two {
+          border: 1px solid rgb(162, 204, 45);
+        }
+        .three {
+          border: 1px solid rgb(45, 74, 204);
+        }
       }
-      .two {
-        border: 1px solid rgb(162, 204, 45);
-      }
-      .three {
-        border: 1px solid rgb(45, 74, 204);
+
+      .information {
+        position: absolute;
+        height: 16px;
+        width: 16px;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
       }
     }
 

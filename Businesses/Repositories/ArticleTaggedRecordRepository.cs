@@ -44,7 +44,7 @@ namespace Businesses.Repositories
             return dto;
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size)
+        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size, TagArticleStatusEnum? status)
         {
             var user = await this.Orm.GetRepository<User>()
                 .Select
@@ -53,6 +53,7 @@ namespace Businesses.Repositories
 
             var records = await this.Select
              .WhereIf(user.Role == TagRoleEnum.Tagger, s => s.UserID == userid)
+             .WhereIf(status != null, s => s.Status == status)
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
@@ -70,7 +71,7 @@ namespace Businesses.Repositories
                      ID = s.Manager.ID.ToString(),
                      Name = s.Manager.NickName
                  },
-                 Tagger = new Tagger()
+                 Tagger = new TaggerDto()
                  {
                      ID = s.Tagger.ID.ToString(),
                      Name = s.Tagger.NickName,
@@ -79,6 +80,55 @@ namespace Businesses.Repositories
                  AuditRecords = s.AuditRecords,
                  Review = s.Review
              });
+
+            return new TaggedRecordDto()
+            {
+                Records = records,
+                Total = total
+            };
+        }
+
+        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size, TagArticleStatusEnum? status)
+        {
+            var tagger = await this.Orm.GetRepository<User>()
+               .Select
+               .Where(s => s.NickName.Contains(taggerName))
+               .ToOneAsync();
+
+            if (tagger == null)
+            {
+                return new TaggedRecordDto();
+            }
+
+            var records = await Select
+                 .Where(s => s.UserID == tagger.ID)
+                 .WhereIf(status != null, s => s.Status == status)
+                 .Page(page, size)
+                 .Include(s => s.Tagger)
+                 .Include(s => s.Manager)
+                 .IncludeMany(s => s.AuditRecords)
+                 .Count(out var total)
+                 .ToListAsync(s => new TaggedRecord()
+                 {
+                     ID = s.ID.ToString(),
+                     CleanedArticleID = s.CleanedArticleID.ToString(),
+                     TaskID = s.TaskID.ToString(),
+                     Status = s.Status,
+                     LastChangeTime = s.LastChangeTime,
+                     Auditor = new Auditor()
+                     {
+                         ID = s.Manager.ID.ToString(),
+                         Name = s.Manager.NickName
+                     },
+                     Tagger = new TaggerDto()
+                     {
+                         ID = s.Tagger.ID.ToString(),
+                         Name = s.Tagger.NickName,
+                         Email = s.Tagger.Email
+                     },
+                     AuditRecords = s.AuditRecords,
+                     Review = s.Review
+                 });
 
             return new TaggedRecordDto()
             {
@@ -183,7 +233,8 @@ namespace Businesses.Repositories
             var article = await this.Select
                .Where(s => s.ID == articleId)
                .ToOneAsync();
-            return article.Status == TagArticleStatusEnum.Unaudited;
+            return article.Status == TagArticleStatusEnum.Unaudited
+                || article.Status == TagArticleStatusEnum.Unavail;
         }
 
         public async Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record)
@@ -277,6 +328,29 @@ namespace Businesses.Repositories
                       .Where(s => s.ID == articleId)
                       .Set(s => s.Review, review)
                       .ExecuteAffrowsAsync() > 0;
+        }
+
+        public async Task<ArticleDto> GetCanAuditArticleAsync(long taggerId)
+        {
+            var article = await Select
+                .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Unavail)
+                .Where(s => s.UserID == taggerId)
+                .ToOneAsync();
+
+            if (article == null)
+            {
+                throw new Exception("未查询到可审核的文章！");
+            }
+
+            var dto = new ArticleDto()
+            {
+                ID = article.ID.ToString(),
+                Content = article.TaggedContent,
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? ""),
+                Review = article.Review
+            };
+
+            return dto;
         }
     }
 }

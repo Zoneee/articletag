@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ArticleTag.Helpers;
+using Businesses.Dto;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
@@ -78,6 +79,26 @@ namespace ArticleTag.Controllers
             }
 
             return Ok(response);
+        }
+
+        [HttpPost("GetTaggerInfoByArticleTaggedRecordId")]
+        [SwaggerResponse(200, "根据文献标记记录获取标记员信息", typeof(JsonResponseBase<TaggerDto, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> GetTaggerInfoByArticleTaggedRecordId(long recordId)
+        {
+            var response = JsonResponseBase<TaggerDto>.CreateDefault();
+            try
+            {
+                response.Result = await _repository.GetTaggerByArticleTaggedRecordIdAsync(recordId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("根据文献标记记录获取标记员信息异常！", ex);
+                return Ok(response);
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ import ArticleDtoResponse from '../model/ArticleDtoResponse';
 import ArticleRecordRequest from '../model/ArticleRecordRequest';
 import AuditArticleRequest from '../model/AuditArticleRequest';
 import BooleanResponse from '../model/BooleanResponse';
+import TagArticleStatusEnum from '../model/TagArticleStatusEnum';
 import TaggedRecordDtoResponse from '../model/TaggedRecordDtoResponse';
 
 /**
@@ -188,6 +189,44 @@ export default class ArticleApi {
       );
     }
     /**
+     * Callback function to receive the result of the apiArticleGetTaggersCanAuditArticlePost operation.
+     * @callback module:api/ArticleApi~apiArticleGetTaggersCanAuditArticlePostCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/ArticleDtoResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/ArticleApi~apiArticleGetTaggersCanAuditArticlePostCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/ArticleDtoResponse}
+     */
+    apiArticleGetTaggersCanAuditArticlePost(opts, callback) {
+      opts = opts || {};
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+        'taggerId': opts['taggerId']
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = [];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = ArticleDtoResponse;
+
+      return this.apiClient.callApi(
+        '/api/Article/GetTaggersCanAuditArticle', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
      * Callback function to receive the result of the apiArticlePagingAritclePost operation.
      * @callback module:api/ArticleApi~apiArticlePagingAritclePostCallback
      * @param {String} error Error message, if any.
@@ -208,7 +247,8 @@ export default class ArticleApi {
       };
       let queryParams = {
         'page': opts['page'],
-        'size': opts['size']
+        'size': opts['size'],
+        'status': opts['status']
       };
       let headerParams = {
       };
@@ -259,6 +299,47 @@ export default class ArticleApi {
 
       return this.apiClient.callApi(
         '/api/Article/SaveTaggedRecord', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
+     * Callback function to receive the result of the apiArticleSearchArticleByTaggerPost operation.
+     * @callback module:api/ArticleApi~apiArticleSearchArticleByTaggerPostCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/TaggedRecordDtoResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/ArticleApi~apiArticleSearchArticleByTaggerPostCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/TaggedRecordDtoResponse}
+     */
+    apiArticleSearchArticleByTaggerPost(opts, callback) {
+      opts = opts || {};
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+        'tagger': opts['tagger'],
+        'page': opts['page'],
+        'size': opts['size'],
+        'status': opts['status']
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = [];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = TaggedRecordDtoResponse;
+
+      return this.apiClient.callApi(
+        '/api/Article/SearchArticleByTagger', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,
         authNames, contentTypes, accepts, returnType, callback
       );

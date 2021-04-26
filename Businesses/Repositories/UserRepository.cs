@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Businesses.Dto;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Deepbio.ApplicationCore.ResearcherDbUser.Query;
@@ -43,6 +44,23 @@ namespace Businesses.Repositories
             };
 
             return userVm;
+        }
+
+        public async Task<TaggerDto> GetTaggerByArticleTaggedRecordIdAsync(long recordId)
+        {
+            var recordReps = this.Orm.GetRepository<ArticleTaggedRecord>();
+
+            var tagger = await Select
+                .InnerJoin<ArticleTaggedRecord>((u, r) => u.ID == r.UserID)
+                .Where<ArticleTaggedRecord>(s => s.ID == recordId)
+                .ToOneAsync(s => new TaggerDto()
+                {
+                    ID = s.ID.ToString(),
+                    Email = s.Email,
+                    Name = s.NickName
+                });
+
+            return tagger;
         }
     }
 }

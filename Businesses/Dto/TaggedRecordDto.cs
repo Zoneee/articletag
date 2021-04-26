@@ -33,18 +33,10 @@ namespace Businesses.Dto
 
         public DateTime LastChangeTime { get; set; }
 
-        public Tagger Tagger { get; set; }
+        public TaggerDto Tagger { get; set; }
         public Auditor Auditor { get; set; }
         public ICollection<AuditRecord> AuditRecords { get; set; }
         public bool Review { get; set; }
-    }
-
-    public class Tagger
-    {
-        public string ID { get; set; }
-
-        public string Name { get; set; }
-        public string Email { get; set; }
     }
 
     public class Auditor

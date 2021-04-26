@@ -5,6 +5,7 @@ using Businesses.Dto;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
 using Businesses.ViewModels.Requsets;
+using Entity.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -151,12 +152,12 @@ namespace ArticleTag.Controllers
 
         [HttpPost("PagingAritcle")]
         [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size)
+        public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size, TagArticleStatusEnum? status = null)
         {
             var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
             try
             {
-                var articles = await _articleRecordRepo.GetArticlesByPagingAsync(CurrentUserId, page, size);
+                var articles = await _articleRecordRepo.GetArticlesByPagingAsync(CurrentUserId, page, size, status);
                 response.Result = articles;
                 return Ok(response);
             }
@@ -195,9 +196,6 @@ namespace ArticleTag.Controllers
         [SwaggerResponse(200, "审核文章", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
         public async Task<IActionResult> AuditArticle(AuditArticleRequest audit)
         {
-#if DEBUG
-            audit.AuditorID = 2;
-#endif
             var response = JsonResponseBase<bool>.CreateDefault();
             try
             {
@@ -230,6 +228,46 @@ namespace ArticleTag.Controllers
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
                 _logger.LogError("设置文章为综述文章异常！", ex);
+                return Ok(response);
+            }
+        }
+
+        [HttpPost("SearchArticleByTagger")]
+        [SwaggerResponse(200, "根据标记员名称查询文献", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> SearchArticleByTagger(string tagger, int page, int size, TagArticleStatusEnum? status = null)
+        {
+            var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
+            try
+            {
+                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(tagger, page, size, status);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("根据标记员名称查询文献异常！", ex);
+                return Ok(response);
+            }
+        }
+
+        [HttpPost("GetTaggersCanAuditArticle")]
+        [SwaggerResponse(200, "根据标记员获取可审核的文献", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> GetTaggersCanAuditArticle(long taggerId)
+        {
+            var response = JsonResponseBase<ArticleDto>.CreateDefault();
+            try
+            {
+                response.Result = await _articleRecordRepo.GetCanAuditArticleAsync(taggerId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("根据标记员获取可审核的文献异常！", ex);
                 return Ok(response);
             }
         }
