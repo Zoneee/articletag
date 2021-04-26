@@ -16,7 +16,9 @@
           :c-id="tag.id"
           :key="tag.id"
           :color="tag.color"
+          @close="removeTags"
           @click="scrollToView"
+          closable
         >
           {{ tag.name }}
         </el-tag>
@@ -125,6 +127,70 @@ export default {
       // 滚动到固定元素
       var id = e.target.getAttribute('c-id')
       document.querySelector(`#mark-id-${id}`).scrollIntoView();
+    },
+    /**删除页面下方Tag，同时移除文章中对应的标记标签 */
+    removeTags (mouse) {
+      var tag = mouse.target.parentElement
+      // 移除tag
+      var id = tag.getAttribute('c-id')
+      this.removeTagsItem(id)
+      // 减少计数器
+      // this.taggedNum -= 1
+      // console.log(`减少计数：${this.taggedNum}`)
+      console.log(`计数减一。当前：${this.currentTagId}`)
+      // 移除页面元素
+      this.removeImgTags(id)
+      this.removeTextTags(id)
+      // 保存操作
+      this.saveTags()
+    },
+    /**删除文章中对应的标记标签。图片标签 */
+    removeImgTags (id) {
+      // 找到元素
+      var img = document.querySelector(`img[c-id="${id}"]`)
+      if (img) {
+        // 删除属性
+        img.classList.remove('tagged', 'tagged-img')
+        img.removeAttribute('c-id')
+        img.removeAttribute('c-type')
+        img.removeAttribute('c-name')
+        img.style.borderWidth = '0px'
+      }
+    },
+    /**删除文章中对应的标记标签。文字标签 */
+    removeTextTags (id) {
+      // 找到元素
+      var marks = document.querySelectorAll(`mark[c-id="${id}"]`)
+      if (marks.length) {
+        // 删除元素
+        for (var mark of marks) {
+          mark.remove()
+        }
+      }
+    },
+    /**移除Tag 数组项 */
+    removeTagsItem (id) {
+      var i = this.tags.findIndex(s => s.id == id)
+      this.tags.splice(i, 1)
+    },
+    /**保存标记信息 */
+    saveTags () {
+      // 调用API保存标记信息
+      this.article = document.querySelector('.article').innerHTML
+      this.articleApi.apiArticleSaveTaggedRecordPost({
+        body: {
+          id: this.articleId,
+          taggedContent: this.article,
+          tags: this.tags
+        }
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        this.bindTooltip()
+      })
     },
     checkStatus () {
       var p = new Promise((resolve, reject) => {
