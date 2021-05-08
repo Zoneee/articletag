@@ -403,7 +403,7 @@ export default {
       }
     }
 
-    @footheight: 330px;
+    @footheight: 200px;
     .footer {
       position: fixed;
       height: @footheight;
@@ -416,7 +416,8 @@ export default {
 
       .mark-history {
         width: 85%;
-        height: 200px;
+        height: 100px;
+        overflow-y: auto;
 
         .tags {
           margin: 5px;
