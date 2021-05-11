@@ -67,13 +67,19 @@
         <template slot="header" slot-scope="scope">
           <el-input
             v-model="taggerName"
-            size="mini"
+            size="small"
             placeholder="输入标记者姓名搜索"
             @change="searchTableData"
             v-if="role === 1"
           />
         </template>
         <template slot-scope="scope">
+          <el-button
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row)"
+            v-if="role === 1"
+            >编辑</el-button
+          >
           <el-button size="mini" @click="handleView(scope.$index, scope.row)"
             >查看</el-button
           >
@@ -160,6 +166,13 @@ export default {
         return ''
       }
       return `${y}-${m}-${d}`
+    },
+    handleEdit (index, row) {
+      this.$router.push({
+        path: `/article/markarticle`,
+        query: { articleId: row.id }
+      })
+      console.log(index, row);
     },
     handleView (index, row) {
       this.$router.push({
