@@ -44,7 +44,10 @@ namespace Businesses.Repositories
             return dto;
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size, TagArticleStatusEnum? status)
+        public async Task<TaggedRecordDto> GetArticlesByPagingAsync(
+            long userid, int page, int size,
+            TagArticleStatusEnum? status,
+            bool? review)
         {
             var user = await this.Orm.GetRepository<User>()
                 .Select
@@ -54,11 +57,13 @@ namespace Businesses.Repositories
             var records = await this.Select
              .WhereIf(user.Role == TagRoleEnum.Tagger, s => s.UserID == userid)
              .WhereIf(status != null, s => s.Status == status)
+             .WhereIf(review != null, s => s.Review == review)
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
              .IncludeMany(s => s.AuditRecords)
              .Count(out var total)
+             .OrderBy(s => s.ID)
              .ToListAsync(s => new TaggedRecord()
              {
                  ID = s.ID.ToString(),

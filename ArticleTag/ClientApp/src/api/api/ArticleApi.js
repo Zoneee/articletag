@@ -248,7 +248,8 @@ export default class ArticleApi {
       let queryParams = {
         'page': opts['page'],
         'size': opts['size'],
-        'status': opts['status']
+        'status': opts['status'],
+        'review': opts['review']
       };
       let headerParams = {
       };

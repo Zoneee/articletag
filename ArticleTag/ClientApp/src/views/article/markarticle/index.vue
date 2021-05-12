@@ -218,7 +218,8 @@ export default {
   },
   created () {
     this.user = JSON.parse(window.localStorage.getItem('user_info') || '{}')
-    if (this.user.role === this.roleEnum.Manager) {
+
+    if (this.user.role === this.roleEnum.Manager && this.$route.query.articleId) {
       this.searchArticleByAuditor().then(() => this.bindTooltip())
     } else {
       this.searchArticle().then((resp) => {
@@ -854,14 +855,14 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  ::selection {
-    color: red;
-    background: yellow;
-  }
-
   .index-container {
     position: relative;
     .article {
+      ::selection {
+        color: red;
+        background: yellow;
+      }
+
       .one {
         border: 1px solid rgb(204, 45, 45);
       }
@@ -915,11 +916,6 @@ export default {
 </style>
 
 <style lang="less">
-  ::selection {
-    color: red;
-    background: yellow;
-  }
-
   .el-dialog__body {
     text-align: inherit !important;
   }
