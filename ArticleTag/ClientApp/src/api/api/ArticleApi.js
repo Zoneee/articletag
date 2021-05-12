@@ -327,7 +327,8 @@ export default class ArticleApi {
         'tagger': opts['tagger'],
         'page': opts['page'],
         'size': opts['size'],
-        'status': opts['status']
+        'status': opts['status'],
+        'review': opts['review']
       };
       let headerParams = {
       };

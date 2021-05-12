@@ -93,7 +93,10 @@ namespace Businesses.Repositories
             };
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size, TagArticleStatusEnum? status)
+        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(
+            string taggerName, int page, int size,
+            TagArticleStatusEnum? status,
+            bool? review)
         {
             var tagger = await this.Orm.GetRepository<User>()
                .Select
@@ -108,11 +111,15 @@ namespace Businesses.Repositories
             var records = await Select
                  .Where(s => s.UserID == tagger.ID)
                  .WhereIf(status != null, s => s.Status == status)
+#pragma warning disable CS0472 // 该句会被译为 Review = 0 OR Review is null 
+                 .WhereIf(review != null, s => s.Review == review || s.Review == null)
+#pragma warning restore CS0472 // 该句会被译为 Review = 0 OR Review is null 
                  .Page(page, size)
                  .Include(s => s.Tagger)
                  .Include(s => s.Manager)
                  .IncludeMany(s => s.AuditRecords)
                  .Count(out var total)
+                 .OrderBy(s => s.ID)
                  .ToListAsync(s => new TaggedRecord()
                  {
                      ID = s.ID.ToString(),
