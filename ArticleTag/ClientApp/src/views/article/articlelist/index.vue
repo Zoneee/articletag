@@ -26,13 +26,31 @@
       </el-table-column>
       <el-table-column
         label="文章状态"
+        prop="status"
+        column-key="status"
         :filters="audtiStatusArray"
         filter-placement="bottom-end"
         :filter-multiple="false"
+        :filter-method="statusFilter"
       >
         <template slot-scope="scope">
           <el-tag size="medium" :type="statusStyle(scope.row)">{{
             scope.row.statusRemark
+          }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="综述文章"
+        prop="review"
+        column-key="review"
+        :filters="reviewStatusArray"
+        filter-placement="bottom-end"
+        :filter-multiple="false"
+        :filter-method="reviewFilter"
+      >
+        <template slot-scope="scope">
+          <el-tag size="medium" :type="scope.row.review ? 'primary' : 'info'">{{
+            scope.row.review ? "是" : "否"
           }}</el-tag>
         </template>
       </el-table-column>
@@ -67,13 +85,19 @@
         <template slot="header" slot-scope="scope">
           <el-input
             v-model="taggerName"
-            size="mini"
+            size="small"
             placeholder="输入标记者姓名搜索"
             @change="searchTableData"
             v-if="role === 1"
           />
         </template>
         <template slot-scope="scope">
+          <el-button
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row)"
+            v-if="role === 1"
+            >编辑</el-button
+          >
           <el-button size="mini" @click="handleView(scope.$index, scope.row)"
             >查看</el-button
           >
@@ -118,7 +142,12 @@ export default {
         { text: '审核不通过', value: '5' },
         { text: '无效的', value: '6' }
       ],
-      filter: null,
+      reviewStatusArray: [
+        { text: '是', value: true },
+        { text: '否', value: false }
+      ],
+      statusFilter: '',
+      reviewFilter: '',
       taggerName: '',
       pager: {
         index: 1,
@@ -161,6 +190,13 @@ export default {
       }
       return `${y}-${m}-${d}`
     },
+    handleEdit (index, row) {
+      this.$router.push({
+        path: `/article/markarticle`,
+        query: { articleId: row.id }
+      })
+      console.log(index, row);
+    },
     handleView (index, row) {
       this.$router.push({
         path: `/article/viewarticle/${row.id}`
@@ -175,27 +211,43 @@ export default {
     },
     filterChangeHandler (filters) {
       // 获得筛选类型
-      var filter = filters[Object.keys(filters)[0]][0]
-      this.filter = filter
-      console.log(filter)
+      // filters 每次只能获取一个列的筛选条件
+      var key = Object.keys(filters)[0]
+      if (key === 'status') {
+        var status = filters['status'] && filters['status'][0]
+        this.statusFilter = status
+      }
+
+      if (key === 'review') {
+        var review = filters['review'] && filters['review'][0]
+        this.reviewFilter = review
+      }
+
       // 后端筛选
-      this.searchTableData(filter)
+      this.searchTableData()
     },
     searchTableData () {
       if (this.taggerName) {
-        this.searchByTaggerName(this.taggerName, this.filter)
+        this.searchByTaggerName(this.taggerName, {
+          status: this.statusFilter,
+          review: this.reviewFilter
+        })
       } else {
-        this.searchByPaging(this.filter)
+        this.searchByPaging({
+          status: this.statusFilter,
+          review: this.reviewFilter
+        })
       }
     },
-    searchByPaging (status) {
+    searchByPaging (filter) {
       // 分页查询
       console.log('分页查询')
 
       this.api.apiArticlePagingAritclePost({
         page: this.pager.index,
         size: this.pager.size,
-        status: status
+        status: filter && filter.status,
+        review: filter && filter.review
       }, (error, data, resp) => {
         if (error) {
           alert(error)
@@ -208,14 +260,15 @@ export default {
         }
       })
     },
-    searchByTaggerName (value, status) {
+    searchByTaggerName (value, filter) {
       // 根据标记者名称查询
       this.pager.index = 1
       this.api.apiArticleSearchArticleByTaggerPost({
         tagger: value,
         page: this.pager.index,
         size: this.pager.size,
-        status: status
+        status: filter && filter.status,
+        review: filter && filter.review
       }, (error, data, resp) => {
         if (error) {
           alert(error)
@@ -248,6 +301,14 @@ export default {
         default:
           return 'info'
       }
+    },
+    statusFilter (value, row, column) {
+      const property = column['property']
+      return row[property] === parseInt(value)
+    },
+    reviewFilter (value, row, column) {
+      const property = column['property']
+      return row[property] === value
     }
   }
 }
@@ -268,6 +329,10 @@ export default {
     }
     .el-table {
       padding-bottom: 39px;
+    }
+
+    .el-button + .el-button {
+      margin-left: 0px;
     }
   }
 </style>

@@ -152,12 +152,16 @@ namespace ArticleTag.Controllers
 
         [HttpPost("PagingAritcle")]
         [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> PagingSearchTaggedRecord(int page, int size, TagArticleStatusEnum? status = null)
+        public async Task<IActionResult> PagingSearchTaggedRecord(
+            int page, int size,
+            TagArticleStatusEnum? status = null,
+            bool? review = null)
         {
             var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
             try
             {
-                var articles = await _articleRecordRepo.GetArticlesByPagingAsync(CurrentUserId, page, size, status);
+                var articles = await _articleRecordRepo
+                    .GetArticlesByPagingAsync(CurrentUserId, page, size, status, review);
                 response.Result = articles;
                 return Ok(response);
             }

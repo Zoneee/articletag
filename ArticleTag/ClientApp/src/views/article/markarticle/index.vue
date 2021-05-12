@@ -33,7 +33,7 @@
           </el-tooltip>
         </el-checkbox>
       </div>
-      <div class="btns">
+      <div class="btns" v-if="user.role === roleEnum.Tagger">
         <el-button type="success" @click="submitAudit">提交审核</el-button>
         <el-button type="danger" @click="skipArticle">跳过文章</el-button>
       </div>
@@ -92,12 +92,13 @@
 <script>
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
-import { ApiClient, ArticleApi } from '@/api'
+import { ApiClient, ArticleApi, TagRoleEnum } from '@/api'
 
 export default {
   data: function () {
     return {
       api: new ArticleApi(ApiClient.instance),
+      roleEnum: new TagRoleEnum(),
       taggedNum: 0,
       selection: {
         anchorNode: null,
@@ -218,9 +219,13 @@ export default {
   created () {
     this.user = JSON.parse(window.localStorage.getItem('user_info') || '{}')
 
-    this.searchArticle().then((resp) => {
-      this.bindTooltip()
-    })
+    if (this.user.role === this.roleEnum.Manager && this.$route.query.articleId) {
+      this.searchArticleByAuditor().then(() => this.bindTooltip())
+    } else {
+      this.searchArticle().then((resp) => {
+        this.bindTooltip()
+      })
+    }
 
     // 禁用默认右键菜单
     if (document.addEventListener) {
@@ -719,6 +724,43 @@ export default {
         }
       })
     },
+    searchArticleByAuditor () {
+      var articleId = this.$route.query.articleId
+
+      var p = new Promise((resolve, reject) => {
+        this.api.apiArticleSearchArticlePost({
+          articleId: articleId
+        }, (error, data, resp) => {
+          if (error) {
+            alert(error)
+            reject(error)
+            return
+          }
+
+          if (data.success) {
+            var result = data.result
+            if (result === null) {
+              this.$router.push('/article/articlelist')
+              resolve(data)
+            }
+            this.articleId = result.id
+            this.article = result.content
+            this.review = result.review
+            this.tags = result.tags || []
+            console.log(`当前计数：${this.currentTagId}`)
+            // this.taggedNum = this.tags.length
+            resolve(data)
+          } else {
+            alert(data.errorMsg)
+            this.$router.push('/article/articlelist')
+            reject(data)
+          }
+          reject(data)
+        })
+      })
+
+      return p
+    },
     searchArticle () {
       // 调用API获取文章信息
       var p = new Promise((resolve, reject) => {
@@ -813,14 +855,14 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  ::selection {
-    color: red;
-    background: yellow;
-  }
-
   .index-container {
     position: relative;
     .article {
+      ::selection {
+        color: red;
+        background: yellow;
+      }
+
       .one {
         border: 1px solid rgb(204, 45, 45);
       }
@@ -832,7 +874,7 @@ export default {
       }
     }
 
-    @footheight: 330px;
+    @footheight: 200px;
     .footer {
       position: fixed;
       height: @footheight;
@@ -846,7 +888,8 @@ export default {
       .mark-history {
         // max-width: 104rem;
         width: 85%;
-        height: 200px;
+        height: 100px;
+        overflow-y: auto;
 
         .tags {
           margin: 5px;
@@ -873,11 +916,6 @@ export default {
 </style>
 
 <style lang="less">
-  ::selection {
-    color: red;
-    background: yellow;
-  }
-
   .el-dialog__body {
     text-align: inherit !important;
   }
