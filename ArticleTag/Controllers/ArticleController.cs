@@ -238,12 +238,16 @@ namespace ArticleTag.Controllers
 
         [HttpPost("SearchArticleByTagger")]
         [SwaggerResponse(200, "根据标记员名称查询文献", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> SearchArticleByTagger(string tagger, int page, int size, TagArticleStatusEnum? status = null)
+        public async Task<IActionResult> SearchArticleByTagger(
+            string tagger, int page, int size,
+            TagArticleStatusEnum? status = null,
+            bool? review = null)
         {
             var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
             try
             {
-                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(tagger, page, size, status);
+                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(
+                    tagger, page, size, status, review);
                 return Ok(response);
             }
             catch (Exception ex)
