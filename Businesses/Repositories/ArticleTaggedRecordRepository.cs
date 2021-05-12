@@ -111,9 +111,7 @@ namespace Businesses.Repositories
             var records = await Select
                  .Where(s => s.UserID == tagger.ID)
                  .WhereIf(status != null, s => s.Status == status)
-#pragma warning disable CS0472 // 该句会被译为 Review = 0 OR Review is null 
-                 .WhereIf(review != null, s => s.Review == review || s.Review == null)
-#pragma warning restore CS0472 // 该句会被译为 Review = 0 OR Review is null 
+                 .WhereIf(review != null, s => s.Review == review)
                  .Page(page, size)
                  .Include(s => s.Tagger)
                  .Include(s => s.Manager)
