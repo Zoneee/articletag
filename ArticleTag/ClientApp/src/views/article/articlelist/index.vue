@@ -88,14 +88,14 @@
             size="small"
             placeholder="输入标记者姓名搜索"
             @change="searchTableData"
-            v-if="role === 1"
+            v-if="role === roleEnum.Auditor"
           />
         </template>
         <template slot-scope="scope">
           <el-button
             size="mini"
             @click="handleEdit(scope.$index, scope.row)"
-            v-if="role === 1"
+            v-if="role === roleEnum.Auditor"
             >编辑</el-button
           >
           <el-button size="mini" @click="handleView(scope.$index, scope.row)"
@@ -105,7 +105,7 @@
             size="mini"
             @click="handleAudit(scope.$index, scope.row)"
             type="danger"
-            v-if="role === 1"
+            v-if="role === roleEnum.Auditor"
             >审核</el-button
           >
         </template>

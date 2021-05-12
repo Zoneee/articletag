@@ -60,6 +60,12 @@ export default class TagArticleStatusEnum {
          */
         Unavail = 6;
 
+        /**
+         * value: 7
+         * @const
+         */
+        PreProcessed = 7;
+
 
     /**
     * Returns a <code>TagArticleStatusEnum</code> enum value from a Javascript object name.

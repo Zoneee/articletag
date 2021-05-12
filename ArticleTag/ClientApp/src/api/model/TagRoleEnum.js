@@ -22,13 +22,19 @@ export default class TagRoleEnum {
          * value: 0
          * @const
          */
-        Tagger = 0;
+        OfflineTagger = 0;
 
         /**
          * value: 1
          * @const
          */
-        Manager = 1;
+        Auditor = 1;
+
+        /**
+         * value: 2
+         * @const
+         */
+        OnlineTagger = 2;
 
 
     /**
