@@ -61,6 +61,8 @@ namespace Entity.Entities
 
         public bool Review { get; set; }
 
+        public int? AutoMarked { get; set; }
+
         public ArticleTaggedRecord SetID()
         {
             this.ID = NewId();

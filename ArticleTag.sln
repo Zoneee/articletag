@@ -19,9 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CleanedHtmlToPlainText", "C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtractMarks", "ExtractMarks\ExtractMarks.csproj", "{BABC9507-EA60-42AB-B52E-F5C68D1DF30F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtractOutput", "ExtractOutput\ExtractOutput.csproj", "{587C1DF3-3471-4284-ACE8-5BFCF2423F77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtractOutput", "ExtractOutput\ExtractOutput.csproj", "{587C1DF3-3471-4284-ACE8-5BFCF2423F77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{4C3DF834-131E-491D-BF91-DA994388D136}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{4C3DF834-131E-491D-BF91-DA994388D136}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkByLearnedData", "MarkByLearnedData\MarkByLearnedData.csproj", "{04DD28BC-FA88-4AB7-A4A5-6F0DCD0139F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +67,10 @@ Global
 		{4C3DF834-131E-491D-BF91-DA994388D136}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C3DF834-131E-491D-BF91-DA994388D136}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C3DF834-131E-491D-BF91-DA994388D136}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04DD28BC-FA88-4AB7-A4A5-6F0DCD0139F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04DD28BC-FA88-4AB7-A4A5-6F0DCD0139F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04DD28BC-FA88-4AB7-A4A5-6F0DCD0139F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04DD28BC-FA88-4AB7-A4A5-6F0DCD0139F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +82,7 @@ Global
 		{BABC9507-EA60-42AB-B52E-F5C68D1DF30F} = {C0C4A69C-C9A1-468E-AE48-70C3E071F04C}
 		{587C1DF3-3471-4284-ACE8-5BFCF2423F77} = {C0C4A69C-C9A1-468E-AE48-70C3E071F04C}
 		{4C3DF834-131E-491D-BF91-DA994388D136} = {C0C4A69C-C9A1-468E-AE48-70C3E071F04C}
+		{04DD28BC-FA88-4AB7-A4A5-6F0DCD0139F4} = {C0C4A69C-C9A1-468E-AE48-70C3E071F04C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2ED9D206-11BB-448C-BF26-996A6F991303}
