@@ -33,7 +33,7 @@
           </el-tooltip>
         </el-checkbox>
       </div>
-      <div class="btns" v-if="user.role === roleEnum.Tagger">
+      <div class="btns" v-if="user.role != roleEnum.Auditor">
         <el-button type="success" @click="submitAudit">提交审核</el-button>
         <el-button type="danger" @click="skipArticle">跳过文章</el-button>
       </div>
@@ -219,7 +219,7 @@ export default {
   created () {
     this.user = JSON.parse(window.localStorage.getItem('user_info') || '{}')
 
-    if (this.user.role === this.roleEnum.Manager && this.$route.query.articleId) {
+    if (this.user.role === this.roleEnum.Auditor && this.$route.query.articleId) {
       this.searchArticleByAuditor().then(() => this.bindTooltip())
     } else {
       this.searchArticle().then((resp) => {

@@ -76,10 +76,19 @@ namespace MarkByLearnedData
                     learnedData.state = $"success marked:{string.Join(",", successMarked)}";
                     record.TaggedArray = taggedArrayStr;
                     record.AutoMarked = 1;
+                    if (taggedArray.Count > 1)
+                    {
+                        record.Status = TagArticleStatusEnum.PreProcessed;
+                    }
                 }
 
                 var r = fsql.Update<_temp_AutoTagged>().SetSource(learnedData).ExecuteAffrows();
-                var r2 = fsql.Update<ArticleTaggedRecord>().Set(p => p.TaggedContent == record.TaggedContent).Set(p => p.TaggedArray == record.TaggedArray).Set(p => p.AutoMarked == record.AutoMarked).Where(p => p.ID == record.ID).ExecuteAffrows();
+                var r2 = fsql.Update<ArticleTaggedRecord>()
+                    .Set(p => p.TaggedContent == record.TaggedContent)
+                    .Set(p => p.TaggedArray == record.TaggedArray)
+                    .Set(p => p.AutoMarked == record.AutoMarked)
+                    .Set(p => p.Status == record.Status)
+                    .Where(p => p.ID == record.ID).ExecuteAffrows();
                 // var r1 = fsql.Update<_temp_AutoTagged>(learnedData);
                 // var r2 = fsql.Update<ArticleTaggedRecord>(record);
 

@@ -55,7 +55,7 @@ namespace Businesses.Repositories
                 .ToOneAsync();
 
             var records = await this.Select
-             .WhereIf(user.Role == TagRoleEnum.Tagger, s => s.UserID == userid)
+             .WhereIf(user.Role != TagRoleEnum.Auditor, s => s.UserID == userid)
              .WhereIf(status != null, s => s.Status == status)
              .WhereIf(review != null, s => s.Review == review)
              .Page(page, size)
@@ -154,19 +154,27 @@ namespace Businesses.Repositories
         {
             // 用户角色检查
             var roleFlag = await this.Orm.Select<User>()
-                .Where(s => s.ID == taggerId && s.Role == TagRoleEnum.Tagger)
+                .Where(s => s.ID == taggerId
+                    && (s.Role == TagRoleEnum.OfflineTagger || s.Role == TagRoleEnum.OnlineTagger))
                 .AnyAsync();
             if (!roleFlag)
             {
                 throw new WarnException("非标记员角色不能标记文章！");
             }
 
+            // 获取用户
+            var tagger = await this.Orm.Select<User>()
+                .Where(s => s.ID == taggerId)
+                .ToOneAsync();
+
             /**
              * 先推送未审核通过的
              * 再推送未标记完成的
+             * 如果是 线下标记员 优先推送预处理的文章，如果是 线上标记员 优先推送未处理的文章
              * 最后推送未分配的
              */
 
+            // 未通过审核的
             var unsanctioned = await Select
                 .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Unsanctioned)
                 .AnyAsync();
@@ -187,6 +195,7 @@ namespace Businesses.Repositories
                 return dto;
             }
 
+            // 标记中的
             var tagging = await Select
                 .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Tagging)
                 .AnyAsync();
@@ -206,9 +215,33 @@ namespace Businesses.Repositories
                 return dto;
             }
 
-            var untagged = await Select
-                .Where(s => s.Status == TagArticleStatusEnum.Untagged)
-                .ToOneAsync();
+            // 未标记的
+            ArticleTaggedRecord untagged = null;
+            switch (tagger.Role)
+            {
+                case TagRoleEnum.OfflineTagger:
+                    {
+                        untagged = await Select
+                            .Where(s => s.Status == TagArticleStatusEnum.PreProcessed)
+                            .ToOneAsync()
+                            ?? await Select
+                              .Where(s => s.Status == TagArticleStatusEnum.Untagged)
+                              .ToOneAsync();
+                    }
+                    break;
+
+                case TagRoleEnum.Auditor:
+                case TagRoleEnum.OnlineTagger:
+                    {
+                        untagged = await Select
+                          .Where(s => s.Status == TagArticleStatusEnum.Untagged)
+                          .ToOneAsync()
+                          ?? await Select
+                            .Where(s => s.Status == TagArticleStatusEnum.PreProcessed)
+                            .ToOneAsync();
+                    }
+                    break;
+            }
 
             if (untagged != null)
             {
