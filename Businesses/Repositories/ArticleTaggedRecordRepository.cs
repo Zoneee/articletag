@@ -55,7 +55,7 @@ namespace Businesses.Repositories
                 .ToOneAsync();
 
             var records = await this.Select
-             .WhereIf(user.Role == TagRoleEnum.OfflineTagger, s => s.UserID == userid)
+             .WhereIf(user.Role != TagRoleEnum.Auditor, s => s.UserID == userid)
              .WhereIf(status != null, s => s.Status == status)
              .WhereIf(review != null, s => s.Review == review)
              .Page(page, size)
