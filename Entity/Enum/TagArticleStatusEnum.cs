@@ -28,5 +28,8 @@ namespace Entity.Enum
 
         [Description("无效的")]
         Unavail = 6,
+
+        [Description("预处理的")]
+        PreProcessed = 7
     }
 }

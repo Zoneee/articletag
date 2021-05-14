@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace MarkByLearnedData
 {
-    class Program
+    public class Program
     {
         static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
             .UseConnectionString(FreeSql.DataType.SqlServer, @"server=192.168.1.55;database=ArticleTag;uid=sa;pwd=deepbiodb@2019")
@@ -24,7 +24,7 @@ namespace MarkByLearnedData
         {
             // var d = "10.1021/bi960038h";
 
-            var autoTaggedData = fsql.Select<_temp_AutoTagged>().Where(p => p.state == null ).ToList();
+            var autoTaggedData = fsql.Select<_temp_AutoTagged>().Where(p => p.state == null).ToList();
             for (var i = 0; i < autoTaggedData.Count; i++)
             {
                 var learnedData = autoTaggedData[i];
@@ -39,7 +39,7 @@ namespace MarkByLearnedData
                 // get record
                 var record = fsql.Select<ArticleTaggedRecord, CleanedArticle, RawArticle>()
                     .InnerJoin((a, b, c) => a.CleanedArticleID == b.ID && b.RawArticleID == c.ID)
-                    .Where(p => p.t1.Status == TagArticleStatusEnum.Untagged && p.t1.AutoMarked == null && p.t3.DOI.ToLower() == doi ).First();
+                    .Where(p => p.t1.Status == TagArticleStatusEnum.Untagged && p.t1.AutoMarked == null && p.t3.DOI.ToLower() == doi).First();
                 if (record == null || record.TaggedArray != null)
                 {
                     learnedData.state = "record not exist by doi or tagged array not null";
@@ -79,7 +79,7 @@ namespace MarkByLearnedData
                 }
 
                 var r = fsql.Update<_temp_AutoTagged>().SetSource(learnedData).ExecuteAffrows();
-                var r2 = fsql.Update<ArticleTaggedRecord>().Set(p=>p.TaggedContent == record.TaggedContent).Set(p=>p.TaggedArray == record.TaggedArray).Set(p=>p.AutoMarked == record.AutoMarked).Where(p=>p.ID == record.ID).ExecuteAffrows();
+                var r2 = fsql.Update<ArticleTaggedRecord>().Set(p => p.TaggedContent == record.TaggedContent).Set(p => p.TaggedArray == record.TaggedArray).Set(p => p.AutoMarked == record.AutoMarked).Where(p => p.ID == record.ID).ExecuteAffrows();
                 // var r1 = fsql.Update<_temp_AutoTagged>(learnedData);
                 // var r2 = fsql.Update<ArticleTaggedRecord>(record);
 
@@ -106,7 +106,7 @@ namespace MarkByLearnedData
                     p_state.SetValue(learnedData, "not found");
                     return;
                 }
-                
+
 
                 Entity entity;
                 string entityAndAttribute;
@@ -137,10 +137,10 @@ namespace MarkByLearnedData
             }
         }
 
-        static Regex GetKeywordRegex(string keyword)
+        public static Regex GetKeywordRegex(string keyword)
         {
             keyword = Regex.Escape(keyword);
-            var keywordRegStr =  new Regex(@"([a-zA-Z]+)(?![a-zA-Z]*$)").Replace(keyword, "$1(<[/]?[^<>]+?>)*");
+            var keywordRegStr = new Regex(@"([a-zA-Z]+)(?![a-zA-Z]*$)").Replace(keyword, "$1(<[/]?[^<>]+?>)*");
 
 
             /*

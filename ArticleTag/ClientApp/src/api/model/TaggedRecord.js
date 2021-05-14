@@ -15,7 +15,7 @@ import ApiClient from '../ApiClient';
 import AuditRecord from './AuditRecord';
 import Auditor from './Auditor';
 import TagArticleStatusEnum from './TagArticleStatusEnum';
-import Tagger from './Tagger';
+import TaggerDto from './TaggerDto';
 
 /**
 * The TaggedRecord model module.
@@ -66,7 +66,7 @@ export default class TaggedRecord {
                 obj['lastChangeTime'] = ApiClient.convertToType(data['lastChangeTime'], 'Date');
             }
             if (data.hasOwnProperty('tagger')) {
-                obj['tagger'] = Tagger.constructFromObject(data['tagger']);
+                obj['tagger'] = TaggerDto.constructFromObject(data['tagger']);
             }
             if (data.hasOwnProperty('auditor')) {
                 obj['auditor'] = Auditor.constructFromObject(data['auditor']);
@@ -106,7 +106,7 @@ export default class TaggedRecord {
     */
     'lastChangeTime' = undefined;
     /**
-    * @member {module:model/Tagger} tagger
+    * @member {module:model/TaggerDto} tagger
     */
     'tagger' = undefined;
     /**
