@@ -29,7 +29,6 @@ let AuthIntercept = superagentIntercept((err, res) => {
 });
 
 const ToLogin = params => {
-    debugger
     window.localStorage.removeItem('user_info');
     window.localStorage.removeItem('user');
     window.localStorage.removeItem('NavigationBar');
