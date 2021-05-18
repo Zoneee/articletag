@@ -1,5 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import { TagRoleEnum } from '@/api'
+
+let roles = new TagRoleEnum()
 
 Vue.use(Router)
 
@@ -119,6 +122,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/statistics',
     name: 'Statistics',
+    role: roles.Auditor,
     meta: {
       title: '统计管理',
       icon: 'form'
@@ -139,13 +143,11 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
   {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
   },
-
   {
     path: '/',
     component: Layout,
