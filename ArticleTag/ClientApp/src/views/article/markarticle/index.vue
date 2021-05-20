@@ -5,7 +5,8 @@
   <el-container class="index-container">
     <el-main>
       <div>
-        <div class="article" @mouseup.right="openMenus" v-html="article"></div>
+        <div class="article" v-html="article" @mouseup.right="openMenus"></div>
+        <div class="information el-icon-info" @click="openNotification"></div>
       </div>
       <div class="footer-placeholder"></div>
     </el-main>
@@ -36,6 +37,12 @@
       <div class="btns" v-if="user.role != roleEnum.Auditor">
         <el-button type="success" @click="submitAudit">提交审核</el-button>
         <el-button type="danger" @click="skipArticle">跳过文章</el-button>
+      </div>
+      <div class="btns" v-if="user.role == roleEnum.Auditor">
+        <!-- 函数待实现 -->
+        <el-button type="success" @click="audited">通过审核</el-button>
+        <!-- 函数待实现 -->
+        <el-button type="danger" @click="openAuditMenus">审核不通过</el-button>
       </div>
     </div>
 
@@ -86,18 +93,50 @@
         <el-button type="primary" @click="addTags">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      :visible.sync="auditDialogVisible"
+      width="30%"
+      center
+      class="dialog"
+      @closed="closeAuditMenus"
+    >
+      <div slot="title" class="dialog-title">
+        <span>请输入未通过原因描述</span>
+      </div>
+      <div class="dialog-body">
+        <el-link id="selection-tooltip"
+          >查看您选中的内容<i class="el-icon-view el-icon--right"></i>
+        </el-link>
+
+        <div class="inputer" ref="inputer">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 6, maxRows: 20 }"
+            placeholder="请输入内容"
+            v-model="remark"
+          >
+          </el-input>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeMenus">取 消</el-button>
+        <el-button type="primary" @click="unaudited">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
 <script>
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
-import { ApiClient, ArticleApi, TagRoleEnum } from '@/api'
+import { ApiClient, ArticleApi, AccountApi, TagArticleStatusEnum, TagRoleEnum } from '@/api'
 
 export default {
   data: function () {
     return {
-      api: new ArticleApi(ApiClient.instance),
+      articleApi: new ArticleApi(ApiClient.instance),
+      accountApi: new AccountApi(ApiClient.instance),
+      auditStatusEnum: new TagArticleStatusEnum(),
       roleEnum: new TagRoleEnum(),
       taggedNum: 0,
       selection: {
@@ -118,6 +157,7 @@ export default {
       imgTagContent: '',
       dialogTitle: '',
       dialogVisible: false,
+      auditDialogVisible: false,
       cascaderVisible: false,
       inputerVisible: false,
       dialogTippy: null,
@@ -211,9 +251,17 @@ export default {
         color: '#CC9966',
         type: 'T'
       }],
+      /**登录者信息 */
       user: {},
       review: false,
-      result: false
+      result: false,
+      remark: '',
+      /**标记员信息 */
+      tagger: {
+        id: 0,
+        email: '',
+        name: ''
+      }
     }
   },
   created () {
@@ -222,9 +270,7 @@ export default {
     if (this.user.role === this.roleEnum.Auditor && this.$route.query.articleId) {
       this.searchArticleByAuditor().then(() => this.bindTooltip())
     } else {
-      this.searchArticle().then((resp) => {
-        this.bindTooltip()
-      })
+      this.searchArticle().then(() => this.bindTooltip())
     }
 
     // 禁用默认右键菜单
@@ -240,6 +286,15 @@ export default {
         // alert("You've tried to open context menu")
         window.event.returnValue = false
       })
+    }
+  },
+  watch: {
+    $route (to, from) {
+      if (this.user.role === this.roleEnum.Auditor && this.$route.query.articleId) {
+        this.searchArticleByAuditor().then(() => this.bindTooltip())
+      } else {
+        this.searchArticle().then(() => this.bindTooltip())
+      }
     }
   },
   computed: {
@@ -260,6 +315,7 @@ export default {
     }
   },
   methods: {
+    // 以下是页面操作相关
     /**根据字符串获取下拉列表中value相等的对象 */
     getCascaderObj (val, opt) {
       return val.map(function (value, index, array) {
@@ -521,19 +577,6 @@ export default {
 
       this.selection.anchorNode.replaceWith(beforeNode, ts, selectedNode, te, afterNode)
     },
-    /**绑定历史标记节点Tip事件 */
-    bindTooltip () {
-      var elements = document.getElementsByClassName('tagged')
-
-      for (var element of elements) {
-        var name = element.getAttribute('c-name')
-        var attribute = element.getAttribute('c-attribute')
-
-        tippy(element, {
-          content: name + (attribute ? `/${attribute}` : '')
-        })
-      }
-    },
     /**创建标记节点 */
     createMark (content, tag) {
       var mark = document.createElement('mark')
@@ -552,6 +595,20 @@ export default {
         element.setAttribute('c-type', tag[0].type)
         element.setAttribute('c-name', tag[0].value)
         element.setAttribute('c-attribute', tag[1].value)
+      }
+    },
+    // 以下是Tag相关
+    /**绑定历史标记节点Tip事件 */
+    bindTooltip () {
+      var elements = document.getElementsByClassName('tagged')
+
+      for (var element of elements) {
+        var name = element.getAttribute('c-name')
+        var attribute = element.getAttribute('c-attribute')
+
+        tippy(element, {
+          content: name + (attribute ? `/${attribute}` : '')
+        })
       }
     },
     /**添加页面下方Tag */
@@ -690,7 +747,7 @@ export default {
     saveTags () {
       // 调用API保存标记信息
       this.article = document.querySelector('.article').innerHTML
-      this.api.apiArticleSaveTaggedRecordPost({
+      this.articleApi.apiArticleSaveTaggedRecordPost({
         body: {
           id: this.articleId,
           taggedContent: this.article,
@@ -705,9 +762,10 @@ export default {
         this.bindTooltip()
       })
     },
+    // 以下是提交相关
     submitAudit () {
       // 调用API提交文章审核
-      this.api.apiArticleSubmitAuditPost({
+      this.articleApi.apiArticleSubmitAuditPost({
         articleId: this.articleId
       }, (error, data, resp) => {
         if (error) {
@@ -721,6 +779,9 @@ export default {
             // 获取下一篇
             this.searchArticle()
           }
+        } else {
+          alert('提交审核异常')
+          console.log('标记员提交审核异常')
         }
       })
     },
@@ -728,7 +789,7 @@ export default {
       var articleId = this.$route.query.articleId
 
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleSearchArticlePost({
+        this.articleApi.apiArticleSearchArticlePost({
           articleId: articleId
         }, (error, data, resp) => {
           if (error) {
@@ -747,6 +808,8 @@ export default {
             this.article = result.content
             this.review = result.review
             this.tags = result.tags || []
+            this.getTaggerInfo()
+            console.log(this.articleId)
             console.log(`当前计数：${this.currentTagId}`)
             // this.taggedNum = this.tags.length
             resolve(data)
@@ -764,11 +827,11 @@ export default {
     searchArticle () {
       // 调用API获取文章信息
       var p = new Promise((resolve, reject) => {
-        this.api.apiArticleDistributeArticlePost({
+        this.articleApi.apiArticleDistributeArticlePost({
           taggerId: this.user.userId
         }, (error, data, resp) => {
           if (error) {
-            alert(error)
+            // alert(error)
             reject(error)
             return
           }
@@ -810,7 +873,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.api.apiArticleSetUnavailArticlePost({
+        this.articleApi.apiArticleSetUnavailArticlePost({
           articleId: this.articleId
         }, (error, data, resp) => {
           if (error) {
@@ -840,7 +903,7 @@ export default {
     },
     setReview () {
       // 设置为综述标志
-      this.api.apiArticleSetReviewArticlePost({
+      this.articleApi.apiArticleSetReviewArticlePost({
         articleId: this.articleId,
         review: this.review
       }, (error, data, resp) => {
@@ -849,7 +912,155 @@ export default {
           return
         }
       })
-    }
+    },
+    // 以下是审核相关功能
+    checkStatus () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleCheckCanAuditPost({
+          articleId: this.articleId
+        }, (error, data, resp) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          if (!data.success || !data.result) {
+            reject(false)
+            return
+          }
+          resolve(true)
+        })
+      })
+      return p
+    },
+    audited () {
+      // 通过
+      this.checkStatus()
+        .then(async () => {
+          debugger
+          await this.submitAudited()
+          this.getNextArticle()
+        })
+        .catch((flag) => {
+          alert('提交审核状态异常')
+          console.log('审核员提交审核通过状态异常')
+        })
+    },
+    unaudited () {
+      // 不通过
+      this.checkStatus()
+        .then(async () => {
+          debugger
+          await this.submitUnaudited()
+          this.closeAuditMenus()
+          this.getNextArticle()
+        })
+        .catch((flag) => {
+          alert('提交审核状态异常')
+          console.log('审核员提交审核不通过状态异常')
+        })
+    },
+    submitAudited () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleAuditArticlePost({
+          body: {
+            id: this.articleId,
+            status: this.auditStatusEnum.Audited,
+            auditorID: this.user.userId
+          }
+        }, (error, data, resp) => {
+          if (error) {
+            reject(error)
+            alert(error)
+            return
+          }
+
+          resolve(data)
+        })
+      })
+
+      return p
+    },
+    submitUnaudited () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleAuditArticlePost({
+          body: {
+            id: this.articleId,
+            status: this.auditStatusEnum.Unsanctioned,
+            remark: this.remark,
+            auditorID: this.user.userId
+          }
+        }, (error, data, resp) => {
+          if (error) {
+            reject(error)
+            console.error(error)
+            alert(error)
+            return
+          }
+          console.log(resp)
+          resolve(data)
+        })
+      })
+
+      return p
+    },
+    getNextArticle () {
+      this.articleApi.apiArticleGetTaggersCanAuditArticlePost({
+        taggerId: this.tagger.id
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          var result = data.result
+          alert(`获取下一篇待审核的文章`)
+          this.$router.push({
+            path: `/article/markarticle`,
+            query: { articleId: result.id }
+          })
+        } else {
+          alert(`没有可审核文章`)
+          this.$router.push(`/article/articlelist`)
+        }
+      })
+    },
+    getTaggerInfo () {
+      this.accountApi.apiAccountGetTaggerInfoByArticleTaggedRecordIdPost({
+        recordId: this.articleId
+      }, (error, data, resp) => {
+        if (error) {
+          alert(error)
+          return
+        }
+
+        if (data.success) {
+          this.tagger.id = data.result.id
+          this.tagger.name = data.result.name
+          this.tagger.email = data.result.email
+
+          this.openNotification()
+        }
+      })
+    },
+    openNotification () {
+      var h = this.$createElement
+      this.$notify({
+        title: '标记员信息',
+        message: h('p', null, [
+          h('p', null, `标记员ID：${this.tagger.id}`),
+          h('p', null, `标记员名称：${this.tagger.name}`),
+          h('p', null, `标记员邮箱：${this.tagger.email}`),
+        ]),
+        offset: 60
+      });
+    },
+    openAuditMenus (mouse) {
+      this.auditDialogVisible = true
+    },
+    closeAuditMenus (mouse) {
+      this.auditDialogVisible = false
+    },
   }
 }
 </script>
@@ -872,6 +1083,15 @@ export default {
       .three {
         border: 1px solid rgb(45, 74, 204);
       }
+    }
+
+    .information {
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
     }
 
     @footheight: 200px;
