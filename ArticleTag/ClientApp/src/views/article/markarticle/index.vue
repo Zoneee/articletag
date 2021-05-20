@@ -831,7 +831,7 @@ export default {
           taggerId: this.user.userId
         }, (error, data, resp) => {
           if (error) {
-            alert(error)
+            // alert(error)
             reject(error)
             return
           }
