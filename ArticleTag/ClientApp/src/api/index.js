@@ -26,12 +26,17 @@ import TagRoleEnum from './model/TagRoleEnum';
 import TaggedRecord from './model/TaggedRecord';
 import TaggedRecordDto from './model/TaggedRecordDto';
 import TaggedRecordDtoResponse from './model/TaggedRecordDtoResponse';
-import Tagger from './model/Tagger';
+import TaggerDto from './model/TaggerDto';
+import TaggerDtoResponse from './model/TaggerDtoResponse';
 import UserLoginResponse from './model/UserLoginResponse';
 import UserLoginResponseResponse from './model/UserLoginResponseResponse';
 import UserLoginVm from './model/UserLoginVm';
+import WorkloadDto from './model/WorkloadDto';
+import WorkloadDtoResponse from './model/WorkloadDtoResponse';
+import WorkloadItem from './model/WorkloadItem';
 import AccountApi from './api/AccountApi';
 import ArticleApi from './api/ArticleApi';
+import UserCenterApi from './api/UserCenterApi';
 
 /**
 * Object.<br>
@@ -156,10 +161,16 @@ export {
     TaggedRecordDtoResponse,
 
     /**
-     * The Tagger model constructor.
-     * @property {module:model/Tagger}
+     * The TaggerDto model constructor.
+     * @property {module:model/TaggerDto}
      */
-    Tagger,
+    TaggerDto,
+
+    /**
+     * The TaggerDtoResponse model constructor.
+     * @property {module:model/TaggerDtoResponse}
+     */
+    TaggerDtoResponse,
 
     /**
      * The UserLoginResponse model constructor.
@@ -180,6 +191,24 @@ export {
     UserLoginVm,
 
     /**
+     * The WorkloadDto model constructor.
+     * @property {module:model/WorkloadDto}
+     */
+    WorkloadDto,
+
+    /**
+     * The WorkloadDtoResponse model constructor.
+     * @property {module:model/WorkloadDtoResponse}
+     */
+    WorkloadDtoResponse,
+
+    /**
+     * The WorkloadItem model constructor.
+     * @property {module:model/WorkloadItem}
+     */
+    WorkloadItem,
+
+    /**
     * The AccountApi service constructor.
     * @property {module:api/AccountApi}
     */
@@ -189,5 +218,11 @@ export {
     * The ArticleApi service constructor.
     * @property {module:api/ArticleApi}
     */
-    ArticleApi
+    ArticleApi,
+
+    /**
+    * The UserCenterApi service constructor.
+    * @property {module:api/UserCenterApi}
+    */
+    UserCenterApi
 };

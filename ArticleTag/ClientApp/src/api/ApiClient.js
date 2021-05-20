@@ -16,6 +16,7 @@ import querystring from "querystring";
 import superagentIntercept from "superagent-intercept"
 import router from '../router/index'
 import Swal from 'sweetalert2'
+import { removeToken } from '@/utils/auth' // get token from cookie
 
 let AuthIntercept = superagentIntercept((err, res) => {
     if (res.status == 401) {
@@ -29,14 +30,14 @@ let AuthIntercept = superagentIntercept((err, res) => {
 });
 
 const ToLogin = params => {
-    debugger
     window.localStorage.removeItem('user_info');
-    window.localStorage.removeItem('user');
-    window.localStorage.removeItem('NavigationBar');
+    // vue-element-admin 框架通过 token 验证
+    // 逻辑详见 permission.js 文件
+    removeToken()
 
     router.replace({
         path: "/login",
-        query: { redirect: router.currentRoute.fullPath }
+        query: { redirect: router.currentRoute.fullPath, t: new Date().getTime() }
     });
     window.location.reload()
 };
