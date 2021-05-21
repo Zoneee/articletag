@@ -39,9 +39,7 @@
         <el-button type="danger" @click="skipArticle">跳过文章</el-button>
       </div>
       <div class="btns" v-if="user.role == roleEnum.Auditor">
-        <!-- 函数待实现 -->
         <el-button type="success" @click="audited">通过审核</el-button>
-        <!-- 函数待实现 -->
         <el-button type="danger" @click="openAuditMenus">审核不通过</el-button>
       </div>
     </div>
@@ -130,6 +128,7 @@
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
 import { ApiClient, ArticleApi, AccountApi, TagArticleStatusEnum, TagRoleEnum } from '@/api'
+import { Loading } from 'element-ui'
 
 export default {
   data: function () {
@@ -261,7 +260,12 @@ export default {
         id: 0,
         email: '',
         name: ''
-      }
+      },
+      loadOption: {
+        lock: true,
+        text: '标记中...'
+      },
+      loadingInstance: null
     }
   },
   created () {
@@ -315,6 +319,13 @@ export default {
     }
   },
   methods: {
+    loading (text) {
+      this.loadOption.text = text
+      this.loadingInstance = Loading.service(this.loadOption);
+    },
+    loaded () {
+      this.loadingInstance.close();
+    },
     // 以下是页面操作相关
     /**根据字符串获取下拉列表中value相等的对象 */
     getCascaderObj (val, opt) {
@@ -745,6 +756,7 @@ export default {
     },
     /**保存标记信息 */
     saveTags () {
+      this.loading('提交中...')
       // 调用API保存标记信息
       this.article = document.querySelector('.article').innerHTML
       this.articleApi.apiArticleSaveTaggedRecordPost({
@@ -754,6 +766,7 @@ export default {
           tags: this.tags
         }
       }, (error, data, resp) => {
+        this.loaded()
         if (error) {
           alert(error)
           return
@@ -764,10 +777,12 @@ export default {
     },
     // 以下是提交相关
     submitAudit () {
+      this.loading('提交中...')
       // 调用API提交文章审核
       this.articleApi.apiArticleSubmitAuditPost({
         articleId: this.articleId
       }, (error, data, resp) => {
+        this.loaded()
         if (error) {
           alert(error)
           return
@@ -873,9 +888,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
+        this.loading('提交中...')
         this.articleApi.apiArticleSetUnavailArticlePost({
           articleId: this.articleId
         }, (error, data, resp) => {
+          this.loaded()
           if (error) {
             alert(error)
             return
