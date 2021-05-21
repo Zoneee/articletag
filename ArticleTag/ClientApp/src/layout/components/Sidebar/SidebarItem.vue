@@ -122,7 +122,6 @@ export default {
   },
   computed: {
     isHidden () {
-      console.log(this.item)
       if (this.item.hidden) {
         return false
       }

@@ -13,6 +13,7 @@
 
 import ApiClient from "../ApiClient";
 import WorkloadDtoResponse from '../model/WorkloadDtoResponse';
+import WorkloadVm from '../model/WorkloadVm';
 
 /**
 * UserCenter service.
@@ -47,12 +48,11 @@ export default class UserCenterApi {
      */
     apiUserCenterWorkloadPost(opts, callback) {
       opts = opts || {};
-      let postBody = null;
+      let postBody = opts['body'];
 
       let pathParams = {
       };
       let queryParams = {
-        'date': opts['_date']
       };
       let headerParams = {
       };
@@ -60,7 +60,7 @@ export default class UserCenterApi {
       };
 
       let authNames = ['Bearer'];
-      let contentTypes = [];
+      let contentTypes = ['application/json', 'text/json', 'application/_*+json'];
       let accepts = ['text/plain', 'application/json', 'text/json'];
       let returnType = WorkloadDtoResponse;
 

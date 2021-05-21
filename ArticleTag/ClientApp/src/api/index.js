@@ -34,6 +34,7 @@ import UserLoginVm from './model/UserLoginVm';
 import WorkloadDto from './model/WorkloadDto';
 import WorkloadDtoResponse from './model/WorkloadDtoResponse';
 import WorkloadItem from './model/WorkloadItem';
+import WorkloadVm from './model/WorkloadVm';
 import AccountApi from './api/AccountApi';
 import ArticleApi from './api/ArticleApi';
 import UserCenterApi from './api/UserCenterApi';
@@ -207,6 +208,12 @@ export {
      * @property {module:model/WorkloadItem}
      */
     WorkloadItem,
+
+    /**
+     * The WorkloadVm model constructor.
+     * @property {module:model/WorkloadVm}
+     */
+    WorkloadVm,
 
     /**
     * The AccountApi service constructor.

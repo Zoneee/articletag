@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ArticleTag.Models;
 using Businesses.Dto;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
@@ -28,12 +29,12 @@ namespace ArticleTag.Controllers
 
         [HttpPost("workload")]
         [SwaggerResponse(200, "根据日期查询用户工作量", typeof(JsonResponseBase<WorkloadDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> GetWorkload(DateTime? date)
+        public async Task<IActionResult> GetWorkload(WorkloadVm workload)
         {
             var response = JsonResponseBase<WorkloadDto>.CreateDefault();
             try
             {
-                var result = await _user.GetWorkloadAsync(date);
+                var result = await _user.GetWorkloadAsync(workload.StartDate, workload.EndDate, workload.ArticleStatus, workload.PageIndex, workload.PageSize);
                 response.Result = result;
             }
             catch (Exception ex)

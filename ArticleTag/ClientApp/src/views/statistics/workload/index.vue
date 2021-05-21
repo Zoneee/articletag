@@ -16,11 +16,28 @@
           <el-date-picker
             v-model="date"
             @change="dateChangeHandler"
-            type="date"
             value-format="yyyy-MM-dd"
-            placeholder="选择日期"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
           >
           </el-date-picker>
+          <el-select
+            v-model="auditstatusIndex"
+            placeholder="全部"
+            @change="changeStatusHandler"
+          >
+            <el-option
+              v-for="item in auditStatusArray"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
         </template>
       </el-table-column>
     </el-table>
@@ -44,44 +61,86 @@ import { ApiClient, UserCenterApi } from '@/api'
 export default {
   data () {
     return {
-      date: '',
+      date: [],
+      startDate: null,
+      endDate: null,
       data: [],
       pager: {
         index: 1,
         size: 100,
         total: 0
       },
-      api: new UserCenterApi(ApiClient.instance)
+      api: new UserCenterApi(ApiClient.instance),
+      auditStatusArray: [
+        { text: '全部', value: '-1' },
+        { text: '未标记', value: '0' },
+        { text: '标记中', value: '1' },
+        { text: '已标记', value: '2' },
+        { text: '未审核', value: '3' },
+        { text: '审核通过', value: '4' },
+        { text: '审核不通过', value: '5' },
+        { text: '无效的', value: '6' },
+      ],
+      auditstatusIndex: null
     }
   },
   created () {
-    const date = new Date();
-    date.setTime(date.getTime() - 3600 * 1000 * 24);
-    this.date = date
+    // const date = new Date();
+    // const date2 = new Date(date.getTime() - 3600 * 1000 * 24)
+
+    // this.date = [date2, date]
 
     this.searchWorkload()
   },
   computed: {
     formattedData () {
       return this.data
+    },
+    selectedStatus () {
+      var status = parseInt(this.auditstatusIndex)
+      
+      if (status === null || isNaN(status) || status < 0) {
+        return null
+      }
+
+      var selected = this.auditStatusArray.find(s => parseInt(s.value) === status)
+      return parseInt(selected.value)
     }
   },
   methods: {
-    dateChangeHandler (date) {
-      this.date = date
+    changeStatusHandler (params) {
+      this.searchWorkload()
+    },
+    dateChangeHandler (params) {
+      if (params) {
+        this.startDate = params[0]
+        this.endDate = params[1]
+      } else {
+        this.startDate = null
+        this.endDate = null
+      }
+
       this.searchWorkload()
     },
     searchWorkload () {
-      console.log(this.date)
       this.api.apiUserCenterWorkloadPost({
-        _date: this.date
+        body: {
+          startDate: this.startDate,
+          endDate: this.endDate,
+          articleStatus: this.selectedStatus,
+          pageIndex: this.pager.index,
+          pageSize: this.pager.size
+        }
       }, (error, data, resp) => {
         if (error) {
           alert(error)
           return
         }
+
         if (data.success) {
           this.data = data.result.collection
+          this.pager.index = 1
+          this.pager.total = data.result.collection.length
         }
       })
     },

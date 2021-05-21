@@ -64,14 +64,18 @@ namespace Businesses.Repositories
             return tagger;
         }
 
-        public async Task<WorkloadDto> GetWorkloadAsync(DateTime? date)
+        public async Task<WorkloadDto> GetWorkloadAsync(
+            DateTime? startDate,
+            DateTime? endDate,
+            TagArticleStatusEnum? status,
+            int page, int size)
         {
             var workloads = await Orm.Select<User, ArticleTaggedRecord>()
                        .InnerJoin((u, r) => u.ID == r.UserID)
-                       .Where((u, r) => r.Status == TagArticleStatusEnum.Unaudited)
-                       .WhereIf(date != null, "DATEDIFF(DAY,CONVERT(VARCHAR(10),@date,120),LastChangeTime) = 0", date)
+                       .WhereIf(status != null, (u, r) => r.Status == status)
+                       .WhereIf(startDate != null && endDate != null, (u, r) => r.LastChangeTime.Between(startDate.Value, endDate.Value))
                        .GroupBy((u, r) => u.ID)
-                       .Page(0, 10)
+                       .Page(page, size)
                        .Count(out var total)
                        .ToListAsync((u) => new WorkloadItem()
                        {
