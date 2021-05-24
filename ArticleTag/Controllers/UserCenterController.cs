@@ -45,5 +45,31 @@ namespace ArticleTag.Controllers
             }
             return Ok(response);
         }
+
+        [HttpPut("user/info")]
+        [SwaggerResponse(200, "更新用户信息", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> Update(UserVm user)
+        {
+            var response = JsonResponseBase<bool, IDictionary<string, string[]>>.CreateDefault();
+
+            try
+            {
+                response.Result = await _user.UpdateUserInfoAsync(new Entity.Entities.User()
+                {
+                    ID = long.Parse(user.ID),
+                    NickName = user.NickName
+                });
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Result = false;
+                response.HttpCode = 500;
+                response.ErrorMsg = "更新用户信息异常！";
+                _logger.LogError(ex, "更新用户信息异常！");
+            }
+
+            return Ok(response);
+        }
     }
 }

@@ -11,8 +11,20 @@
       <el-table-column prop="email" label="标记员帐号"> </el-table-column>
       <el-table-column prop="count" label="标记数量" sortable>
       </el-table-column>
+      <el-table-column prop="nickName" label="人员名称" sortable>
+        <template slot-scope="scope">
+          <input
+            type="text"
+            class="el-input__inner"
+            placeholder="请输入内容1"
+            :c-id="scope.row.id"
+            :value="scope.row.nickName"
+            @change="changeNickNameHandler"
+          />
+        </template>
+      </el-table-column>
       <el-table-column label="操作">
-        <template slot="header" slot-scope="scope">
+        <template slot="header">
           <el-date-picker
             v-model="date"
             @change="dateChangeHandler"
@@ -57,6 +69,8 @@
 
 <script>
 import { ApiClient, UserCenterApi } from '@/api'
+import { Loading } from 'element-ui'
+import { Message } from 'element-ui';
 
 export default {
   data () {
@@ -85,11 +99,6 @@ export default {
     }
   },
   created () {
-    // const date = new Date();
-    // const date2 = new Date(date.getTime() - 3600 * 1000 * 24)
-
-    // this.date = [date2, date]
-
     this.searchWorkload()
   },
   computed: {
@@ -98,7 +107,7 @@ export default {
     },
     selectedStatus () {
       var status = parseInt(this.auditstatusIndex)
-      
+
       if (status === null || isNaN(status) || status < 0) {
         return null
       }
@@ -108,6 +117,44 @@ export default {
     }
   },
   methods: {
+    changeNickNameHandler (e) {
+      var element = e.target
+      var id = element.getAttribute("c-id")
+      var value = element.value
+
+      var loadingInstance = Loading.service()
+      this.api.apiUserCenterUserInfoPut({
+        body: {
+          id: id,
+          nickName: value
+        }
+      }, (error, data, resp) => {
+        loadingInstance.close()
+        if (error) {
+          Message.error({
+            message: `ID:${id} 名称更新失败！`,
+            duration: 0,
+            showClose: true,
+          })
+          alert(error)
+          console.error(error)
+          return
+        }
+
+        if (data.success) {
+          Message.success({
+            message: `ID:${id} 名称更新成功！`,
+            showClose: true,
+          })
+        } else {
+          Message.error({
+            message: `ID:${id} 名称更新失败！`,
+            duration: 0,
+            showClose: true,
+          })
+        }
+      })
+    },
     changeStatusHandler (params) {
       this.searchWorkload()
     },

@@ -80,6 +80,7 @@ namespace Businesses.Repositories
                        .ToListAsync((u) => new WorkloadItem()
                        {
                            ID = u.Key,
+                           NickName = u.Max(u.Value.Item1.NickName),
                            Email = u.Max(u.Value.Item1.Email),
                            Count = SqlExt.DistinctCount(u.Value.Item2.ID)
                        });
@@ -89,6 +90,18 @@ namespace Businesses.Repositories
                 Collection = workloads,
                 Total = total
             };
+        }
+
+        public async Task<bool> UpdateUserInfoAsync(User user)
+        {
+            var model = await Select.Where(s => s.ID == user.ID).ToOneAsync();
+            if (model == null)
+            {
+                return false;
+            }
+
+            model.NickName = user.NickName;
+            return await UpdateAsync(model) > 0;
         }
     }
 }
