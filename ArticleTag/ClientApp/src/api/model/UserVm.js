@@ -14,14 +14,14 @@
 import ApiClient from '../ApiClient';
 
 /**
-* The WorkloadItem model module.
-* @module model/WorkloadItem
+* The UserVm model module.
+* @module model/UserVm
 * @version v1
 */
-export default class WorkloadItem {
+export default class UserVm {
     /**
-    * Constructs a new <code>WorkloadItem</code>.
-    * @alias module:model/WorkloadItem
+    * Constructs a new <code>UserVm</code>.
+    * @alias module:model/UserVm
     * @class
     */
 
@@ -32,25 +32,19 @@ export default class WorkloadItem {
     }
 
     /**
-    * Constructs a <code>WorkloadItem</code> from a plain JavaScript object, optionally creating a new instance.
+    * Constructs a <code>UserVm</code> from a plain JavaScript object, optionally creating a new instance.
     * Copies all relevant properties from <code>data</code> to <code>obj</code> if supplied or a new instance if not.
     * @param {Object} data The plain JavaScript object bearing properties of interest.
-    * @param {module:model/WorkloadItem} obj Optional instance to populate.
-    * @return {module:model/WorkloadItem} The populated <code>WorkloadItem</code> instance.
+    * @param {module:model/UserVm} obj Optional instance to populate.
+    * @return {module:model/UserVm} The populated <code>UserVm</code> instance.
     */
     static constructFromObject(data, obj) {
         if (data) {
-            obj = obj || new WorkloadItem();
+            obj = obj || new UserVm();
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
-            }
-            if (data.hasOwnProperty('email')) {
-                obj['email'] = ApiClient.convertToType(data['email'], 'String');
-            }
-            if (data.hasOwnProperty('count')) {
-                obj['count'] = ApiClient.convertToType(data['count'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('nickName')) {
                 obj['nickName'] = ApiClient.convertToType(data['nickName'], 'String');
@@ -60,17 +54,9 @@ export default class WorkloadItem {
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
-    /**
-    * @member {String} email
-    */
-    'email' = undefined;
-    /**
-    * @member {Number} count
-    */
-    'count' = undefined;
     /**
     * @member {String} nickName
     */

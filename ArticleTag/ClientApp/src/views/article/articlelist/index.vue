@@ -28,7 +28,7 @@
         label="文章状态"
         prop="status"
         column-key="status"
-        :filters="audtiStatusArray"
+        :filters="auditStatusArray"
         filter-placement="bottom-end"
         :filter-multiple="false"
         :filter-method="statusFilter"
@@ -133,7 +133,7 @@ export default {
     return {
       api: new ArticleApi(ApiClient.instance),
       auditStatusEnum: new TagArticleStatusEnum(),
-      audtiStatusArray: [
+      auditStatusArray: [
         { text: '未标记', value: '0' },
         { text: '标记中', value: '1' },
         { text: '已标记', value: '2' },

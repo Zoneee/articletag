@@ -12,7 +12,10 @@
  */
 
 import ApiClient from "../ApiClient";
+import BooleanResponse from '../model/BooleanResponse';
+import UserVm from '../model/UserVm';
 import WorkloadDtoResponse from '../model/WorkloadDtoResponse';
+import WorkloadVm from '../model/WorkloadVm';
 
 /**
 * UserCenter service.
@@ -33,6 +36,43 @@ export default class UserCenterApi {
     }
 
     /**
+     * Callback function to receive the result of the apiUserCenterUserInfoPut operation.
+     * @callback module:api/UserCenterApi~apiUserCenterUserInfoPutCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/BooleanResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/UserCenterApi~apiUserCenterUserInfoPutCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/BooleanResponse}
+     */
+    apiUserCenterUserInfoPut(opts, callback) {
+      opts = opts || {};
+      let postBody = opts['body'];
+
+      let pathParams = {
+      };
+      let queryParams = {
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = ['application/json', 'text/json', 'application/_*+json'];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = BooleanResponse;
+
+      return this.apiClient.callApi(
+        '/api/UserCenter/user/info', 'PUT',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
      * Callback function to receive the result of the apiUserCenterWorkloadPost operation.
      * @callback module:api/UserCenterApi~apiUserCenterWorkloadPostCallback
      * @param {String} error Error message, if any.
@@ -47,12 +87,11 @@ export default class UserCenterApi {
      */
     apiUserCenterWorkloadPost(opts, callback) {
       opts = opts || {};
-      let postBody = null;
+      let postBody = opts['body'];
 
       let pathParams = {
       };
       let queryParams = {
-        'date': opts['_date']
       };
       let headerParams = {
       };
@@ -60,7 +99,7 @@ export default class UserCenterApi {
       };
 
       let authNames = ['Bearer'];
-      let contentTypes = [];
+      let contentTypes = ['application/json', 'text/json', 'application/_*+json'];
       let accepts = ['text/plain', 'application/json', 'text/json'];
       let returnType = WorkloadDtoResponse;
 

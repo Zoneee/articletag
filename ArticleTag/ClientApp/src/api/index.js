@@ -31,9 +31,11 @@ import TaggerDtoResponse from './model/TaggerDtoResponse';
 import UserLoginResponse from './model/UserLoginResponse';
 import UserLoginResponseResponse from './model/UserLoginResponseResponse';
 import UserLoginVm from './model/UserLoginVm';
+import UserVm from './model/UserVm';
 import WorkloadDto from './model/WorkloadDto';
 import WorkloadDtoResponse from './model/WorkloadDtoResponse';
 import WorkloadItem from './model/WorkloadItem';
+import WorkloadVm from './model/WorkloadVm';
 import AccountApi from './api/AccountApi';
 import ArticleApi from './api/ArticleApi';
 import UserCenterApi from './api/UserCenterApi';
@@ -191,6 +193,12 @@ export {
     UserLoginVm,
 
     /**
+     * The UserVm model constructor.
+     * @property {module:model/UserVm}
+     */
+    UserVm,
+
+    /**
      * The WorkloadDto model constructor.
      * @property {module:model/WorkloadDto}
      */
@@ -207,6 +215,12 @@ export {
      * @property {module:model/WorkloadItem}
      */
     WorkloadItem,
+
+    /**
+     * The WorkloadVm model constructor.
+     * @property {module:model/WorkloadVm}
+     */
+    WorkloadVm,
 
     /**
     * The AccountApi service constructor.

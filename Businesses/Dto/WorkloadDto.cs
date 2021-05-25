@@ -13,5 +13,6 @@ namespace Businesses.Dto
         public long ID { get; set; }
         public string Email { get; set; }
         public long Count { get; set; }
+        public string NickName { get; set; }
     }
 }
