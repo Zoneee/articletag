@@ -38,7 +38,6 @@ import WorkloadItem from './model/WorkloadItem';
 import WorkloadVm from './model/WorkloadVm';
 import AccountApi from './api/AccountApi';
 import ArticleApi from './api/ArticleApi';
-import UserCenterApi from './api/UserCenterApi';
 
 /**
 * Object.<br>
@@ -232,11 +231,5 @@ export {
     * The ArticleApi service constructor.
     * @property {module:api/ArticleApi}
     */
-    ArticleApi,
-
-    /**
-    * The UserCenterApi service constructor.
-    * @property {module:api/UserCenterApi}
-    */
-    UserCenterApi
+    ArticleApi
 };

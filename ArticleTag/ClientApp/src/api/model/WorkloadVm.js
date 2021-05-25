@@ -12,7 +12,6 @@
  */
 
 import ApiClient from '../ApiClient';
-import TagArticleStatusEnum from './TagArticleStatusEnum';
 
 /**
 * The WorkloadVm model module.
@@ -50,9 +49,6 @@ export default class WorkloadVm {
             if (data.hasOwnProperty('endDate')) {
                 obj['endDate'] = ApiClient.convertToType(data['endDate'], 'Date');
             }
-            if (data.hasOwnProperty('articleStatus')) {
-                obj['articleStatus'] = TagArticleStatusEnum.constructFromObject(data['articleStatus']);
-            }
             if (data.hasOwnProperty('pageIndex')) {
                 obj['pageIndex'] = ApiClient.convertToType(data['pageIndex'], 'Number');
             }
@@ -71,10 +67,6 @@ export default class WorkloadVm {
     * @member {Date} endDate
     */
     'endDate' = undefined;
-    /**
-    * @member {module:model/TagArticleStatusEnum} articleStatus
-    */
-    'articleStatus' = undefined;
     /**
     * @member {Number} pageIndex
     */

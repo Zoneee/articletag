@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import { ApiClient, UserCenterApi } from '@/api'
+import { ApiClient, AccountApi, ArticleApi } from '@/api'
 import { Loading } from 'element-ui'
 import { Message } from 'element-ui';
 
@@ -84,7 +84,8 @@ export default {
         size: 100,
         total: 0
       },
-      api: new UserCenterApi(ApiClient.instance),
+      accountApi: new AccountApi(ApiClient.instance),
+      articleApi: new ArticleApi(ApiClient.instance),
       auditStatusArray: [
         { text: '全部', value: '-1' },
         { text: '未标记', value: '0' },
@@ -123,7 +124,7 @@ export default {
       var value = element.value
 
       var loadingInstance = Loading.service()
-      this.api.apiUserCenterUserInfoPut({
+      this.accountApi.apiAccountUserInfoPut({
         body: {
           id: id,
           nickName: value
@@ -170,7 +171,7 @@ export default {
       this.searchWorkload()
     },
     searchWorkload () {
-      this.api.apiUserCenterWorkloadPost({
+      this.articleApi.apiArticleWorkloadPost({
         body: {
           startDate: this.startDate,
           endDate: this.endDate,

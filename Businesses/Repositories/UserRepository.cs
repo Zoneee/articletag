@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Businesses.Dto;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Deepbio.ApplicationCore.ResearcherDbUser.Query;
 using Entity.Entities;
-using Entity.Enum;
 using FreeSql;
 
 namespace Businesses.Repositories
@@ -45,51 +43,6 @@ namespace Businesses.Repositories
             };
 
             return userVm;
-        }
-
-        public async Task<TaggerDto> GetTaggerByArticleTaggedRecordIdAsync(long recordId)
-        {
-            var recordReps = this.Orm.GetRepository<ArticleTaggedRecord>();
-
-            var tagger = await Select
-                .InnerJoin<ArticleTaggedRecord>((u, r) => u.ID == r.UserID)
-                .Where<ArticleTaggedRecord>(s => s.ID == recordId)
-                .ToOneAsync(s => new TaggerDto()
-                {
-                    ID = s.ID.ToString(),
-                    Email = s.Email,
-                    Name = s.NickName
-                });
-
-            return tagger;
-        }
-
-        public async Task<WorkloadDto> GetWorkloadAsync(
-            DateTime? startDate,
-            DateTime? endDate,
-            TagArticleStatusEnum? status,
-            int page, int size)
-        {
-            var workloads = await Orm.Select<User, ArticleTaggedRecord>()
-                       .InnerJoin((u, r) => u.ID == r.UserID)
-                       .WhereIf(status != null, (u, r) => r.Status == status)
-                       .WhereIf(startDate != null && endDate != null, (u, r) => r.LastChangeTime.Between(startDate.Value, endDate.Value))
-                       .GroupBy((u, r) => u.ID)
-                       .Page(page, size)
-                       .Count(out var total)
-                       .ToListAsync((u) => new WorkloadItem()
-                       {
-                           ID = u.Key,
-                           NickName = u.Max(u.Value.Item1.NickName),
-                           Email = u.Max(u.Value.Item1.Email),
-                           Count = SqlExt.DistinctCount(u.Value.Item2.ID)
-                       });
-
-            return new WorkloadDto()
-            {
-                Collection = workloads,
-                Total = total
-            };
         }
 
         public async Task<bool> UpdateUserInfoAsync(User user)

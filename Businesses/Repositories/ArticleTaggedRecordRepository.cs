@@ -395,5 +395,84 @@ namespace Businesses.Repositories
 
             return dto;
         }
+
+        public async Task<WorkloadDto> GetWorkloadAsync(
+            DateTime? startDate,
+            DateTime? endDate,
+            int page, int size)
+        {
+            var whereSql =
+                startDate != null && endDate != null
+                ? "WHERE LastChangeTime BETWEEN @startDate AND @endDate"
+                : string.Empty;
+
+            var workloads = await Orm.Ado.QueryAsync<WorkloadItem>($@"
+                SELECT
+	                a.id,
+	                a.email,
+	                a.nickname,
+	                tb.Untagged,
+	                tb.Tagging,
+	                tb.Tagged,
+	                tb.Unaudited,
+	                tb.Audited,
+	                tb.Unsanctioned,
+	                tb.Unavail,
+	                tb.PreProcessed
+                FROM
+	                [User] AS a
+	                INNER JOIN (
+	                SELECT
+		                tb.UserID,
+		                SUM ( [0] ) AS Untagged,
+		                SUM ( [1] ) AS Tagging,
+		                SUM ( [2] ) AS Tagged,
+		                SUM ( [3] ) AS Unaudited,
+		                SUM ( [4] ) AS Audited,
+		                SUM ( [5] ) AS Unsanctioned,
+		                SUM ( [6] ) AS Unavail,
+		                SUM ( [7] ) AS PreProcessed
+	                FROM
+	                    ( SELECT UserID, Status, ID, LastChangeTime FROM ArticleTaggedRecord {whereSql}) tb
+                    PIVOT (COUNT ( ID ) FOR Status IN ( [0], [1], [2], [3], [4], [5], [6], [7] )) AS tb
+                    GROUP BY
+	                tb.UserID
+	                ) tb ON a.id= tb.userid
+                	ORDER BY a.id
+                    OFFSET @skip ROW FETCH NEXT @size ROW ONLY
+                "
+             , new
+             {
+                 startDate,
+                 endDate,
+                 skip = (page - 1) * size,
+                 size
+             });
+
+            var total = await Select
+                  .WhereIf(startDate != null && endDate != null, r => r.LastChangeTime.Between(startDate.Value, endDate.Value))
+                  .CountAsync();
+
+            return new WorkloadDto()
+            {
+                Collection = workloads,
+                Total = total.ToString()
+            };
+        }
+
+        public async Task<TaggerDto> GetTaggerByArticleTaggedRecordIdAsync(long recordId)
+        {
+            var tagger = await Orm.Select<ArticleTaggedRecord, User>()
+                .InnerJoin<User>((r, u) => u.ID == r.UserID)
+                .Where((r, u) => r.ID == recordId)
+                .ToOneAsync((r, u) => new TaggerDto()
+                {
+                    ID = r.ID.ToString(),
+                    Email = u.Email,
+                    Name = u.NickName
+                });
+
+            return tagger;
+        }
     }
 }
