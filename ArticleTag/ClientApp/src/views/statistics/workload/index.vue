@@ -24,7 +24,7 @@
         </template>
       </el-table-column>
       <el-table-column label="操作">
-        <template slot="header">
+        <template slot="header" slot-scope="scope">
           <el-date-picker
             v-model="date"
             @change="dateChangeHandler"
