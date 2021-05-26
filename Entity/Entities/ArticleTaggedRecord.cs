@@ -13,25 +13,12 @@ namespace Entity.Entities
     /// <remarks>Tag 模块</remarks>
     public class ArticleTaggedRecord : EntityBase<long>, IAggregateRoot
     {
-        [Navigate(nameof(AuditRecord.TaggedRecordID))]
-        public virtual ICollection<AuditRecord> AuditRecords { get; set; }
-
         /// <summary>
         /// 标注员ID
         /// </summary>
-        //[Navigate(nameof(User.ID))]
         public long UserID { get; set; }
 
-        [Navigate(nameof(ArticleTaggedRecord.UserID))]
-        public virtual User Tagger { get; set; }
-
         public long AdminID { get; set; }
-
-        /// <summary>
-        /// Include
-        /// </summary>
-        [Navigate(nameof(ArticleTaggedRecord.AdminID))]
-        public virtual User Manager { get; set; }
 
         /// <summary>
         /// 已格式化的文章ID
@@ -62,6 +49,19 @@ namespace Entity.Entities
         public bool Review { get; set; }
 
         public int? AutoMarked { get; set; }
+
+        #region Include
+
+        [Navigate(nameof(UserID))]
+        public virtual User Tagger { get; set; }
+
+        [Navigate(nameof(UserID))]
+        public virtual User Manager { get; set; }
+
+        [Navigate(nameof(AuditRecord.TaggedRecordID))]
+        public virtual ICollection<AuditRecord> AuditRecords { get; set; }
+
+        #endregion Include
 
         public ArticleTaggedRecord SetID()
         {

@@ -26,6 +26,7 @@ import TagRoleEnum from './model/TagRoleEnum';
 import TaggedRecord from './model/TaggedRecord';
 import TaggedRecordDto from './model/TaggedRecordDto';
 import TaggedRecordDtoResponse from './model/TaggedRecordDtoResponse';
+import TaggedRecordPagerVm from './model/TaggedRecordPagerVm';
 import TaggerDto from './model/TaggerDto';
 import TaggerDtoResponse from './model/TaggerDtoResponse';
 import UserLoginResponse from './model/UserLoginResponse';
@@ -160,6 +161,12 @@ export {
      * @property {module:model/TaggedRecordDtoResponse}
      */
     TaggedRecordDtoResponse,
+
+    /**
+     * The TaggedRecordPagerVm model constructor.
+     * @property {module:model/TaggedRecordPagerVm}
+     */
+    TaggedRecordPagerVm,
 
     /**
      * The TaggerDto model constructor.

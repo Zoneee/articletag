@@ -1,5 +1,4 @@
 ﻿using System;
-using Entity.Enum;
 
 namespace ArticleTag.Models
 {
