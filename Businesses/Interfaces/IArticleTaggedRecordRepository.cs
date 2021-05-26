@@ -17,9 +17,7 @@ namespace Businesses.Interfaces
 
         Task<ArticleDto> GetArticleByTaggerIdAsync(long taggerId);
 
-        Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size, TagArticleStatusEnum? status, bool? review);
-
-        Task<TaggedRecordDto> GetArticlesByTaggerAsync(string taggerName, int page, int size, TagArticleStatusEnum? status, bool? review);
+        Task<TaggedRecordDto> GetArticlesByPagingAsync(long userid, int page, int size, TagArticleStatusEnum? status, bool? review, string taggerNickName);
 
         Task<ArticleDto> GetCanAuditArticleAsync(long taggerId);
 

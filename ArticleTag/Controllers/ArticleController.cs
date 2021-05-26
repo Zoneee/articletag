@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ArticleTag.Models;
 using Businesses.Dto;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
 using Businesses.ViewModels.Requsets;
-using Entity.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -150,31 +150,6 @@ namespace ArticleTag.Controllers
             }
         }
 
-        [HttpPost("PagingAritcle")]
-        [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> PagingSearchTaggedRecord(
-            int page, int size,
-            TagArticleStatusEnum? status = null,
-            bool? review = null)
-        {
-            var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
-            try
-            {
-                var articles = await _articleRecordRepo
-                    .GetArticlesByPagingAsync(CurrentUserId, page, size, status, review);
-                response.Result = articles;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.ErrorMsg = ex.Message;
-                response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("分页查看标记记录异常！", ex);
-                return Ok(response);
-            }
-        }
-
         [HttpPost("SearchArticle")]
         [SwaggerResponse(200, "查看文章", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
         public async Task<IActionResult> SearchArticle(long articleId)
@@ -236,30 +211,6 @@ namespace ArticleTag.Controllers
             }
         }
 
-        [HttpPost("SearchArticleByTagger")]
-        [SwaggerResponse(200, "根据标记员名称查询文献", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> SearchArticleByTagger(
-            string tagger, int page, int size,
-            TagArticleStatusEnum? status = null,
-            bool? review = null)
-        {
-            var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
-            try
-            {
-                response.Result = await _articleRecordRepo.GetArticlesByTaggerAsync(
-                    tagger, page, size, status, review);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.ErrorMsg = ex.Message;
-                response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("根据标记员名称查询文献异常！", ex);
-                return Ok(response);
-            }
-        }
-
         [HttpPost("GetTaggersCanAuditArticle")]
         [SwaggerResponse(200, "根据标记员获取可审核的文献", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
         public async Task<IActionResult> GetTaggersCanAuditArticle(long taggerId)
@@ -276,6 +227,29 @@ namespace ArticleTag.Controllers
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
                 _logger.LogError("根据标记员获取可审核的文献异常！", ex);
+                return Ok(response);
+            }
+        }
+
+        [HttpPost("PagingAritcle")]
+        [SwaggerResponse(200, "分页查看标记记录", typeof(JsonResponseBase<TaggedRecordDto, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> PagingSearchTaggedRecord(TaggedRecordPagerVm vm)
+        {
+            var response = JsonResponseBase<TaggedRecordDto>.CreateDefault();
+            try
+            {
+                var articles = await _articleRecordRepo
+                    .GetArticlesByPagingAsync(CurrentUserId, vm.Page, vm.Size,
+                    vm.Status, vm.Review, vm.TaggerNickName);
+                response.Result = articles;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Error;
+                _logger.LogError("分页查看标记记录异常！", ex);
                 return Ok(response);
             }
         }

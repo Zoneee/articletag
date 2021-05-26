@@ -45,11 +45,13 @@ namespace Businesses.Repositories
         }
 
         public async Task<TaggedRecordDto> GetArticlesByPagingAsync(
-            long userid, int page, int size,
+            long userid,
+            int page, int size,
             TagArticleStatusEnum? status,
-            bool? review)
+            bool? review,
+            string taggerNickName)
         {
-            var user = await this.Orm.GetRepository<User>()
+            var user = await Orm.GetRepository<User>()
                 .Select
                 .Where(s => s.ID == userid)
                 .ToOneAsync();
@@ -58,6 +60,7 @@ namespace Businesses.Repositories
              .WhereIf(user.Role != TagRoleEnum.Auditor, s => s.UserID == userid)
              .WhereIf(status != null, s => s.Status == status)
              .WhereIf(review != null, s => s.Review == review)
+             .WhereIf(!string.IsNullOrWhiteSpace(taggerNickName), s => s.Tagger.NickName.Contains(taggerNickName))
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
@@ -85,60 +88,6 @@ namespace Businesses.Repositories
                  AuditRecords = s.AuditRecords,
                  Review = s.Review
              });
-
-            return new TaggedRecordDto()
-            {
-                Records = records,
-                Total = total
-            };
-        }
-
-        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(
-            string taggerName, int page, int size,
-            TagArticleStatusEnum? status,
-            bool? review)
-        {
-            var tagger = await this.Orm.GetRepository<User>()
-               .Select
-               .Where(s => s.NickName.Contains(taggerName))
-               .ToOneAsync();
-
-            if (tagger == null)
-            {
-                return new TaggedRecordDto();
-            }
-
-            var records = await Select
-                 .Where(s => s.UserID == tagger.ID)
-                 .WhereIf(status != null, s => s.Status == status)
-                 .WhereIf(review != null, s => s.Review == review)
-                 .Page(page, size)
-                 .Include(s => s.Tagger)
-                 .Include(s => s.Manager)
-                 .IncludeMany(s => s.AuditRecords)
-                 .Count(out var total)
-                 .OrderBy(s => s.ID)
-                 .ToListAsync(s => new TaggedRecord()
-                 {
-                     ID = s.ID.ToString(),
-                     CleanedArticleID = s.CleanedArticleID.ToString(),
-                     TaskID = s.TaskID.ToString(),
-                     Status = s.Status,
-                     LastChangeTime = s.LastChangeTime,
-                     Auditor = new Auditor()
-                     {
-                         ID = s.Manager.ID.ToString(),
-                         Name = s.Manager.NickName
-                     },
-                     Tagger = new TaggerDto()
-                     {
-                         ID = s.Tagger.ID.ToString(),
-                         Name = s.Tagger.NickName,
-                         Email = s.Tagger.Email
-                     },
-                     AuditRecords = s.AuditRecords,
-                     Review = s.Review
-                 });
 
             return new TaggedRecordDto()
             {
