@@ -16,8 +16,11 @@ import ArticleDtoResponse from '../model/ArticleDtoResponse';
 import ArticleRecordRequest from '../model/ArticleRecordRequest';
 import AuditArticleRequest from '../model/AuditArticleRequest';
 import BooleanResponse from '../model/BooleanResponse';
-import TagArticleStatusEnum from '../model/TagArticleStatusEnum';
 import TaggedRecordDtoResponse from '../model/TaggedRecordDtoResponse';
+import TaggedRecordPagerVm from '../model/TaggedRecordPagerVm';
+import TaggerDtoResponse from '../model/TaggerDtoResponse';
+import WorkloadDtoResponse from '../model/WorkloadDtoResponse';
+import WorkloadVm from '../model/WorkloadVm';
 
 /**
 * Article service.
@@ -189,6 +192,44 @@ export default class ArticleApi {
       );
     }
     /**
+     * Callback function to receive the result of the apiArticleGetTaggerInfoByArticleTaggedRecordIdPost operation.
+     * @callback module:api/ArticleApi~apiArticleGetTaggerInfoByArticleTaggedRecordIdPostCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/TaggerDtoResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/ArticleApi~apiArticleGetTaggerInfoByArticleTaggedRecordIdPostCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/TaggerDtoResponse}
+     */
+    apiArticleGetTaggerInfoByArticleTaggedRecordIdPost(opts, callback) {
+      opts = opts || {};
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+        'recordId': opts['recordId']
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = [];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = TaggerDtoResponse;
+
+      return this.apiClient.callApi(
+        '/api/Article/GetTaggerInfoByArticleTaggedRecordId', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
      * Callback function to receive the result of the apiArticleGetTaggersCanAuditArticlePost operation.
      * @callback module:api/ArticleApi~apiArticleGetTaggersCanAuditArticlePostCallback
      * @param {String} error Error message, if any.
@@ -241,15 +282,11 @@ export default class ArticleApi {
      */
     apiArticlePagingAritclePost(opts, callback) {
       opts = opts || {};
-      let postBody = null;
+      let postBody = opts['body'];
 
       let pathParams = {
       };
       let queryParams = {
-        'page': opts['page'],
-        'size': opts['size'],
-        'status': opts['status'],
-        'review': opts['review']
       };
       let headerParams = {
       };
@@ -257,7 +294,7 @@ export default class ArticleApi {
       };
 
       let authNames = ['Bearer'];
-      let contentTypes = [];
+      let contentTypes = ['application/json', 'text/json', 'application/_*+json'];
       let accepts = ['text/plain', 'application/json', 'text/json'];
       let returnType = TaggedRecordDtoResponse;
 
@@ -300,48 +337,6 @@ export default class ArticleApi {
 
       return this.apiClient.callApi(
         '/api/Article/SaveTaggedRecord', 'POST',
-        pathParams, queryParams, headerParams, formParams, postBody,
-        authNames, contentTypes, accepts, returnType, callback
-      );
-    }
-    /**
-     * Callback function to receive the result of the apiArticleSearchArticleByTaggerPost operation.
-     * @callback module:api/ArticleApi~apiArticleSearchArticleByTaggerPostCallback
-     * @param {String} error Error message, if any.
-     * @param {module:model/TaggedRecordDtoResponse} data The data returned by the service call.
-     * @param {String} response The complete HTTP response.
-     */
-
-    /**
-     * @param {Object} opts Optional parameters
-     * @param {module:api/ArticleApi~apiArticleSearchArticleByTaggerPostCallback} callback The callback function, accepting three arguments: error, data, response
-     * data is of type: {@link module:model/TaggedRecordDtoResponse}
-     */
-    apiArticleSearchArticleByTaggerPost(opts, callback) {
-      opts = opts || {};
-      let postBody = null;
-
-      let pathParams = {
-      };
-      let queryParams = {
-        'tagger': opts['tagger'],
-        'page': opts['page'],
-        'size': opts['size'],
-        'status': opts['status'],
-        'review': opts['review']
-      };
-      let headerParams = {
-      };
-      let formParams = {
-      };
-
-      let authNames = ['Bearer'];
-      let contentTypes = [];
-      let accepts = ['text/plain', 'application/json', 'text/json'];
-      let returnType = TaggedRecordDtoResponse;
-
-      return this.apiClient.callApi(
-        '/api/Article/SearchArticleByTagger', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,
         authNames, contentTypes, accepts, returnType, callback
       );
@@ -495,6 +490,43 @@ export default class ArticleApi {
 
       return this.apiClient.callApi(
         '/api/Article/SubmitAudit', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
+     * Callback function to receive the result of the apiArticleWorkloadPost operation.
+     * @callback module:api/ArticleApi~apiArticleWorkloadPostCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/WorkloadDtoResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/ArticleApi~apiArticleWorkloadPostCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/WorkloadDtoResponse}
+     */
+    apiArticleWorkloadPost(opts, callback) {
+      opts = opts || {};
+      let postBody = opts['body'];
+
+      let pathParams = {
+      };
+      let queryParams = {
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = ['application/json', 'text/json', 'application/_*+json'];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = WorkloadDtoResponse;
+
+      return this.apiClient.callApi(
+        '/api/Article/workload', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,
         authNames, contentTypes, accepts, returnType, callback
       );

@@ -1,5 +1,19 @@
 <template>
   <div class="container">
+    <div class="tools">
+      <el-date-picker
+        v-model="date"
+        @change="dateChangeHandler"
+        value-format="yyyy-MM-dd"
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+      >
+      </el-date-picker>
+    </div>
     <el-table
       :data="formattedData"
       style="width: 100%"
@@ -9,49 +23,31 @@
     >
       <el-table-column prop="id" label="人员ID"> </el-table-column>
       <el-table-column prop="email" label="标记员帐号"> </el-table-column>
-      <el-table-column prop="count" label="标记数量" sortable>
-      </el-table-column>
-      <el-table-column prop="nickName" label="人员名称" sortable>
+      <el-table-column prop="nickName" label="人员名称">
         <template slot-scope="scope">
           <input
             type="text"
             class="el-input__inner"
-            placeholder="请输入内容1"
+            placeholder="请输入内容"
             :c-id="scope.row.id"
             :value="scope.row.nickName"
             @change="changeNickNameHandler"
           />
         </template>
       </el-table-column>
-      <el-table-column label="操作">
-        <template slot="header" slot-scope="scope">
-          <el-date-picker
-            v-model="date"
-            @change="dateChangeHandler"
-            value-format="yyyy-MM-dd"
-            type="daterange"
-            align="right"
-            unlink-panels
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-          >
-          </el-date-picker>
-          <el-select
-            v-model="auditstatusIndex"
-            placeholder="全部"
-            @change="changeStatusHandler"
-          >
-            <el-option
-              v-for="item in auditStatusArray"
-              :key="item.value"
-              :label="item.text"
-              :value="item.value"
-            >
-            </el-option>
-          </el-select>
-        </template>
-      </el-table-column>
+      <el-table-column prop="untagged" label="未标记"></el-table-column>
+      <el-table-column prop="tagging" label="标记中"></el-table-column>
+      <el-table-column prop="tagged" label="已标记"></el-table-column>
+      <el-table-column prop="unaudited" label="未审核"></el-table-column>
+      <el-table-column
+        prop="audited"
+        label="审核通过"
+        sortable
+      ></el-table-column>
+      <el-table-column prop="unsanctioned" label="审核不通过"></el-table-column>
+      <el-table-column prop="unavail" label="无效的"></el-table-column>
+      <el-table-column prop="preProcessed" label="预处理的"></el-table-column>
+      <el-table-column prop="count" label="总计"> </el-table-column>
     </el-table>
     <el-pagination
       id="pagination"
@@ -68,7 +64,7 @@
 </template>
 
 <script>
-import { ApiClient, UserCenterApi } from '@/api'
+import { ApiClient, AccountApi, ArticleApi } from '@/api'
 import { Loading } from 'element-ui'
 import { Message } from 'element-ui';
 
@@ -84,18 +80,8 @@ export default {
         size: 100,
         total: 0
       },
-      api: new UserCenterApi(ApiClient.instance),
-      auditStatusArray: [
-        { text: '全部', value: '-1' },
-        { text: '未标记', value: '0' },
-        { text: '标记中', value: '1' },
-        { text: '已标记', value: '2' },
-        { text: '未审核', value: '3' },
-        { text: '审核通过', value: '4' },
-        { text: '审核不通过', value: '5' },
-        { text: '无效的', value: '6' },
-      ],
-      auditstatusIndex: null
+      accountApi: new AccountApi(ApiClient.instance),
+      articleApi: new ArticleApi(ApiClient.instance)
     }
   },
   created () {
@@ -104,16 +90,6 @@ export default {
   computed: {
     formattedData () {
       return this.data
-    },
-    selectedStatus () {
-      var status = parseInt(this.auditstatusIndex)
-
-      if (status === null || isNaN(status) || status < 0) {
-        return null
-      }
-
-      var selected = this.auditStatusArray.find(s => parseInt(s.value) === status)
-      return parseInt(selected.value)
     }
   },
   methods: {
@@ -123,7 +99,7 @@ export default {
       var value = element.value
 
       var loadingInstance = Loading.service()
-      this.api.apiUserCenterUserInfoPut({
+      this.accountApi.apiAccountUserInfoPut({
         body: {
           id: id,
           nickName: value
@@ -155,9 +131,6 @@ export default {
         }
       })
     },
-    changeStatusHandler (params) {
-      this.searchWorkload()
-    },
     dateChangeHandler (params) {
       if (params) {
         this.startDate = params[0]
@@ -170,11 +143,10 @@ export default {
       this.searchWorkload()
     },
     searchWorkload () {
-      this.api.apiUserCenterWorkloadPost({
+      this.articleApi.apiArticleWorkloadPost({
         body: {
           startDate: this.startDate,
           endDate: this.endDate,
-          articleStatus: this.selectedStatus,
           pageIndex: this.pager.index,
           pageSize: this.pager.size
         }
@@ -219,6 +191,10 @@ export default {
     }
     .el-table {
       padding-bottom: 39px;
+    }
+
+    .tools {
+      margin: 1rem;
     }
   }
 </style>

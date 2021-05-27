@@ -26,6 +26,7 @@ import TagRoleEnum from './model/TagRoleEnum';
 import TaggedRecord from './model/TaggedRecord';
 import TaggedRecordDto from './model/TaggedRecordDto';
 import TaggedRecordDtoResponse from './model/TaggedRecordDtoResponse';
+import TaggedRecordPagerVm from './model/TaggedRecordPagerVm';
 import TaggerDto from './model/TaggerDto';
 import TaggerDtoResponse from './model/TaggerDtoResponse';
 import UserLoginResponse from './model/UserLoginResponse';
@@ -38,7 +39,6 @@ import WorkloadItem from './model/WorkloadItem';
 import WorkloadVm from './model/WorkloadVm';
 import AccountApi from './api/AccountApi';
 import ArticleApi from './api/ArticleApi';
-import UserCenterApi from './api/UserCenterApi';
 
 /**
 * Object.<br>
@@ -163,6 +163,12 @@ export {
     TaggedRecordDtoResponse,
 
     /**
+     * The TaggedRecordPagerVm model constructor.
+     * @property {module:model/TaggedRecordPagerVm}
+     */
+    TaggedRecordPagerVm,
+
+    /**
      * The TaggerDto model constructor.
      * @property {module:model/TaggerDto}
      */
@@ -232,11 +238,5 @@ export {
     * The ArticleApi service constructor.
     * @property {module:api/ArticleApi}
     */
-    ArticleApi,
-
-    /**
-    * The UserCenterApi service constructor.
-    * @property {module:api/UserCenterApi}
-    */
-    UserCenterApi
+    ArticleApi
 };

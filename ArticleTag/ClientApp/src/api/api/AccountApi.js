@@ -12,9 +12,10 @@
  */
 
 import ApiClient from "../ApiClient";
-import TaggerDtoResponse from '../model/TaggerDtoResponse';
+import BooleanResponse from '../model/BooleanResponse';
 import UserLoginResponseResponse from '../model/UserLoginResponseResponse';
 import UserLoginVm from '../model/UserLoginVm';
+import UserVm from '../model/UserVm';
 
 /**
 * Account service.
@@ -34,44 +35,6 @@ export default class AccountApi {
         this.apiClient = apiClient || ApiClient.instance;
     }
 
-    /**
-     * Callback function to receive the result of the apiAccountGetTaggerInfoByArticleTaggedRecordIdPost operation.
-     * @callback module:api/AccountApi~apiAccountGetTaggerInfoByArticleTaggedRecordIdPostCallback
-     * @param {String} error Error message, if any.
-     * @param {module:model/TaggerDtoResponse} data The data returned by the service call.
-     * @param {String} response The complete HTTP response.
-     */
-
-    /**
-     * @param {Object} opts Optional parameters
-     * @param {module:api/AccountApi~apiAccountGetTaggerInfoByArticleTaggedRecordIdPostCallback} callback The callback function, accepting three arguments: error, data, response
-     * data is of type: {@link module:model/TaggerDtoResponse}
-     */
-    apiAccountGetTaggerInfoByArticleTaggedRecordIdPost(opts, callback) {
-      opts = opts || {};
-      let postBody = null;
-
-      let pathParams = {
-      };
-      let queryParams = {
-        'recordId': opts['recordId']
-      };
-      let headerParams = {
-      };
-      let formParams = {
-      };
-
-      let authNames = ['Bearer'];
-      let contentTypes = [];
-      let accepts = ['text/plain', 'application/json', 'text/json'];
-      let returnType = TaggerDtoResponse;
-
-      return this.apiClient.callApi(
-        '/api/Account/GetTaggerInfoByArticleTaggedRecordId', 'POST',
-        pathParams, queryParams, headerParams, formParams, postBody,
-        authNames, contentTypes, accepts, returnType, callback
-      );
-    }
     /**
      * Callback function to receive the result of the apiAccountLoginPost operation.
      * @callback module:api/AccountApi~apiAccountLoginPostCallback
@@ -105,6 +68,43 @@ export default class AccountApi {
 
       return this.apiClient.callApi(
         '/api/Account/Login', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
+    }
+    /**
+     * Callback function to receive the result of the apiAccountUserInfoPut operation.
+     * @callback module:api/AccountApi~apiAccountUserInfoPutCallback
+     * @param {String} error Error message, if any.
+     * @param {module:model/BooleanResponse} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * @param {Object} opts Optional parameters
+     * @param {module:api/AccountApi~apiAccountUserInfoPutCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link module:model/BooleanResponse}
+     */
+    apiAccountUserInfoPut(opts, callback) {
+      opts = opts || {};
+      let postBody = opts['body'];
+
+      let pathParams = {
+      };
+      let queryParams = {
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = ['Bearer'];
+      let contentTypes = ['application/json', 'text/json', 'application/_*+json'];
+      let accepts = ['text/plain', 'application/json', 'text/json'];
+      let returnType = BooleanResponse;
+
+      return this.apiClient.callApi(
+        '/api/Account/user/info', 'PUT',
         pathParams, queryParams, headerParams, formParams, postBody,
         authNames, contentTypes, accepts, returnType, callback
       );

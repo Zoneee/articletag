@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ArticleTag.Helpers;
-using Businesses.Dto;
+using ArticleTag.Models;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
@@ -81,24 +81,30 @@ namespace ArticleTag.Controllers
             return Ok(response);
         }
 
-        [HttpPost("GetTaggerInfoByArticleTaggedRecordId")]
-        [SwaggerResponse(200, "根据文献标记记录获取标记员信息", typeof(JsonResponseBase<TaggerDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> GetTaggerInfoByArticleTaggedRecordId(long recordId)
+        [HttpPut("user/info")]
+        [SwaggerResponse(200, "更新用户信息", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> Update(UserVm user)
         {
-            var response = JsonResponseBase<TaggerDto>.CreateDefault();
+            var response = JsonResponseBase<bool, IDictionary<string, string[]>>.CreateDefault();
+
             try
             {
-                response.Result = await _repository.GetTaggerByArticleTaggedRecordIdAsync(recordId);
-                return Ok(response);
+                response.Result = await _repository.UpdateUserInfoAsync(new Entity.Entities.User()
+                {
+                    ID = long.Parse(user.ID),
+                    NickName = user.NickName
+                });
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.ErrorMsg = ex.Message;
-                response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("根据文献标记记录获取标记员信息异常！", ex);
-                return Ok(response);
+                response.Result = false;
+                response.HttpCode = 500;
+                response.ErrorMsg = "更新用户信息异常！";
+                _logger.LogError(ex, "更新用户信息异常！");
             }
+
+            return Ok(response);
         }
     }
 }
