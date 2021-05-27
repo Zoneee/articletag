@@ -44,23 +44,47 @@ export default class WorkloadItem {
                         
             
             if (data.hasOwnProperty('id')) {
-                obj['id'] = ApiClient.convertToType(data['id'], 'Number');
+                obj['id'] = ApiClient.convertToType(data['id'], 'String');
             }
             if (data.hasOwnProperty('email')) {
                 obj['email'] = ApiClient.convertToType(data['email'], 'String');
             }
-            if (data.hasOwnProperty('count')) {
-                obj['count'] = ApiClient.convertToType(data['count'], 'Number');
-            }
             if (data.hasOwnProperty('nickName')) {
                 obj['nickName'] = ApiClient.convertToType(data['nickName'], 'String');
+            }
+            if (data.hasOwnProperty('untagged')) {
+                obj['untagged'] = ApiClient.convertToType(data['untagged'], 'String');
+            }
+            if (data.hasOwnProperty('tagging')) {
+                obj['tagging'] = ApiClient.convertToType(data['tagging'], 'String');
+            }
+            if (data.hasOwnProperty('tagged')) {
+                obj['tagged'] = ApiClient.convertToType(data['tagged'], 'String');
+            }
+            if (data.hasOwnProperty('unaudited')) {
+                obj['unaudited'] = ApiClient.convertToType(data['unaudited'], 'String');
+            }
+            if (data.hasOwnProperty('audited')) {
+                obj['audited'] = ApiClient.convertToType(data['audited'], 'String');
+            }
+            if (data.hasOwnProperty('unsanctioned')) {
+                obj['unsanctioned'] = ApiClient.convertToType(data['unsanctioned'], 'String');
+            }
+            if (data.hasOwnProperty('unavail')) {
+                obj['unavail'] = ApiClient.convertToType(data['unavail'], 'String');
+            }
+            if (data.hasOwnProperty('preProcessed')) {
+                obj['preProcessed'] = ApiClient.convertToType(data['preProcessed'], 'String');
+            }
+            if (data.hasOwnProperty('count')) {
+                obj['count'] = ApiClient.convertToType(data['count'], 'String');
             }
         }
         return obj;
     }
 
     /**
-    * @member {Number} id
+    * @member {String} id
     */
     'id' = undefined;
     /**
@@ -68,13 +92,45 @@ export default class WorkloadItem {
     */
     'email' = undefined;
     /**
-    * @member {Number} count
-    */
-    'count' = undefined;
-    /**
     * @member {String} nickName
     */
     'nickName' = undefined;
+    /**
+    * @member {String} untagged
+    */
+    'untagged' = undefined;
+    /**
+    * @member {String} tagging
+    */
+    'tagging' = undefined;
+    /**
+    * @member {String} tagged
+    */
+    'tagged' = undefined;
+    /**
+    * @member {String} unaudited
+    */
+    'unaudited' = undefined;
+    /**
+    * @member {String} audited
+    */
+    'audited' = undefined;
+    /**
+    * @member {String} unsanctioned
+    */
+    'unsanctioned' = undefined;
+    /**
+    * @member {String} unavail
+    */
+    'unavail' = undefined;
+    /**
+    * @member {String} preProcessed
+    */
+    'preProcessed' = undefined;
+    /**
+    * @member {String} count
+    */
+    'count' = undefined;
 
 
 

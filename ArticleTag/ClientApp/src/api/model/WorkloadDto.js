@@ -48,7 +48,7 @@ export default class WorkloadDto {
                 obj['collection'] = ApiClient.convertToType(data['collection'], [WorkloadItem]);
             }
             if (data.hasOwnProperty('total')) {
-                obj['total'] = ApiClient.convertToType(data['total'], 'Number');
+                obj['total'] = ApiClient.convertToType(data['total'], 'String');
             }
         }
         return obj;
@@ -59,7 +59,7 @@ export default class WorkloadDto {
     */
     'collection' = undefined;
     /**
-    * @member {Number} total
+    * @member {String} total
     */
     'total' = undefined;
 

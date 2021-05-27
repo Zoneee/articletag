@@ -77,13 +77,12 @@
 <script>
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
-import { ApiClient, ArticleApi, AccountApi, TagArticleStatusEnum } from '@/api'
+import { ApiClient, ArticleApi, TagArticleStatusEnum } from '@/api'
 
 export default {
   data: function () {
     return {
       articleApi: new ArticleApi(ApiClient.instance),
-      accountApi: new AccountApi(ApiClient.instance),
       auditStatusEnum: new TagArticleStatusEnum(),
       remark: '',
       article: '',
@@ -336,7 +335,7 @@ export default {
       })
     },
     getTaggerInfo () {
-      this.accountApi.apiAccountGetTaggerInfoByArticleTaggedRecordIdPost({
+      this.articleApi.apiArticleGetTaggerInfoByArticleTaggedRecordIdPost({
         recordId: this.articleId
       }, (error, data, resp) => {
         if (error) {
