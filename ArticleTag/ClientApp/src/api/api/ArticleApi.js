@@ -17,10 +17,10 @@ import ArticleRecordRequest from '../model/ArticleRecordRequest';
 import AuditArticleRequest from '../model/AuditArticleRequest';
 import BooleanResponse from '../model/BooleanResponse';
 import TaggedRecordDtoResponse from '../model/TaggedRecordDtoResponse';
+import TaggedRecordPagerVm from '../model/TaggedRecordPagerVm';
 import TaggerDtoResponse from '../model/TaggerDtoResponse';
 import WorkloadDtoResponse from '../model/WorkloadDtoResponse';
 import WorkloadVm from '../model/WorkloadVm';
-import TaggedRecordPagerVm from '../model/TaggedRecordPagerVm';
 
 /**
 * Article service.

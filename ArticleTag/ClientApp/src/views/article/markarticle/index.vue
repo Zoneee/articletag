@@ -952,7 +952,6 @@ export default {
       // 通过
       this.checkStatus()
         .then(async () => {
-          debugger
           await this.submitAudited()
           this.getNextArticle()
         })
@@ -965,7 +964,6 @@ export default {
       // 不通过
       this.checkStatus()
         .then(async () => {
-          debugger
           await this.submitUnaudited()
           this.closeAuditMenus()
           this.getNextArticle()
