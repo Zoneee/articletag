@@ -416,7 +416,7 @@ namespace Businesses.Repositories
                 .Where((r, u) => r.ID == recordId)
                 .ToOneAsync((r, u) => new TaggerDto()
                 {
-                    ID = r.ID.ToString(),
+                    ID = u.ID.ToString(),
                     Email = u.Email,
                     Name = u.NickName
                 });

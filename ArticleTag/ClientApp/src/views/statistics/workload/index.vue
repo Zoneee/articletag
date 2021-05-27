@@ -23,47 +23,31 @@
     >
       <el-table-column prop="id" label="人员ID"> </el-table-column>
       <el-table-column prop="email" label="标记员帐号"> </el-table-column>
-      <el-table-column prop="nickName" label="人员名称" sortable>
+      <el-table-column prop="nickName" label="人员名称">
         <template slot-scope="scope">
           <input
             type="text"
             class="el-input__inner"
-            placeholder="请输入内容1"
+            placeholder="请输入内容"
             :c-id="scope.row.id"
             :value="scope.row.nickName"
             @change="changeNickNameHandler"
           />
         </template>
       </el-table-column>
-      <el-table-column
-        prop="untagged"
-        label="未标记"
-        sortable
-      ></el-table-column>
-      <el-table-column prop="tagging" label="标记中" sortable></el-table-column>
-      <el-table-column prop="tagged" label="已标记" sortable></el-table-column>
-      <el-table-column
-        prop="unaudited"
-        label="未审核"
-        sortable
-      ></el-table-column>
+      <el-table-column prop="untagged" label="未标记"></el-table-column>
+      <el-table-column prop="tagging" label="标记中"></el-table-column>
+      <el-table-column prop="tagged" label="已标记"></el-table-column>
+      <el-table-column prop="unaudited" label="未审核"></el-table-column>
       <el-table-column
         prop="audited"
         label="审核通过"
         sortable
       ></el-table-column>
-      <el-table-column
-        prop="unsanctioned"
-        label="审核不通过"
-        sortable
-      ></el-table-column>
-      <el-table-column prop="unavail" label="无效的" sortable></el-table-column>
-      <el-table-column
-        prop="preProcessed"
-        label="预处理的"
-        sortable
-      ></el-table-column>
-      <el-table-column prop="count" label="总计" sortable> </el-table-column>
+      <el-table-column prop="unsanctioned" label="审核不通过"></el-table-column>
+      <el-table-column prop="unavail" label="无效的"></el-table-column>
+      <el-table-column prop="preProcessed" label="预处理的"></el-table-column>
+      <el-table-column prop="count" label="总计"> </el-table-column>
     </el-table>
     <el-pagination
       id="pagination"
