@@ -322,16 +322,18 @@ namespace Businesses.Repositories
                       .ExecuteAffrowsAsync() > 0;
         }
 
-        public async Task<ArticleDto> GetCanAuditArticleAsync(long taggerId)
+        public async Task<ArticleDto> GetCanAuditArticleByTaggerIdAsync(long taggerId)
         {
             var article = await Select
                 .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Unavail)
                 .Where(s => s.UserID == taggerId)
+                .OrderBy(s => s.Status)
+                .Include(s => s.Tagger)
                 .ToOneAsync();
 
             if (article == null)
             {
-                throw new Exception("未查询到可审核的文章！");
+                throw new Exception($"未查询到{article.Tagger.Email}可审核的文章！");
             }
 
             var dto = new ArticleDto()

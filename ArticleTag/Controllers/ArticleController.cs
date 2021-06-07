@@ -212,13 +212,13 @@ namespace ArticleTag.Controllers
         }
 
         [HttpPost("GetTaggersCanAuditArticle")]
-        [SwaggerResponse(200, "根据标记员获取可审核的文献", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
+        [SwaggerResponse(200, "获取同一个标记员的下一篇待审核的文章", typeof(JsonResponseBase<ArticleDto, IDictionary<string, string[]>>))]
         public async Task<IActionResult> GetTaggersCanAuditArticle(long taggerId)
         {
             var response = JsonResponseBase<ArticleDto>.CreateDefault();
             try
             {
-                response.Result = await _repository.GetCanAuditArticleAsync(taggerId);
+                response.Result = await _repository.GetCanAuditArticleByTaggerIdAsync(taggerId);
                 return Ok(response);
             }
             catch (Exception ex)
