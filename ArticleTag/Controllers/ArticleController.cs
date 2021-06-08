@@ -46,7 +46,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("标记员获取文献异常！", ex);
+                _logger.LogError(ex, "标记员获取文献异常！");
                 return Ok(response);
             }
         }
@@ -66,7 +66,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("输出文献可编辑标识异常！", ex);
+                _logger.LogError(ex, "输出文献可编辑标识异常！");
                 return Ok(response);
             }
         }
@@ -86,7 +86,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("输出文献可审核标识异常！", ex);
+                _logger.LogError(ex, "输出文献可审核标识异常！");
                 return Ok(response);
             }
         }
@@ -106,7 +106,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("保存标记员标记记录异常！", ex);
+                _logger.LogError(ex, "保存标记员标记记录异常！");
                 return Ok(response);
             }
         }
@@ -126,7 +126,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("标记员提交审核异常！", ex);
+                _logger.LogError(ex, "标记员提交审核异常！");
                 return Ok(response);
             }
         }
@@ -146,7 +146,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Warn;
-                _logger.LogError($"{CurrentUserEmail} 当日可跳过次数耗尽。", ex);
+                _logger.LogWarning(ex, $"{CurrentUserEmail} 当日可跳过次数耗尽。");
                 return Ok(response);
             }
             catch (Exception ex)
@@ -154,7 +154,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("标记员提交无效文章异常！", ex);
+                _logger.LogError(ex, "标记员提交无效文章异常！");
                 return Ok(response);
             }
         }
@@ -175,7 +175,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("查看文章异常！", ex);
+                _logger.LogError(ex, "查看文章异常！");
                 return Ok(response);
             }
         }
@@ -195,7 +195,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("审核文章异常！", ex);
+                _logger.LogError(ex, "审核文章异常！");
                 return Ok(response);
             }
         }
@@ -215,7 +215,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("设置文章为综述文章异常！", ex);
+                _logger.LogError(ex, "设置文章为综述文章异常！");
                 return Ok(response);
             }
         }
@@ -235,7 +235,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Warn;
-                _logger.LogError($"当前用户没有待审核文献。", ex);
+                _logger.LogError(ex, $"当前用户没有待审核文献。");
                 return Ok(response);
             }
             catch (Exception ex)
@@ -243,7 +243,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("根据标记员获取可审核的文献异常！", ex);
+                _logger.LogError(ex, "根据标记员获取可审核的文献异常！");
                 return Ok(response);
             }
         }
@@ -266,7 +266,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("分页查看标记记录异常！", ex);
+                _logger.LogError(ex, "分页查看标记记录异常！");
                 return Ok(response);
             }
         }
@@ -285,7 +285,7 @@ namespace ArticleTag.Controllers
             {
                 response.Success = false;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError($"根据日期查询用户工作量异常！", ex);
+                _logger.LogError(ex, $"根据日期查询用户工作量异常！");
             }
             return Ok(response);
         }
@@ -305,7 +305,7 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorMsg = ex.Message;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("根据文献标记记录获取标记员信息异常！", ex);
+                _logger.LogError(ex, "根据文献标记记录获取标记员信息异常！");
                 return Ok(response);
             }
         }

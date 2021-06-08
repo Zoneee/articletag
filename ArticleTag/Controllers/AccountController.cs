@@ -80,13 +80,13 @@ namespace ArticleTag.Controllers
                 response.Success = false;
                 response.ErrorCode = HttpCodeEnum.Warn;
                 response.ErrorMsg = warn.Message;
-                _logger.LogWarning($"登录失败：{loginUser.LoginName}", warn);
+                _logger.LogWarning(warn, $"登录失败：{loginUser.LoginName}");
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError($"登录异常：{loginUser.LoginName}", ex);
+                _logger.LogError(ex, $"登录异常：{loginUser.LoginName}");
             }
 
             return Ok(response);
