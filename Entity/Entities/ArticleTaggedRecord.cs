@@ -55,7 +55,7 @@ namespace Entity.Entities
         [Navigate(nameof(UserID))]
         public virtual User Tagger { get; set; }
 
-        [Navigate(nameof(UserID))]
+        [Navigate(nameof(AdminID))]
         public virtual User Manager { get; set; }
 
         [Navigate(nameof(AuditRecord.TaggedRecordID))]
