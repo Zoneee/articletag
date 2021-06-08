@@ -906,7 +906,7 @@ export default {
           } else {
             this.$message({
               type: 'warning',
-              message: '跳过失败!'
+              message: '跳过失败!' + data.errorMsg
             })
           }
         })

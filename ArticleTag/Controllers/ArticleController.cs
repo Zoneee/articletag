@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArticleTag.Models;
 using Businesses.Dto;
+using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
 using Businesses.ViewModels.Requsets;
@@ -131,13 +132,21 @@ namespace ArticleTag.Controllers
         }
 
         [HttpPost("SetUnavailArticle")]
-        [SwaggerResponse(200, "标记员提交无效文章", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        [SwaggerResponse(200, "标记员跳过文章/标记员提交无效文章", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
         public async Task<IActionResult> SetUnavailArticle(long articleId)
         {
             var response = JsonResponseBase<bool>.CreateDefault();
             try
             {
                 response.Result = await _repository.SetUnavailArticleAsync(articleId);
+                return Ok(response);
+            }
+            catch (WarnException ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Warn;
+                _logger.LogError($"{CurrentUserEmail} 当日可跳过次数耗尽。", ex);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -219,6 +228,14 @@ namespace ArticleTag.Controllers
             try
             {
                 response.Result = await _repository.GetCanAuditArticleByTaggerIdAsync(taggerId);
+                return Ok(response);
+            }
+            catch (WarnException ex)
+            {
+                response.Success = false;
+                response.ErrorMsg = ex.Message;
+                response.ErrorCode = HttpCodeEnum.Warn;
+                _logger.LogError($"当前用户没有待审核文献。", ex);
                 return Ok(response);
             }
             catch (Exception ex)

@@ -10,9 +10,11 @@ using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
 using Businesses.ViewModels.Requsets;
-using Deepbio.ApplicationCore.ResearcherDbUser.Query;
+using Businesses.ViewModels.Responses;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -27,14 +29,20 @@ namespace ArticleTag.Controllers
     {
         private readonly IUserRepository _repository;
         private readonly ILogger<AccountController> _logger;
+        private readonly IDistributedCache _cache;
+        private readonly IServiceProvider _service;
         private readonly AppSettings _appSettings;
 
         public AccountController(IUserRepository repository
             , IOptions<AppSettings> appSettings
-            , ILogger<AccountController> logger)
+            , ILogger<AccountController> logger
+            , IDistributedCache cache
+            , IServiceProvider service)
         {
             _repository = repository;
             _logger = logger;
+            _cache = cache;
+            _service = service;
             _appSettings = appSettings.Value;
         }
 
@@ -53,16 +61,19 @@ namespace ArticleTag.Controllers
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                         new Claim(ClaimTypes.Name, user.UserName),
                         new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
-                    }),
+                        //new Claim(GlobalHelper.ClaimsTypeUserCanSkipTimes,user.CanSkipTimesPerDay.ToString()),
+                        new Claim(GlobalHelper.ClaimsTypeUserVersion,user.Version.ToString()),
+                    }, JwtBearerDefaults.AuthenticationScheme),
                     Expires = DateTime.UtcNow.AddDays(7),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 user.Token = tokenHandler.WriteToken(token);
                 response.Result = user;
+                await _cache.SetStringAsync(string.Format(GlobalHelper.UserCacheKeyFormatter, user.UserId, user.Version), user.Token);
             }
             catch (WarnException warn)
             {
@@ -105,6 +116,15 @@ namespace ArticleTag.Controllers
             }
 
             return Ok(response);
+        }
+
+        [HttpDelete("Logout")]
+        [SwaggerResponse(200, "登出", typeof(bool))]
+        public async Task<IActionResult> Logout()
+        {
+            await _cache.RemoveAsync(string.Format(GlobalHelper.UserCacheKeyFormatter, CurrentUserId, CurrentUserVersion));
+            return Ok(true);
+            // TODO：添加filter检查token和cache的数据是否一致，如果不一致，则引导用户进行登录
         }
     }
 }

@@ -77,13 +77,14 @@
 <script>
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css' // optional for styling
-import { ApiClient, ArticleApi, TagArticleStatusEnum } from '@/api'
+import { ApiClient, ArticleApi, TagArticleStatusEnum, HttpCodeEnum } from '@/api'
 
 export default {
   data: function () {
     return {
       articleApi: new ArticleApi(ApiClient.instance),
       auditStatusEnum: new TagArticleStatusEnum(),
+      httpCodeEnum: new HttpCodeEnum(),
       remark: '',
       article: '',
       articleId: '',
@@ -329,7 +330,7 @@ export default {
           alert(`获取下一篇`)
           this.$router.push(`/article/auditarticle/${result.id}`)
         } else {
-          alert(`没有可审核文献`)
+          alert(data.errorMsg)
           this.$router.push(`/article/articlelist`)
         }
       })

@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using ArticleTag.Extensions;
 using ArticleTag.Filters;
@@ -40,6 +41,15 @@ namespace ArticleTag
 #endif
                 });
             });
+
+            services.AddDistributedMemoryCache(options =>
+            {
+                options.ExpirationScanFrequency = TimeSpan.FromMinutes(30);
+            });
+            //services.AddMemoryCache(options =>
+            //{
+            //    options.ExpirationScanFrequency = TimeSpan.FromMinutes(30);
+            //});
             services.AddControllers(option =>
             {
                 option.Filters.Add(typeof(ApiExceptionFilterAttribute));
@@ -73,6 +83,9 @@ namespace ArticleTag
                     ValidateAudience = false
                 };
             });
+
+            // 注册单例定时任务
+            services.AddSingleton<IHostedService, SkipTimeResetTask>();
         }
 
         // ConfigureContainer is where you can register things directly

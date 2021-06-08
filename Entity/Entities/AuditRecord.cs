@@ -25,6 +25,5 @@ namespace Entity.Entities
         public string Remark { get; set; }
 
         public DateTime RecordTime { get; set; }
-
     }
 }

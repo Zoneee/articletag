@@ -31,5 +31,16 @@ namespace Entity.Entities
         public string Email { get; set; }
         public string Phone { get; set; }
         public DateTime LastLoginTime { get; set; }
+
+        /// <summary>
+        /// 每日可跳过次数
+        /// </summary>
+        public int CanSkipTimesPerDay { get; set; }
+
+        /// <summary>
+        /// 用户信息版本
+        /// （用来使JWT过期）
+        /// </summary>
+        public int Version { get; set; }
     }
 }

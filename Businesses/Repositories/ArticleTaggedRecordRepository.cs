@@ -261,11 +261,44 @@ namespace Businesses.Repositories
         /// </summary>
         public async Task<bool> SetUnavailArticleAsync(long articleId)
         {
-            return await this.Where(s => s.ID == articleId)
-              .ToUpdate()
-              .Set(s => s.Status, TagArticleStatusEnum.Unavail)
-              .Set(s => s.LastChangeTime, DateTime.Now)
-              .ExecuteAffrowsAsync() > 0;
+            var article = await this.Where(s => s.ID == articleId)
+                .Include(s => s.Tagger)
+                .ToOneAsync();
+            article.Status = TagArticleStatusEnum.Unavail;
+            article.LastChangeTime = DateTime.Now;
+
+            if (article.Tagger.CanSkipTimesPerDay <= 0)
+            {
+                throw new WarnException($"今日可跳过文章次数限额为：{article.Tagger.CanSkipTimesPerDay}");
+            }
+
+            using (var uow = Orm.CreateUnitOfWork())
+            {
+                try
+                {
+                    this.UnitOfWork = uow;
+                    var userRepos = Orm.GetRepository<User>();
+                    userRepos.UnitOfWork = uow;
+
+                    var skipFlag = await this.UpdateAsync(article) > 0;
+
+                    if (skipFlag)
+                    {
+                        var subtractFlag = await userRepos
+                             .Where(s => s.ID == article.Tagger.ID)
+                             .ToUpdate()
+                             .Set(s => s.CanSkipTimesPerDay - 1)
+                             .ExecuteAffrowsAsync();
+                    }
+                    uow.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    uow.Rollback();
+                    throw ex;
+                }
+            }
         }
 
         /// <summary>
@@ -333,7 +366,7 @@ namespace Businesses.Repositories
 
             if (article == null)
             {
-                throw new Exception($"未查询到{article.Tagger.Email}可审核的文章！");
+                throw new WarnException($"未查询到{article.Tagger.Email}可审核的文章！");
             }
 
             var dto = new ArticleDto()
