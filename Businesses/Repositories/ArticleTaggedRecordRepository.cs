@@ -29,16 +29,28 @@ namespace Businesses.Repositories
 
         public async Task<ArticleDto> GetArticleAsync(long id)
         {
-            var article = await this.Select
-                   .Where(s => s.ID == id)
-                   .ToOneAsync();
+            var record = await Orm.Select<ArticleTaggedRecord, AuditRecord>()
+                     .Where((article, audit) => article.ID == id)
+                     .LeftJoin((article, audit) => article.ID == audit.TaggedRecordID)
+                     .OrderByDescending((article, audit) => audit.RecordTime)
+                     .ToOneAsync((article, audit) => new
+                     {
+                         ID = article.ID,
+                         TaggedContent = article.TaggedContent,
+                         TaggedArray = article.TaggedArray,
+                         Review = article.Review,
+                         Status = article.Status,
+                         LastRemark = audit.Remark
+                     });
 
             var dto = new ArticleDto()
             {
-                ID = article.ID.ToString(),
-                Content = article.TaggedContent,
-                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? ""),
-                Review = article.Review
+                ID = record.ID.ToString(),
+                Content = record.TaggedContent,
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(record.TaggedArray ?? ""),
+                Review = record.Review,
+                Status = record.Status,
+                LastRemark = record.LastRemark
             };
 
             return dto;
@@ -117,51 +129,50 @@ namespace Businesses.Repositories
                 .ToOneAsync();
 
             /**
-             * 先推送未审核通过的
-             * 再推送未标记完成的
-             * 如果是 线下标记员 优先推送预处理的文章，如果是 线上标记员 优先推送未处理的文章
-             * 最后推送未分配的
+             * 先派发“未通过审核的”
+             * 在派发“标记中的”
+             * 最后根据用户类型选择派发“预处理的”或“未标记的”
              */
 
-            // 未通过审核的
-            var unsanctioned = await Select
-                .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Unsanctioned)
-                .AnyAsync();
-
-            if (unsanctioned)
+            var statusOrder = new TagArticleStatusEnum[]
             {
-                var unsanction = await Select
-                    .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Unsanctioned)
-                    .ToOneAsync();
+                TagArticleStatusEnum.Unsanctioned, // 未通过审核的
+                TagArticleStatusEnum.Tagging, // 标记中的
+            };
 
-                var dto = new ArticleDto()
-                {
-                    ID = unsanction.ID.ToString(),
-                    Content = unsanction.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? ""),
-                    Review = unsanction.Review
-                };
-                return dto;
-            }
-
-            // 标记中的
-            var tagging = await Select
-                .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Tagging)
-                .AnyAsync();
-            if (tagging)
+            foreach (var status in statusOrder)
             {
-                var taggingArticle = await Select
-                .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Tagging)
-                .ToOneAsync();
-
-                var dto = new ArticleDto()
+                var flag = await Select
+                    .Where(s => s.UserID == taggerId && s.Status == status)
+                    .AnyAsync();
+                if (flag)
                 {
-                    ID = taggingArticle.ID.ToString(),
-                    Content = taggingArticle.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? ""),
-                    Review = taggingArticle.Review
-                };
-                return dto;
+                    var record = await Orm.Select<ArticleTaggedRecord, AuditRecord>()
+                         .Where((article, audit) => article.UserID == taggerId)
+                         .Where((article, audit) => article.Status == status)
+                         .LeftJoin((article, audit) => article.ID == audit.TaggedRecordID)
+                         .OrderByDescending((article, audit) => audit.RecordTime)
+                         .ToOneAsync((article, audit) => new
+                         {
+                             ID = article.ID,
+                             TaggedContent = article.TaggedContent,
+                             TaggedArray = article.TaggedArray,
+                             Review = article.Review,
+                             Status = article.Status,
+                             LastRemark = audit.Remark
+                         });
+
+                    var dto = new ArticleDto()
+                    {
+                        ID = record.ID.ToString(),
+                        Content = record.TaggedContent,
+                        Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(record.TaggedArray ?? ""),
+                        Review = record.Review,
+                        Status = record.Status,
+                        LastRemark = record.LastRemark
+                    };
+                    return dto;
+                }
             }
 
             // 未标记的
@@ -179,7 +190,6 @@ namespace Businesses.Repositories
                     }
                     break;
 
-                case TagRoleEnum.Auditor:
                 case TagRoleEnum.OnlineTagger:
                     {
                         untagged = await Select
@@ -204,7 +214,8 @@ namespace Businesses.Repositories
                     ID = untagged.ID.ToString(),
                     Content = untagged.TaggedContent,
                     Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? ""),
-                    Review = untagged.Review
+                    Review = untagged.Review,
+                    Status = untagged.Status
                 };
             }
 

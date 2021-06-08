@@ -77,7 +77,7 @@ export default {
     // TODO: refactor with render function
     this.onlyOneChild = null
     return {
-      roles: new TagRoleEnum(),
+      roles: TagRoleEnum,
       userInfo: {}
     }
   },

@@ -88,7 +88,7 @@ export default {
     }
     return {
       api: new AccountApi(ApiClient.instance),
-      httpCode: new HttpCodeEnum(),
+      httpCode: HttpCodeEnum ,
       loginForm: {
         username: '',
         password: ''

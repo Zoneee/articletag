@@ -83,8 +83,8 @@ export default {
   data: function () {
     return {
       articleApi: new ArticleApi(ApiClient.instance),
-      auditStatusEnum: new TagArticleStatusEnum(),
-      httpCodeEnum: new HttpCodeEnum(),
+      auditStatusEnum: TagArticleStatusEnum,
+      httpCodeEnum: HttpCodeEnum,
       remark: '',
       article: '',
       articleId: '',
