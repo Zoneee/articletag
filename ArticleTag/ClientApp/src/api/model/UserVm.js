@@ -15,33 +15,33 @@
 import {ApiClient} from '../ApiClient';
 
 /**
- * The Auditor model module.
- * @module model/Auditor
+ * The UserVm model module.
+ * @module model/UserVm
  * @version v1
  */
-export class Auditor {
+export class UserVm {
   /**
-   * Constructs a new <code>Auditor</code>.
-   * @alias module:model/Auditor
+   * Constructs a new <code>UserVm</code>.
+   * @alias module:model/UserVm
    * @class
    */
   constructor() {
   }
 
   /**
-   * Constructs a <code>Auditor</code> from a plain JavaScript object, optionally creating a new instance.
+   * Constructs a <code>UserVm</code> from a plain JavaScript object, optionally creating a new instance.
    * Copies all relevant properties from <code>data</code> to <code>obj</code> if supplied or a new instance if not.
    * @param {Object} data The plain JavaScript object bearing properties of interest.
-   * @param {module:model/Auditor} obj Optional instance to populate.
-   * @return {module:model/Auditor} The populated <code>Auditor</code> instance.
+   * @param {module:model/UserVm} obj Optional instance to populate.
+   * @return {module:model/UserVm} The populated <code>UserVm</code> instance.
    */
   static constructFromObject(data, obj) {
     if (data) {
-      obj = obj || new Auditor();
+      obj = obj || new UserVm();
       if (data.hasOwnProperty('id'))
         obj.id = ApiClient.convertToType(data['id'], 'String');
-      if (data.hasOwnProperty('name'))
-        obj.name = ApiClient.convertToType(data['name'], 'String');
+      if (data.hasOwnProperty('nickName'))
+        obj.nickName = ApiClient.convertToType(data['nickName'], 'String');
     }
     return obj;
   }
@@ -50,10 +50,10 @@ export class Auditor {
 /**
  * @member {String} id
  */
-Auditor.prototype.id = undefined;
+UserVm.prototype.id = undefined;
 
 /**
- * @member {String} name
+ * @member {String} nickName
  */
-Auditor.prototype.name = undefined;
+UserVm.prototype.nickName = undefined;
 

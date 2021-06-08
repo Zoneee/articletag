@@ -14,31 +14,32 @@
  */
 import {ApiClient} from '../ApiClient';
 import {HttpCodeEnum} from './HttpCodeEnum';
+import {WorkloadDto} from './WorkloadDto';
 
 /**
- * The BooleanResponse model module.
- * @module model/BooleanResponse
+ * The WorkloadDtoResponse model module.
+ * @module model/WorkloadDtoResponse
  * @version v1
  */
-export class BooleanResponse {
+export class WorkloadDtoResponse {
   /**
-   * Constructs a new <code>BooleanResponse</code>.
-   * @alias module:model/BooleanResponse
+   * Constructs a new <code>WorkloadDtoResponse</code>.
+   * @alias module:model/WorkloadDtoResponse
    * @class
    */
   constructor() {
   }
 
   /**
-   * Constructs a <code>BooleanResponse</code> from a plain JavaScript object, optionally creating a new instance.
+   * Constructs a <code>WorkloadDtoResponse</code> from a plain JavaScript object, optionally creating a new instance.
    * Copies all relevant properties from <code>data</code> to <code>obj</code> if supplied or a new instance if not.
    * @param {Object} data The plain JavaScript object bearing properties of interest.
-   * @param {module:model/BooleanResponse} obj Optional instance to populate.
-   * @return {module:model/BooleanResponse} The populated <code>BooleanResponse</code> instance.
+   * @param {module:model/WorkloadDtoResponse} obj Optional instance to populate.
+   * @return {module:model/WorkloadDtoResponse} The populated <code>WorkloadDtoResponse</code> instance.
    */
   static constructFromObject(data, obj) {
     if (data) {
-      obj = obj || new BooleanResponse();
+      obj = obj || new WorkloadDtoResponse();
       if (data.hasOwnProperty('success'))
         obj.success = ApiClient.convertToType(data['success'], 'Boolean');
       if (data.hasOwnProperty('httpCode'))
@@ -48,7 +49,7 @@ export class BooleanResponse {
       if (data.hasOwnProperty('errorMsg'))
         obj.errorMsg = ApiClient.convertToType(data['errorMsg'], 'String');
       if (data.hasOwnProperty('result'))
-        obj.result = ApiClient.convertToType(data['result'], 'Boolean');
+        obj.result = WorkloadDto.constructFromObject(data['result']);
       if (data.hasOwnProperty('errorMsgModel'))
         obj.errorMsgModel = ApiClient.convertToType(data['errorMsgModel'], {'String': ['String']});
     }
@@ -59,30 +60,30 @@ export class BooleanResponse {
 /**
  * @member {Boolean} success
  */
-BooleanResponse.prototype.success = undefined;
+WorkloadDtoResponse.prototype.success = undefined;
 
 /**
  * @member {Number} httpCode
  */
-BooleanResponse.prototype.httpCode = undefined;
+WorkloadDtoResponse.prototype.httpCode = undefined;
 
 /**
  * @member {module:model/HttpCodeEnum} errorCode
  */
-BooleanResponse.prototype.errorCode = undefined;
+WorkloadDtoResponse.prototype.errorCode = undefined;
 
 /**
  * @member {String} errorMsg
  */
-BooleanResponse.prototype.errorMsg = undefined;
+WorkloadDtoResponse.prototype.errorMsg = undefined;
 
 /**
- * @member {Boolean} result
+ * @member {module:model/WorkloadDto} result
  */
-BooleanResponse.prototype.result = undefined;
+WorkloadDtoResponse.prototype.result = undefined;
 
 /**
  * @member {Object.<String, Array.<String>>} errorMsgModel
  */
-BooleanResponse.prototype.errorMsgModel = undefined;
+WorkloadDtoResponse.prototype.errorMsgModel = undefined;
 

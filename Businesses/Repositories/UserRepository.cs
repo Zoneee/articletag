@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Businesses.Dto;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
-using Deepbio.ApplicationCore.ResearcherDbUser.Query;
+using Businesses.ViewModels.Responses;
 using Entity.Entities;
 using FreeSql;
 
@@ -40,27 +39,24 @@ namespace Businesses.Repositories
                 UserId = user.ID,
                 UserName = user.NickName,
                 Email = user.Email,
-                Role = user.Role
+                Role = user.Role,
+                CanSkipTimesPerDay = user.CanSkipTimesPerDay,
+                Version = user.Version,
             };
 
             return userVm;
         }
 
-        public async Task<TaggerDto> GetTaggerByArticleTaggedRecordIdAsync(long recordId)
+        public async Task<bool> UpdateUserInfoAsync(User user)
         {
-            var recordReps = this.Orm.GetRepository<ArticleTaggedRecord>();
+            var model = await Select.Where(s => s.ID == user.ID).ToOneAsync();
+            if (model == null)
+            {
+                return false;
+            }
 
-            var tagger = await Select
-                .InnerJoin<ArticleTaggedRecord>((u, r) => u.ID == r.UserID)
-                .Where<ArticleTaggedRecord>(s => s.ID == recordId)
-                .ToOneAsync(s => new TaggerDto()
-                {
-                    ID = s.ID.ToString(),
-                    Email = s.Email,
-                    Name = s.NickName
-                });
-
-            return tagger;
+            model.NickName = user.NickName;
+            return await UpdateAsync(model) > 0;
         }
     }
 }

@@ -29,27 +29,41 @@ namespace Businesses.Repositories
 
         public async Task<ArticleDto> GetArticleAsync(long id)
         {
-            var article = await this.Select
-                   .Where(s => s.ID == id)
-                   .ToOneAsync();
+            var record = await Orm.Select<ArticleTaggedRecord, AuditRecord>()
+                     .Where((article, audit) => article.ID == id)
+                     .LeftJoin((article, audit) => article.ID == audit.TaggedRecordID)
+                     .OrderByDescending((article, audit) => audit.RecordTime)
+                     .ToOneAsync((article, audit) => new
+                     {
+                         ID = article.ID,
+                         TaggedContent = article.TaggedContent,
+                         TaggedArray = article.TaggedArray,
+                         Review = article.Review,
+                         Status = article.Status,
+                         LastRemark = audit.Remark
+                     });
 
             var dto = new ArticleDto()
             {
-                ID = article.ID.ToString(),
-                Content = article.TaggedContent,
-                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(article.TaggedArray ?? ""),
-                Review = article.Review
+                ID = record.ID.ToString(),
+                Content = record.TaggedContent,
+                Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(record.TaggedArray ?? ""),
+                Review = record.Review,
+                Status = record.Status,
+                LastRemark = record.LastRemark
             };
 
             return dto;
         }
 
         public async Task<TaggedRecordDto> GetArticlesByPagingAsync(
-            long userid, int page, int size,
+            long userid,
+            int page, int size,
             TagArticleStatusEnum? status,
-            bool? review)
+            bool? review,
+            string taggerNickName)
         {
-            var user = await this.Orm.GetRepository<User>()
+            var user = await Orm.GetRepository<User>()
                 .Select
                 .Where(s => s.ID == userid)
                 .ToOneAsync();
@@ -58,6 +72,7 @@ namespace Businesses.Repositories
              .WhereIf(user.Role != TagRoleEnum.Auditor, s => s.UserID == userid)
              .WhereIf(status != null, s => s.Status == status)
              .WhereIf(review != null, s => s.Review == review)
+             .WhereIf(!string.IsNullOrWhiteSpace(taggerNickName), s => s.Tagger.NickName.Contains(taggerNickName))
              .Page(page, size)
              .Include(s => s.Tagger)
              .Include(s => s.Manager)
@@ -93,60 +108,6 @@ namespace Businesses.Repositories
             };
         }
 
-        public async Task<TaggedRecordDto> GetArticlesByTaggerAsync(
-            string taggerName, int page, int size,
-            TagArticleStatusEnum? status,
-            bool? review)
-        {
-            var tagger = await this.Orm.GetRepository<User>()
-               .Select
-               .Where(s => s.NickName.Contains(taggerName))
-               .ToOneAsync();
-
-            if (tagger == null)
-            {
-                return new TaggedRecordDto();
-            }
-
-            var records = await Select
-                 .Where(s => s.UserID == tagger.ID)
-                 .WhereIf(status != null, s => s.Status == status)
-                 .WhereIf(review != null, s => s.Review == review)
-                 .Page(page, size)
-                 .Include(s => s.Tagger)
-                 .Include(s => s.Manager)
-                 .IncludeMany(s => s.AuditRecords)
-                 .Count(out var total)
-                 .OrderBy(s => s.ID)
-                 .ToListAsync(s => new TaggedRecord()
-                 {
-                     ID = s.ID.ToString(),
-                     CleanedArticleID = s.CleanedArticleID.ToString(),
-                     TaskID = s.TaskID.ToString(),
-                     Status = s.Status,
-                     LastChangeTime = s.LastChangeTime,
-                     Auditor = new Auditor()
-                     {
-                         ID = s.Manager.ID.ToString(),
-                         Name = s.Manager.NickName
-                     },
-                     Tagger = new TaggerDto()
-                     {
-                         ID = s.Tagger.ID.ToString(),
-                         Name = s.Tagger.NickName,
-                         Email = s.Tagger.Email
-                     },
-                     AuditRecords = s.AuditRecords,
-                     Review = s.Review
-                 });
-
-            return new TaggedRecordDto()
-            {
-                Records = records,
-                Total = total
-            };
-        }
-
         /// <summary>
         /// 标记者获取文献
         /// </summary>
@@ -168,51 +129,50 @@ namespace Businesses.Repositories
                 .ToOneAsync();
 
             /**
-             * 先推送未审核通过的
-             * 再推送未标记完成的
-             * 如果是 线下标记员 优先推送预处理的文章，如果是 线上标记员 优先推送未处理的文章
-             * 最后推送未分配的
+             * 先派发“未通过审核的”
+             * 在派发“标记中的”
+             * 最后根据用户类型选择派发“预处理的”或“未标记的”
              */
 
-            // 未通过审核的
-            var unsanctioned = await Select
-                .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Unsanctioned)
-                .AnyAsync();
-
-            if (unsanctioned)
+            var statusOrder = new TagArticleStatusEnum[]
             {
-                var unsanction = await Select
-                    .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Unsanctioned)
-                    .ToOneAsync();
+                TagArticleStatusEnum.Unsanctioned, // 未通过审核的
+                TagArticleStatusEnum.Tagging, // 标记中的
+            };
 
-                var dto = new ArticleDto()
-                {
-                    ID = unsanction.ID.ToString(),
-                    Content = unsanction.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(unsanction.TaggedArray ?? ""),
-                    Review = unsanction.Review
-                };
-                return dto;
-            }
-
-            // 标记中的
-            var tagging = await Select
-                .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Tagging)
-                .AnyAsync();
-            if (tagging)
+            foreach (var status in statusOrder)
             {
-                var taggingArticle = await Select
-                .Where(s => s.UserID == taggerId && s.Status == TagArticleStatusEnum.Tagging)
-                .ToOneAsync();
-
-                var dto = new ArticleDto()
+                var flag = await Select
+                    .Where(s => s.UserID == taggerId && s.Status == status)
+                    .AnyAsync();
+                if (flag)
                 {
-                    ID = taggingArticle.ID.ToString(),
-                    Content = taggingArticle.TaggedContent,
-                    Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(taggingArticle.TaggedArray ?? ""),
-                    Review = taggingArticle.Review
-                };
-                return dto;
+                    var record = await Orm.Select<ArticleTaggedRecord, AuditRecord>()
+                         .Where((article, audit) => article.UserID == taggerId)
+                         .Where((article, audit) => article.Status == status)
+                         .LeftJoin((article, audit) => article.ID == audit.TaggedRecordID)
+                         .OrderByDescending((article, audit) => audit.RecordTime)
+                         .ToOneAsync((article, audit) => new
+                         {
+                             ID = article.ID,
+                             TaggedContent = article.TaggedContent,
+                             TaggedArray = article.TaggedArray,
+                             Review = article.Review,
+                             Status = article.Status,
+                             LastRemark = audit.Remark
+                         });
+
+                    var dto = new ArticleDto()
+                    {
+                        ID = record.ID.ToString(),
+                        Content = record.TaggedContent,
+                        Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(record.TaggedArray ?? ""),
+                        Review = record.Review,
+                        Status = record.Status,
+                        LastRemark = record.LastRemark
+                    };
+                    return dto;
+                }
             }
 
             // 未标记的
@@ -230,7 +190,6 @@ namespace Businesses.Repositories
                     }
                     break;
 
-                case TagRoleEnum.Auditor:
                 case TagRoleEnum.OnlineTagger:
                     {
                         untagged = await Select
@@ -255,7 +214,8 @@ namespace Businesses.Repositories
                     ID = untagged.ID.ToString(),
                     Content = untagged.TaggedContent,
                     Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(untagged.TaggedArray ?? ""),
-                    Review = untagged.Review
+                    Review = untagged.Review,
+                    Status = untagged.Status
                 };
             }
 
@@ -312,11 +272,44 @@ namespace Businesses.Repositories
         /// </summary>
         public async Task<bool> SetUnavailArticleAsync(long articleId)
         {
-            return await this.Where(s => s.ID == articleId)
-              .ToUpdate()
-              .Set(s => s.Status, TagArticleStatusEnum.Unavail)
-              .Set(s => s.LastChangeTime, DateTime.Now)
-              .ExecuteAffrowsAsync() > 0;
+            var article = await this.Where(s => s.ID == articleId)
+                .Include(s => s.Tagger)
+                .ToOneAsync();
+            article.Status = TagArticleStatusEnum.Unavail;
+            article.LastChangeTime = DateTime.Now;
+
+            if (article.Tagger.CanSkipTimesPerDay <= 0)
+            {
+                throw new WarnException($"今日可跳过文章次数限额为：{article.Tagger.CanSkipTimesPerDay}");
+            }
+
+            using (var uow = Orm.CreateUnitOfWork())
+            {
+                try
+                {
+                    this.UnitOfWork = uow;
+                    var userRepos = Orm.GetRepository<User>();
+                    userRepos.UnitOfWork = uow;
+
+                    var skipFlag = await this.UpdateAsync(article) > 0;
+
+                    if (skipFlag)
+                    {
+                        var subtractFlag = await userRepos
+                             .Where(s => s.ID == article.Tagger.ID)
+                             .ToUpdate()
+                             .Set(s => s.CanSkipTimesPerDay - 1)
+                             .ExecuteAffrowsAsync();
+                    }
+                    uow.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    uow.Rollback();
+                    throw ex;
+                }
+            }
         }
 
         /// <summary>
@@ -373,16 +366,18 @@ namespace Businesses.Repositories
                       .ExecuteAffrowsAsync() > 0;
         }
 
-        public async Task<ArticleDto> GetCanAuditArticleAsync(long taggerId)
+        public async Task<ArticleDto> GetCanAuditArticleByTaggerIdAsync(long taggerId)
         {
             var article = await Select
                 .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Unavail)
                 .Where(s => s.UserID == taggerId)
+                .OrderBy(s => s.Status)
+                .Include(s => s.Tagger)
                 .ToOneAsync();
 
             if (article == null)
             {
-                throw new Exception("未查询到可审核的文章！");
+                throw new WarnException($"未查询到{article.Tagger.Email}可审核的文章！");
             }
 
             var dto = new ArticleDto()
@@ -394,6 +389,85 @@ namespace Businesses.Repositories
             };
 
             return dto;
+        }
+
+        public async Task<WorkloadDto> GetWorkloadAsync(
+            DateTime? startDate,
+            DateTime? endDate,
+            int page, int size)
+        {
+            var whereSql =
+                startDate != null && endDate != null
+                ? "WHERE LastChangeTime BETWEEN @startDate AND @endDate"
+                : string.Empty;
+
+            var workloads = await Orm.Ado.QueryAsync<WorkloadItem>($@"
+                SELECT
+	                a.id,
+	                a.email,
+	                a.nickname,
+	                tb.Untagged,
+	                tb.Tagging,
+	                tb.Tagged,
+	                tb.Unaudited,
+	                tb.Audited,
+	                tb.Unsanctioned,
+	                tb.Unavail,
+	                tb.PreProcessed
+                FROM
+	                [User] AS a
+	                INNER JOIN (
+	                SELECT
+		                tb.UserID,
+		                SUM ( [0] ) AS Untagged,
+		                SUM ( [1] ) AS Tagging,
+		                SUM ( [2] ) AS Tagged,
+		                SUM ( [3] ) AS Unaudited,
+		                SUM ( [4] ) AS Audited,
+		                SUM ( [5] ) AS Unsanctioned,
+		                SUM ( [6] ) AS Unavail,
+		                SUM ( [7] ) AS PreProcessed
+	                FROM
+	                    ( SELECT UserID, Status, ID, LastChangeTime FROM ArticleTaggedRecord {whereSql}) tb
+                    PIVOT (COUNT ( ID ) FOR Status IN ( [0], [1], [2], [3], [4], [5], [6], [7] )) AS tb
+                    GROUP BY
+	                tb.UserID
+	                ) tb ON a.id= tb.userid
+                	ORDER BY a.id
+                    OFFSET @skip ROW FETCH NEXT @size ROW ONLY
+                "
+             , new
+             {
+                 startDate,
+                 endDate,
+                 skip = (page - 1) * size,
+                 size
+             });
+
+            var total = await Select
+                  .WhereIf(startDate != null && endDate != null, r => r.LastChangeTime.Between(startDate.Value, endDate.Value))
+                  .CountAsync();
+
+            return new WorkloadDto()
+            {
+                Collection = workloads,
+                Total = total.ToString()
+            };
+        }
+
+        public async Task<TaggerDto> GetTaggerByArticleTaggedRecordIdAsync(long recordId)
+        {
+            var tagger = await Orm.Select<ArticleTaggedRecord, User>()
+                .InnerJoin<User>((r, u) => u.ID == r.UserID)
+                .Where((r, u) => r.ID == recordId)
+                .ToOneAsync((r, u) => new TaggerDto()
+                {
+                    ID = u.ID.ToString(),
+                    Email = u.Email,
+                    Name = u.NickName
+                });
+
+            return tagger;
         }
     }
 }

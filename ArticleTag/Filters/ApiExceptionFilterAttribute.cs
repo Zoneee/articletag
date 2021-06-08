@@ -18,7 +18,6 @@ namespace ArticleTag.Filters
 
         public override async Task OnExceptionAsync(ExceptionContext context)
         {
-            _logger.LogError(context.Exception, context.Exception.Message);
             var response = JsonResponseBase<dynamic>.CreateDefault();
             response.Success = false;
 

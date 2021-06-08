@@ -19,7 +19,7 @@
           <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/" v-if="false">
             <el-dropdown-item>Github</el-dropdown-item>
           </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/" v-if="flase">
+          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/" v-if="false">
             <el-dropdown-item>Docs</el-dropdown-item>
           </a>
           <el-dropdown-item divided>

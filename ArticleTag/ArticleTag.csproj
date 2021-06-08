@@ -12,7 +12,7 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\ArticleTag.xml</DocumentationFile>
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<DefineConstants>RELESE</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -45,6 +45,11 @@
 		<None Update="ClientApp\dist\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Update="nlog.config">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
 		<!-- As part of publishing, ensure the JS resources are freshly built in production mode -->

@@ -28,7 +28,7 @@
         label="文章状态"
         prop="status"
         column-key="status"
-        :filters="audtiStatusArray"
+        :filters="auditStatusArray"
         filter-placement="bottom-end"
         :filter-multiple="false"
         :filter-method="statusFilter"
@@ -87,7 +87,7 @@
             v-model="taggerName"
             size="small"
             placeholder="输入标记者姓名搜索"
-            @change="searchTableData"
+            @change="taggerNickNameChangeHandler"
             v-if="role === roleEnum.Auditor"
           />
         </template>
@@ -132,8 +132,8 @@ export default {
   data () {
     return {
       api: new ArticleApi(ApiClient.instance),
-      auditStatusEnum: new TagArticleStatusEnum(),
-      audtiStatusArray: [
+      auditStatusEnum: TagArticleStatusEnum,
+      auditStatusArray: [
         { text: '未标记', value: '0' },
         { text: '标记中', value: '1' },
         { text: '已标记', value: '2' },
@@ -146,21 +146,24 @@ export default {
         { text: '是', value: true },
         { text: '否', value: false }
       ],
-      statusFilter: '',
-      reviewFilter: '',
-      taggerName: '',
+      statusFilter: null,
+      reviewFilter: null,
+      taggerName: null,
       pager: {
         index: 1,
         size: 100,
         total: 0
       },
       data: [],
-      roleEnum: new TagRoleEnum(),
+      roleEnum: TagRoleEnum,
       role: 0
     }
   },
   created () {
-    this.searchTableData()
+    this.searchByPaging({
+      status: this.statusFilter,
+      review: this.reviewFilter
+    })
     var userInfo = JSON.parse(window.localStorage.getItem('user_info') || '{}')
     this.role = userInfo.role
   },
@@ -224,30 +227,28 @@ export default {
       }
 
       // 后端筛选
-      this.searchTableData()
+      this.searchByPaging({
+        status: this.statusFilter,
+        review: this.reviewFilter
+      })
     },
-    searchTableData () {
-      if (this.taggerName) {
-        this.searchByTaggerName(this.taggerName, {
-          status: this.statusFilter,
-          review: this.reviewFilter
-        })
-      } else {
-        this.searchByPaging({
-          status: this.statusFilter,
-          review: this.reviewFilter
-        })
-      }
+    taggerNickNameChangeHandler () {
+      this.pager.index = 1
+      this.searchByPaging({
+        status: this.statusFilter,
+        review: this.reviewFilter
+      })
     },
     searchByPaging (filter) {
       // 分页查询
-      console.log('分页查询')
-
       this.api.apiArticlePagingAritclePost({
-        page: this.pager.index,
-        size: this.pager.size,
-        status: filter && filter.status,
-        review: filter && filter.review
+        body: {
+          page: this.pager.index,
+          size: this.pager.size,
+          status: parseInt(filter && filter.status),
+          review: filter && filter.review,
+          taggerNickName: this.taggerName,
+        }
       }, (error, data, resp) => {
         if (error) {
           alert(error)
@@ -260,35 +261,20 @@ export default {
         }
       })
     },
-    searchByTaggerName (value, filter) {
-      // 根据标记者名称查询
-      this.pager.index = 1
-      this.api.apiArticleSearchArticleByTaggerPost({
-        tagger: value,
-        page: this.pager.index,
-        size: this.pager.size,
-        status: filter && filter.status,
-        review: filter && filter.review
-      }, (error, data, resp) => {
-        if (error) {
-          alert(error)
-          return
-        }
-
-        if (data.success) {
-          this.data = data.result.records || []
-          this.pager.total = data.result.total || 0
-        }
-      })
-    },
     handleSizeChange (size) {
       this.pager.index = 1
       this.pager.size = size
-      this.searchTableData()
+      this.searchByPaging({
+        status: this.statusFilter,
+        review: this.reviewFilter
+      })
     },
     handleCurrentChange (index) {
       this.pager.index = index
-      this.searchTableData()
+      this.searchByPaging({
+        status: this.statusFilter,
+        review: this.reviewFilter
+      })
     },
     statusStyle (row) {
       switch (row.status) {

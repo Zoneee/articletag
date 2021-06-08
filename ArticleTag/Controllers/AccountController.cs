@@ -5,14 +5,16 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ArticleTag.Helpers;
-using Businesses.Dto;
+using ArticleTag.Models;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
 using Businesses.ViewModels;
 using Businesses.ViewModels.Requsets;
-using Deepbio.ApplicationCore.ResearcherDbUser.Query;
+using Businesses.ViewModels.Responses;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -27,14 +29,20 @@ namespace ArticleTag.Controllers
     {
         private readonly IUserRepository _repository;
         private readonly ILogger<AccountController> _logger;
+        private readonly IDistributedCache _cache;
+        private readonly IServiceProvider _service;
         private readonly AppSettings _appSettings;
 
         public AccountController(IUserRepository repository
             , IOptions<AppSettings> appSettings
-            , ILogger<AccountController> logger)
+            , ILogger<AccountController> logger
+            , IDistributedCache cache
+            , IServiceProvider service)
         {
             _repository = repository;
             _logger = logger;
+            _cache = cache;
+            _service = service;
             _appSettings = appSettings.Value;
         }
 
@@ -53,52 +61,70 @@ namespace ArticleTag.Controllers
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                         new Claim(ClaimTypes.Name, user.UserName),
                         new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
-                    }),
+                        //new Claim(GlobalHelper.ClaimsTypeUserCanSkipTimes,user.CanSkipTimesPerDay.ToString()),
+                        new Claim(GlobalHelper.ClaimsTypeUserVersion,user.Version.ToString()),
+                    }, JwtBearerDefaults.AuthenticationScheme),
                     Expires = DateTime.UtcNow.AddDays(7),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 user.Token = tokenHandler.WriteToken(token);
                 response.Result = user;
+                await _cache.SetStringAsync(string.Format(GlobalHelper.UserCacheKeyFormatter, user.UserId, user.Version), user.Token);
             }
             catch (WarnException warn)
             {
                 response.Success = false;
                 response.ErrorCode = HttpCodeEnum.Warn;
                 response.ErrorMsg = warn.Message;
-                _logger.LogWarning($"登录失败：{loginUser.LoginName}", warn);
+                _logger.LogWarning(warn, $"登录失败：{loginUser.LoginName}");
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError($"登录异常：{loginUser.LoginName}", ex);
+                _logger.LogError(ex, $"登录异常：{loginUser.LoginName}");
             }
 
             return Ok(response);
         }
 
-        [HttpPost("GetTaggerInfoByArticleTaggedRecordId")]
-        [SwaggerResponse(200, "根据文献标记记录获取标记员信息", typeof(JsonResponseBase<TaggerDto, IDictionary<string, string[]>>))]
-        public async Task<IActionResult> GetTaggerInfoByArticleTaggedRecordId(long recordId)
+        [HttpPut("user/info")]
+        [SwaggerResponse(200, "更新用户信息", typeof(JsonResponseBase<bool, IDictionary<string, string[]>>))]
+        public async Task<IActionResult> Update(UserVm user)
         {
-            var response = JsonResponseBase<TaggerDto>.CreateDefault();
+            var response = JsonResponseBase<bool, IDictionary<string, string[]>>.CreateDefault();
+
             try
             {
-                response.Result = await _repository.GetTaggerByArticleTaggedRecordIdAsync(recordId);
-                return Ok(response);
+                response.Result = await _repository.UpdateUserInfoAsync(new Entity.Entities.User()
+                {
+                    ID = long.Parse(user.ID),
+                    NickName = user.NickName
+                });
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.ErrorMsg = ex.Message;
-                response.ErrorCode = HttpCodeEnum.Error;
-                _logger.LogError("根据文献标记记录获取标记员信息异常！", ex);
-                return Ok(response);
+                response.Result = false;
+                response.HttpCode = 500;
+                response.ErrorMsg = "更新用户信息异常！";
+                _logger.LogError(ex, "更新用户信息异常！");
             }
+
+            return Ok(response);
+        }
+
+        [HttpDelete("Logout")]
+        [SwaggerResponse(200, "登出", typeof(bool))]
+        public async Task<IActionResult> Logout()
+        {
+            await _cache.RemoveAsync(string.Format(GlobalHelper.UserCacheKeyFormatter, CurrentUserId, CurrentUserVersion));
+            return Ok(true);
+            // TODO：添加filter检查token和cache的数据是否一致，如果不一致，则引导用户进行登录
         }
     }
 }
