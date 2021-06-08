@@ -1,6 +1,6 @@
 ﻿using Entity.Enum;
 
-namespace Deepbio.ApplicationCore.ResearcherDbUser.Query
+namespace Businesses.ViewModels.Responses
 {
     public class UserLoginResponse
     {
@@ -10,5 +10,7 @@ namespace Deepbio.ApplicationCore.ResearcherDbUser.Query
         public string Token { get; set; }
         public TagRoleEnum Role { get; set; }
         public string RoleName => Role.ToDescriptionOrString();
+        public int CanSkipTimesPerDay { get; set; }
+        public int Version { get; set; }
     }
 }

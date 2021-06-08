@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Deepbio.ApplicationCore.ResearcherDbUser.Query;
+using Businesses.ViewModels.Responses;
 using Entity.Entities;
 
 namespace Businesses.Interfaces

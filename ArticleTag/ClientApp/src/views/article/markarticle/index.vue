@@ -6,7 +6,13 @@
     <el-main>
       <div>
         <div class="article" v-html="article" @mouseup.right="openMenus"></div>
-        <div class="information el-icon-info" @click="openNotification"></div>
+        <div class="information">
+          <div class="el-icon-info" @click="openNotification"></div>
+          <div
+            class="el-icon-warning"
+            @click="openAuditRemakNotification"
+          ></div>
+        </div>
       </div>
       <div class="footer-placeholder"></div>
     </el-main>
@@ -134,8 +140,8 @@ export default {
   data: function () {
     return {
       articleApi: new ArticleApi(ApiClient.instance),
-      auditStatusEnum: new TagArticleStatusEnum(),
-      roleEnum: new TagRoleEnum(),
+      auditStatusEnum: TagArticleStatusEnum,
+      roleEnum: TagRoleEnum,
       taggedNum: 0,
       selection: {
         anchorNode: null,
@@ -163,6 +169,8 @@ export default {
       tags: [],
       article: '',
       articleId: 0,
+      articleStatus: 0,
+      articleRemark: '',
       options: [{
         value: 'AptamerType',
         label: 'AptamerType',
@@ -264,16 +272,29 @@ export default {
         lock: true,
         text: '标记中...'
       },
-      loadingInstance: null
+      loadingInstance: null,
+      auditStatusArray: [
+        { text: '未标记', value: '0' },
+        { text: '标记中', value: '1' },
+        { text: '已标记', value: '2' },
+        { text: '未审核', value: '3' },
+        { text: '审核通过', value: '4' },
+        { text: '审核不通过', value: '5' },
+        { text: '无效的', value: '6' }
+      ],
     }
   },
   created () {
     this.user = JSON.parse(window.localStorage.getItem('user_info') || '{}')
 
     if (this.user.role === this.roleEnum.Auditor && this.$route.query.articleId) {
-      this.searchArticleByAuditor().then(() => this.bindTooltip())
+      this.searchArticleByAuditor().then(() => this.bindTooltip()).then(() => this.openAuditRemakNotification())
     } else {
-      this.searchArticle().then(() => this.bindTooltip())
+      this.searchArticle().then(() => this.bindTooltip()).then(() => {
+        if (this.articleRemark) {
+          this.openAuditRemakNotification()
+        }
+      })
     }
 
     // 禁用默认右键菜单
@@ -315,6 +336,9 @@ export default {
       var ids = this.tags.map(s => parseInt(s.id)).sort()
       var last = ids.length ? ids[ids.length - 2] : 1
       return last
+    },
+    articleStatusText () {
+      return this.auditStatusArray[this.articleStatus].text
     }
   },
   methods: {
@@ -821,6 +845,8 @@ export default {
             this.articleId = result.id
             this.article = result.content
             this.review = result.review
+            this.articleStatus = result.status
+            this.articleRemark = result.remark
             this.tags = result.tags || []
             this.getTaggerInfo()
             console.log(this.articleId)
@@ -859,6 +885,8 @@ export default {
             this.articleId = result.id
             this.article = result.content
             this.review = result.review
+            this.articleStatus = result.status
+            this.articleRemark = result.remark
             this.tags = result.tags || []
             console.log(`当前计数：${this.currentTagId}`)
             // this.taggedNum = this.tags.length
@@ -906,7 +934,7 @@ export default {
           } else {
             this.$message({
               type: 'warning',
-              message: '跳过失败!'
+              message: '跳过失败!' + data.errorMsg
             })
           }
         })
@@ -1065,6 +1093,19 @@ export default {
           h('p', null, `标记员ID：${this.tagger.id}`),
           h('p', null, `标记员名称：${this.tagger.name}`),
           h('p', null, `标记员邮箱：${this.tagger.email}`),
+        ]),
+        offset: 60
+      });
+    },
+    openAuditRemakNotification () {
+      var h = this.$createElement
+      this.$notify({
+        type: 'error',
+        title: '审核信息',
+        message: h('p', null, [
+          h('p', null, `文章编号：${this.articleId}`),
+          h('p', null, `文章状态：${this.articleStatusText}`),
+          h('p', null, `审核备注：${this.articleRemark}`),
         ]),
         offset: 60
       });

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Businesses.Exceptions;
 using Businesses.Interfaces;
-using Deepbio.ApplicationCore.ResearcherDbUser.Query;
+using Businesses.ViewModels.Responses;
 using Entity.Entities;
 using FreeSql;
 
@@ -39,7 +39,9 @@ namespace Businesses.Repositories
                 UserId = user.ID,
                 UserName = user.NickName,
                 Email = user.Email,
-                Role = user.Role
+                Role = user.Role,
+                CanSkipTimesPerDay = user.CanSkipTimesPerDay,
+                Version = user.Version,
             };
 
             return userVm;

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { TagRoleEnum } from '@/api'
 
-let roles = new TagRoleEnum()
+let roles = TagRoleEnum
 
 Vue.use(Router)
 

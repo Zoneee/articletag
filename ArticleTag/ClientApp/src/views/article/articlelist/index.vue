@@ -132,7 +132,7 @@ export default {
   data () {
     return {
       api: new ArticleApi(ApiClient.instance),
-      auditStatusEnum: new TagArticleStatusEnum(),
+      auditStatusEnum: TagArticleStatusEnum,
       auditStatusArray: [
         { text: '未标记', value: '0' },
         { text: '标记中', value: '1' },
@@ -155,7 +155,7 @@ export default {
         total: 0
       },
       data: [],
-      roleEnum: new TagRoleEnum(),
+      roleEnum: TagRoleEnum,
       role: 0
     }
   },

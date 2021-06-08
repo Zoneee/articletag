@@ -1,4 +1,7 @@
+using System;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ArticleTag.Extensions;
 using ArticleTag.Filters;
 using ArticleTag.Helpers;
@@ -40,10 +43,24 @@ namespace ArticleTag
 #endif
                 });
             });
+
+            services.AddDistributedMemoryCache(options =>
+            {
+                options.ExpirationScanFrequency = TimeSpan.FromMinutes(30);
+            });
+            //services.AddMemoryCache(options =>
+            //{
+            //    options.ExpirationScanFrequency = TimeSpan.FromMinutes(30);
+            //});
             services.AddControllers(option =>
             {
                 option.Filters.Add(typeof(ApiExceptionFilterAttribute));
-            });
+            })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "clientapp/dist";
@@ -73,6 +90,9 @@ namespace ArticleTag
                     ValidateAudience = false
                 };
             });
+
+            // 注册单例定时任务
+            services.AddSingleton<IHostedService, SkipTimeResetTask>();
         }
 
         // ConfigureContainer is where you can register things directly
