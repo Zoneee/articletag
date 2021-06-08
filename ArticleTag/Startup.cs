@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ArticleTag.Extensions;
 using ArticleTag.Filters;
 using ArticleTag.Helpers;
@@ -53,7 +55,12 @@ namespace ArticleTag
             services.AddControllers(option =>
             {
                 option.Filters.Add(typeof(ApiExceptionFilterAttribute));
-            });
+            })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "clientapp/dist";

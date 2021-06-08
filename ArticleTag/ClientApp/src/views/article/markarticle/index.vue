@@ -272,14 +272,23 @@ export default {
         lock: true,
         text: '标记中...'
       },
-      loadingInstance: null
+      loadingInstance: null,
+      auditStatusArray: [
+        { text: '未标记', value: '0' },
+        { text: '标记中', value: '1' },
+        { text: '已标记', value: '2' },
+        { text: '未审核', value: '3' },
+        { text: '审核通过', value: '4' },
+        { text: '审核不通过', value: '5' },
+        { text: '无效的', value: '6' }
+      ],
     }
   },
   created () {
     this.user = JSON.parse(window.localStorage.getItem('user_info') || '{}')
 
     if (this.user.role === this.roleEnum.Auditor && this.$route.query.articleId) {
-      this.searchArticleByAuditor().then(() => this.bindTooltip())
+      this.searchArticleByAuditor().then(() => this.bindTooltip()).then(() => this.openAuditRemakNotification())
     } else {
       this.searchArticle().then(() => this.bindTooltip()).then(() => {
         if (this.articleRemark) {
@@ -327,6 +336,9 @@ export default {
       var ids = this.tags.map(s => parseInt(s.id)).sort()
       var last = ids.length ? ids[ids.length - 2] : 1
       return last
+    },
+    articleStatusText () {
+      return this.auditStatusArray[this.articleStatus].text
     }
   },
   methods: {
@@ -1092,7 +1104,7 @@ export default {
         title: '审核信息',
         message: h('p', null, [
           h('p', null, `文章编号：${this.articleId}`),
-          h('p', null, `文章状态：${this.articleStatus}`),
+          h('p', null, `文章状态：${this.articleStatusText}`),
           h('p', null, `审核备注：${this.articleRemark}`),
         ]),
         offset: 60
