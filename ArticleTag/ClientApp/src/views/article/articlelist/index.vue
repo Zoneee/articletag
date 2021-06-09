@@ -133,15 +133,7 @@ export default {
     return {
       api: new ArticleApi(ApiClient.instance),
       auditStatusEnum: TagArticleStatusEnum,
-      auditStatusArray: [
-        { text: '未标记', value: '0' },
-        { text: '标记中', value: '1' },
-        { text: '已标记', value: '2' },
-        { text: '未审核', value: '3' },
-        { text: '审核通过', value: '4' },
-        { text: '审核不通过', value: '5' },
-        { text: '无效的', value: '6' }
-      ],
+      auditStatusArray: [],
       reviewStatusArray: [
         { text: '是', value: true },
         { text: '否', value: false }
@@ -166,6 +158,9 @@ export default {
     })
     var userInfo = JSON.parse(window.localStorage.getItem('user_info') || '{}')
     this.role = userInfo.role
+
+    var articleStatusArray = JSON.parse(window.localStorage.getItem('articleStatusArray'))
+    this.auditStatusArray = articleStatusArray
   },
   computed: {
     formattedData () {

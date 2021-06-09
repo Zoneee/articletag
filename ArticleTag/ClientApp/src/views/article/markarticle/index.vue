@@ -47,6 +47,7 @@
       <div class="btns" v-if="user.role == roleEnum.Auditor">
         <el-button type="success" @click="audited">通过审核</el-button>
         <el-button type="danger" @click="openAuditMenus">审核不通过</el-button>
+        <el-button type="danger" @click="unavail">无效文章</el-button>
       </div>
     </div>
 
@@ -273,15 +274,7 @@ export default {
         text: '标记中...'
       },
       loadingInstance: null,
-      auditStatusArray: [
-        { text: '未标记', value: '0' },
-        { text: '标记中', value: '1' },
-        { text: '已标记', value: '2' },
-        { text: '未审核', value: '3' },
-        { text: '审核通过', value: '4' },
-        { text: '审核不通过', value: '5' },
-        { text: '无效的', value: '6' }
-      ],
+      auditStatusArray: [],
     }
   },
   created () {
@@ -296,6 +289,9 @@ export default {
         }
       })
     }
+
+    var articleStatusArray = JSON.parse(window.localStorage.getItem('articleStatusArray'))
+    this.auditStatusArray = articleStatusArray
 
     // 禁用默认右键菜单
     if (document.addEventListener) {
@@ -1001,6 +997,19 @@ export default {
           console.log('审核员提交审核不通过状态异常')
         })
     },
+    unavail () {
+      // 不通过
+      this.checkStatus()
+        .then(async () => {
+          await this.submitUnavail()
+          this.closeAuditMenus()
+          this.getNextArticle()
+        })
+        .catch((flag) => {
+          alert('提交审核状态异常')
+          console.log('审核员提交审核不通过状态异常')
+        })
+    },
     submitAudited () {
       var p = new Promise((resolve, reject) => {
         this.articleApi.apiArticleAuditArticlePost({
@@ -1028,6 +1037,29 @@ export default {
           body: {
             id: this.articleId,
             status: this.auditStatusEnum.Unsanctioned,
+            remark: this.remark,
+            auditorID: this.user.userId
+          }
+        }, (error, data, resp) => {
+          if (error) {
+            reject(error)
+            console.error(error)
+            alert(error)
+            return
+          }
+          console.log(resp)
+          resolve(data)
+        })
+      })
+
+      return p
+    },
+    submitUnavail () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleAuditArticlePost({
+          body: {
+            id: this.articleId,
+            status: this.auditStatusEnum.Unavail,
             remark: this.remark,
             auditorID: this.user.userId
           }
