@@ -23,7 +23,7 @@ namespace DecodeSpecialChars
 
             var list = fsql.Select<ArticleTaggedRecord>()
                 .WithSql(
-                    "select a.* from ArticleTaggedRecord a where a.id not in (select theid from BatchProcessHst where [Catalog] = 'decode_hex')");
+                    $"select a.* from ArticleTaggedRecord a where a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");
             var count = list.Count();
             for (var i = 0; i < count; i++)
             {

@@ -16,5 +16,6 @@ namespace Entity.Entities
         public long TheID { get; set; }
         public string Catalog { get; set; }
         public DateTime _timestamp { get; set; }
+        public int Modified { get; set; }
     }
 }
