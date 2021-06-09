@@ -52,6 +52,8 @@ export class ArticleDto {
         obj.status = TagArticleStatusEnum.constructFromObject(data['status']);
       if (data.hasOwnProperty('remark'))
         obj.remark = ApiClient.convertToType(data['remark'], 'String');
+      if (data.hasOwnProperty('lastChangeTime'))
+        obj.lastChangeTime = ApiClient.convertToType(data['lastChangeTime'], 'Date');
     }
     return obj;
   }
@@ -86,4 +88,9 @@ ArticleDto.prototype.status = undefined;
  * @member {String} remark
  */
 ArticleDto.prototype.remark = undefined;
+
+/**
+ * @member {Date} lastChangeTime
+ */
+ArticleDto.prototype.lastChangeTime = undefined;
 

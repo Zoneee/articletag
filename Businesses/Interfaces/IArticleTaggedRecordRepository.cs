@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using Businesses.Dto;
 using Businesses.ViewModels.Requsets;
+using Entity.Entities;
 using Entity.Enum;
+using FreeSql;
 
 namespace Businesses.Interfaces
 {
-    public interface IArticleTaggedRecordRepository
+    public interface IArticleTaggedRecordRepository : IBaseRepository<ArticleTaggedRecord, long>
     {
         Task<bool> AuditArticleAsync(AuditArticleRequest article);
 

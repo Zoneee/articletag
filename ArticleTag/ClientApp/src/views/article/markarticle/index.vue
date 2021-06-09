@@ -172,6 +172,7 @@ export default {
       articleId: 0,
       articleStatus: 0,
       articleRemark: '',
+      articleLastChangeTime: '',
       options: [{
         value: 'AptamerType',
         label: 'AptamerType',
@@ -335,6 +336,10 @@ export default {
     },
     articleStatusText () {
       return this.auditStatusArray[this.articleStatus].text
+    },
+    articleLastChangeTimeText () {
+      var date = new Date(this.articleLastChangeTime)
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     }
   },
   methods: {
@@ -843,6 +848,7 @@ export default {
             this.review = result.review
             this.articleStatus = result.status
             this.articleRemark = result.remark
+            this.articleLastChangeTime = result.lastChangeTime
             this.tags = result.tags || []
             this.getTaggerInfo()
             console.log(this.articleId)
@@ -883,6 +889,7 @@ export default {
             this.review = result.review
             this.articleStatus = result.status
             this.articleRemark = result.remark
+            this.articleLastChangeTime = result.lastChangeTime
             this.tags = result.tags || []
             console.log(`当前计数：${this.currentTagId}`)
             // this.taggedNum = this.tags.length
@@ -1137,6 +1144,7 @@ export default {
         message: h('p', null, [
           h('p', null, `文章编号：${this.articleId}`),
           h('p', null, `文章状态：${this.articleStatusText}`),
+          h('p', null, `最后标记时间：${this.articleLastChangeTimeText}`),
           h('p', null, `审核备注：${this.articleRemark}`),
         ]),
         offset: 60

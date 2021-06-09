@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Entity.Enum;
 
@@ -17,5 +18,6 @@ namespace Businesses.Dto
         /// </summary>
         [JsonPropertyName("remark")]
         public string LastRemark { get; set; }
+        public DateTime LastChangeTime { get; set; }
     }
 }
