@@ -11,8 +11,12 @@ namespace WrapLargeParagraphs
      */
     class Program
     {
-        static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
+        /*static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
             .UseConnectionString(FreeSql.DataType.SqlServer, @"server=192.168.1.55;database=ArticleTag;uid=sa;pwd=deepbiodb@2019")
+            .Build();*/
+        static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
+            .UseConnectionString(FreeSql.DataType.SqlServer, 
+                @"server=deepbio-prod.sqlserver.rds.aliyuncs.com,1433;database=ArticleTag;uid=zhanglianlian;pwd=3k%0S7r8Ah")
             .Build();
         static void Main(string[] args)
         {
@@ -20,18 +24,26 @@ namespace WrapLargeParagraphs
             var list = fsql.Select<ArticleTaggedRecord>()
                 .WithSql(
                     $"select a.* from ArticleTaggedRecord a where a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");
-                    // $"select a.* from ArticleTaggedRecord a where a.id = 2820");
-                    var count = list.Count();
+            var count = list.Count();
 
-            for (var i = 0; i < count; i++)
+            var i = 0;
+            while (true)
             {
                 //because data in BatchProcessHst keep changing bellow, so every time just fetch the first one is ok to iterate the set
                 var obj = list.Take(1).First();
+                if (obj == null)
+                {
+                    Console.WriteLine("Finished");
+                    Console.Read();
+                    return;
+                }
+
                 var newContent = Wrap(obj.TaggedContent);
                 var hst = new BatchProcessHst()
                 {
                     TheID = obj.ID,
-                    Catalog = processCatalog
+                    Catalog = processCatalog,
+                    _timestamp = DateTime.Now
                 };
                 if (newContent != obj.TaggedContent)
                 {
@@ -41,7 +53,7 @@ namespace WrapLargeParagraphs
 
                 fsql.Insert<BatchProcessHst>(hst).ExecuteAffrows();
 
-                Console.WriteLine($"{count - i}");
+                Console.WriteLine($"{++i}/{count}");
             }
         }
 

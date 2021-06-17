@@ -12,7 +12,7 @@ namespace Entity.Entities
     public class BatchProcessHst : EntityBase<long>, IAggregateRoot
     {
         [Column(IsIdentity = true, IsPrimary = true)]
-        public  long ID { get; set; }
+        public long ID { get; set; }
         public long TheID { get; set; }
         public string Catalog { get; set; }
         public DateTime _timestamp { get; set; }

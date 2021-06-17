@@ -13,35 +13,59 @@ namespace DecodeSpecialChars
 {
     class Program
     {
-        static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
+        /*static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
             .UseConnectionString(FreeSql.DataType.SqlServer, @"server=192.168.1.55;database=ArticleTag;uid=sa;pwd=deepbiodb@2019")
+            .Build();*/
+        static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
+            .UseConnectionString(FreeSql.DataType.SqlServer,
+                @"server=deepbio-prod.sqlserver.rds.aliyuncs.com,1433;database=ArticleTag;uid=zhanglianlian;pwd=3k%0S7r8Ah")
             .Build();
         static void Main(string[] args)
         {
-
             var processCatalog = "decode_hex";
 
             var list = fsql.Select<ArticleTaggedRecord>()
                 .WithSql(
                     $"select a.* from ArticleTaggedRecord a where a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");
             var count = list.Count();
-            for (var i = 0; i < count; i++)
+            var i = 0;
+            while (true)
             {
-                //because data in BatchProcessHst keep changing bellow, so every time just fetch the first one is ok to iterate the set
-                var obj = list.Take(1).First();
-                var newContent = Decode(obj.TaggedContent);
-                if (newContent != obj.TaggedContent)
+                try
                 {
-                    var rows = fsql.Update<ArticleTaggedRecord>(obj.ID).Set(p => p.TaggedContent, newContent).ExecuteAffrows();
+                    //because data in BatchProcessHst keep changing bellow, so every time just fetch the first one is ok to iterate the set
+                    var obj = list.Take(1).First();
+                    if (obj == null)
+                    {
+                        Console.WriteLine("Finished");
+                        Console.Read();
+                        return;
+                    }
+
+                    var hst = new BatchProcessHst()
+                    {
+                        TheID = obj.ID,
+                        Catalog = processCatalog,
+                        _timestamp = DateTime.Now
+                    };
+                    var newContent = Decode(obj.TaggedContent);
+                    if (newContent != obj.TaggedContent)
+                    {
+                        var rows = fsql.Update<ArticleTaggedRecord>(obj.ID).Set(p => p.TaggedContent, newContent).ExecuteAffrows();
+                        hst.Modified = 1;
+                    }
+
+                    fsql.Insert(hst).ExecuteAffrows();
+
+                    Console.WriteLine($"{++i}/{count}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    Console.Read();
+                    return;
                 }
 
-                fsql.Insert<BatchProcessHst>(new BatchProcessHst()
-                {
-                    TheID = obj.ID,
-                    Catalog = processCatalog
-                }).ExecuteAffrows();
-
-                Console.WriteLine($"{--count}");
             }
 
         }
