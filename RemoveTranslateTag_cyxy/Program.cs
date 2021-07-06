@@ -10,19 +10,23 @@ namespace RemoveTranslateTag_cyxy
     /// </summary>
     public class Program
     {
-        static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
+        /*static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
             .UseConnectionString(FreeSql.DataType.SqlServer, @"server=192.168.1.55;database=ArticleTag;uid=webdeploy;pwd=webdeploy@2021")
+            .Build();*/
+        static IFreeSql fsql = new FreeSql.FreeSqlBuilder()
+            .UseConnectionString(FreeSql.DataType.SqlServer,
+                @"server=deepbio-prod.sqlserver.rds.aliyuncs.com,1433;database=ArticleTag;uid=zhanglianlian;pwd=3k%0S7r8Ah")
             .Build();
         static void Main(string[] args)
         {
             var processCatalog = "remove_cyxy";
 
-            /*var list = fsql.Select<ArticleTaggedRecord>()
-                .WithSql(
-                    $"select a.* from ArticleTaggedRecord a where a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");*/
             var list = fsql.Select<ArticleTaggedRecord>()
                 .WithSql(
-                    $"select a.* from ArticleTaggedRecord a where a.lastChangeTime >'2021-7-5' and a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");
+                    $"select a.* from ArticleTaggedRecord a where a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");
+            /*var list = fsql.Select<ArticleTaggedRecord>()
+                .WithSql(
+                    $"select a.* from ArticleTaggedRecord a where a.lastChangeTime >'2021-7-5' and a.id not in (select theid from BatchProcessHst where [Catalog] = '{processCatalog}')");*/
             var count = list.Count();
 
             var i = 0;
