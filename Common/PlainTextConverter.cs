@@ -122,7 +122,6 @@ namespace Common
             var attribute = node.Attributes["style"];
 
             bool thisVisible = attribute == null || CheckStyleVisibility(attribute.Value);
-
             return thisVisible;
         }
 
@@ -163,7 +162,10 @@ namespace Common
                 if (!s.Contains(':'))
                     continue;
                 var data = s.Split(':');
-                result.Add(data[0], data[1]);
+                if (!result.ContainsKey(data[0]))
+                {
+                    result.Add(data[0], data[1]);
+                }
             }
 
             return result;

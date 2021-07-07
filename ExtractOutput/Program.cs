@@ -32,6 +32,8 @@ namespace ExtractOutput
             {
                 Directory.CreateDirectory(folder);
             }
+
+            var issueTaskIdsFilePath = "issueTaskIds.txt";
             for (var index = 0; index < count; index++)
             {
                 var taskId = taskIdList[index];
@@ -47,7 +49,18 @@ namespace ExtractOutput
 
                 string plain;
                 string output;
-                extractor.Extract(out plain, out output);
+
+                try
+                {
+                    extractor.Extract(out plain, out output);
+                }
+                catch (Exception e)
+                {
+                    var issueTaskIdInfo = taskId + ",Exception:" + e;
+                    File.AppendAllLines(issueTaskIdsFilePath, new[] {issueTaskIdInfo  });
+                    Console.WriteLine(issueTaskIdInfo);
+                    continue;
+                }
 
                 var plainFilePath = $"{folder}\\plain_{taskId}.txt";
                 var outputFilePath = $"{folder}\\output_{taskId}.txt";
