@@ -19,8 +19,13 @@ namespace Businesses.Dto
         public string Unaudited { get; set; }
         public string Audited { get; set; }
         public string Unsanctioned { get; set; }
-        public string Unavail { get; set; }
+        public string Skiped { get; set; }
         public string PreProcessed { get; set; }
-        public string Count => (long.Parse(Untagged) + long.Parse(Tagging) + long.Parse(Tagged) + long.Parse(Unaudited) + long.Parse(Audited) + long.Parse(Unsanctioned) + long.Parse(Unavail) + long.Parse(PreProcessed)).ToString();
+        public string Unavail { get; set; }
+        public string Count => (long.Parse(Untagged) + long.Parse(Tagging)
+            + long.Parse(Tagged) + long.Parse(Unaudited) + long.Parse(Audited)
+            + long.Parse(Unsanctioned) + long.Parse(Unavail) + long.Parse(PreProcessed)
+            + long.Parse(Skiped))
+            .ToString();
     }
 }

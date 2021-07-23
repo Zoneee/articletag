@@ -45,8 +45,9 @@
         sortable
       ></el-table-column>
       <el-table-column prop="unsanctioned" label="审核不通过"></el-table-column>
-      <el-table-column prop="unavail" label="无效的"></el-table-column>
+      <el-table-column prop="skiped" label="跳过的文章"></el-table-column>
       <el-table-column prop="preProcessed" label="预处理的"></el-table-column>
+      <el-table-column prop="unavail" label="无效的"></el-table-column>
       <el-table-column prop="count" label="总计"> </el-table-column>
     </el-table>
     <el-pagination

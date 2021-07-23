@@ -56,10 +56,12 @@ export class WorkloadItem {
         obj.audited = ApiClient.convertToType(data['audited'], 'String');
       if (data.hasOwnProperty('unsanctioned'))
         obj.unsanctioned = ApiClient.convertToType(data['unsanctioned'], 'String');
-      if (data.hasOwnProperty('unavail'))
-        obj.unavail = ApiClient.convertToType(data['unavail'], 'String');
+      if (data.hasOwnProperty('skiped'))
+        obj.skiped = ApiClient.convertToType(data['skiped'], 'String');
       if (data.hasOwnProperty('preProcessed'))
         obj.preProcessed = ApiClient.convertToType(data['preProcessed'], 'String');
+      if (data.hasOwnProperty('unavail'))
+        obj.unavail = ApiClient.convertToType(data['unavail'], 'String');
       if (data.hasOwnProperty('count'))
         obj.count = ApiClient.convertToType(data['count'], 'String');
     }
@@ -113,14 +115,19 @@ WorkloadItem.prototype.audited = undefined;
 WorkloadItem.prototype.unsanctioned = undefined;
 
 /**
- * @member {String} unavail
+ * @member {String} skiped
  */
-WorkloadItem.prototype.unavail = undefined;
+WorkloadItem.prototype.skiped = undefined;
 
 /**
  * @member {String} preProcessed
  */
 WorkloadItem.prototype.preProcessed = undefined;
+
+/**
+ * @member {String} unavail
+ */
+WorkloadItem.prototype.unavail = undefined;
 
 /**
  * @member {String} count
