@@ -44,7 +44,7 @@ namespace Common
                 var token = text_mark.Substring(p.startMark.index + p.startMark.matchText.Length,
                     p.endMark.index - (p.startMark.index + p.startMark.matchText.Length));
                 token = markReg.Replace(token, "");
-                var t3 = new MarkEntity(p.cid, p.ctype,p.cattr, p.cname, p.startMark, p.endMark, token);
+                var t3 = new MarkEntity(p.cid, p.ctype, p.cattr, p.cname, p.startMark, p.endMark, token);
                 entityList.Add(t3);
             }
 
@@ -118,7 +118,7 @@ namespace Common
             public string cattr { get; set; }
             public string cname { get; }
 
-            public MatchEntity(string cid, MatchText startMark, MatchText endMark, string ctype,string cattr, string cname)
+            public MatchEntity(string cid, MatchText startMark, MatchText endMark, string ctype, string cattr, string cname)
             {
                 this.cid = cid;
                 this.startMark = startMark;
@@ -143,7 +143,7 @@ namespace Common
             public int startIndex { get; set; }
             public int endIndex { get; set; }
 
-            public MarkEntity(string cid, string ctype,string cattr, string cname, MatchText startMark, MatchText endMark, string token)
+            public MarkEntity(string cid, string ctype, string cattr, string cname, MatchText startMark, MatchText endMark, string token)
             {
                 this.cid = cid;
                 this.ctype = ctype;
