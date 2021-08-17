@@ -89,7 +89,7 @@ namespace Common
             var lines = entityList.Select(p =>
                 $"{p.SeqNo}￥{p.ctype}￥{p.token}￥{p.startIndex}￥{p.endIndex}￥{p.cname + (p.cattr.Pipe(string.IsNullOrEmpty) ? "" : "/" + p.cattr)}");
 
-            output = string.Join(Environment.NewLine, lines);
+            output = string.Join("￥", lines);
         }
 
 
