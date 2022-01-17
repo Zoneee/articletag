@@ -47,6 +47,7 @@
       <div class="btns" v-if="user.role == roleEnum.Auditor">
         <el-button type="success" @click="audited">通过审核</el-button>
         <el-button type="danger" @click="openAuditMenus">审核不通过</el-button>
+        <el-button type="danger" @click="unavail">无效文章</el-button>
       </div>
     </div>
 
@@ -171,6 +172,7 @@ export default {
       articleId: 0,
       articleStatus: 0,
       articleRemark: '',
+      articleLastChangeTime: '',
       options: [{
         value: 'AptamerType',
         label: 'AptamerType',
@@ -273,15 +275,7 @@ export default {
         text: '标记中...'
       },
       loadingInstance: null,
-      auditStatusArray: [
-        { text: '未标记', value: '0' },
-        { text: '标记中', value: '1' },
-        { text: '已标记', value: '2' },
-        { text: '未审核', value: '3' },
-        { text: '审核通过', value: '4' },
-        { text: '审核不通过', value: '5' },
-        { text: '无效的', value: '6' }
-      ],
+      auditStatusArray: [],
     }
   },
   created () {
@@ -296,6 +290,9 @@ export default {
         }
       })
     }
+
+    var articleStatusArray = JSON.parse(window.localStorage.getItem('articleStatusArray'))
+    this.auditStatusArray = articleStatusArray
 
     // 禁用默认右键菜单
     if (document.addEventListener) {
@@ -339,6 +336,10 @@ export default {
     },
     articleStatusText () {
       return this.auditStatusArray[this.articleStatus].text
+    },
+    articleLastChangeTimeText () {
+      var date = new Date(this.articleLastChangeTime)
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     }
   },
   methods: {
@@ -847,6 +848,7 @@ export default {
             this.review = result.review
             this.articleStatus = result.status
             this.articleRemark = result.remark
+            this.articleLastChangeTime = result.lastChangeTime
             this.tags = result.tags || []
             this.getTaggerInfo()
             console.log(this.articleId)
@@ -887,6 +889,7 @@ export default {
             this.review = result.review
             this.articleStatus = result.status
             this.articleRemark = result.remark
+            this.articleLastChangeTime = result.lastChangeTime
             this.tags = result.tags || []
             console.log(`当前计数：${this.currentTagId}`)
             // this.taggedNum = this.tags.length
@@ -1001,6 +1004,19 @@ export default {
           console.log('审核员提交审核不通过状态异常')
         })
     },
+    unavail () {
+      // 不通过
+      this.checkStatus()
+        .then(async () => {
+          await this.submitUnavail()
+          this.closeAuditMenus()
+          this.getNextArticle()
+        })
+        .catch((flag) => {
+          alert('提交审核状态异常')
+          console.log('审核员提交审核不通过状态异常')
+        })
+    },
     submitAudited () {
       var p = new Promise((resolve, reject) => {
         this.articleApi.apiArticleAuditArticlePost({
@@ -1028,6 +1044,29 @@ export default {
           body: {
             id: this.articleId,
             status: this.auditStatusEnum.Unsanctioned,
+            remark: this.remark,
+            auditorID: this.user.userId
+          }
+        }, (error, data, resp) => {
+          if (error) {
+            reject(error)
+            console.error(error)
+            alert(error)
+            return
+          }
+          console.log(resp)
+          resolve(data)
+        })
+      })
+
+      return p
+    },
+    submitUnavail () {
+      var p = new Promise((resolve, reject) => {
+        this.articleApi.apiArticleAuditArticlePost({
+          body: {
+            id: this.articleId,
+            status: this.auditStatusEnum.Unavail,
             remark: this.remark,
             auditorID: this.user.userId
           }
@@ -1105,6 +1144,7 @@ export default {
         message: h('p', null, [
           h('p', null, `文章编号：${this.articleId}`),
           h('p', null, `文章状态：${this.articleStatusText}`),
+          h('p', null, `最后标记时间：${this.articleLastChangeTimeText}`),
           h('p', null, `审核备注：${this.articleRemark}`),
         ]),
         offset: 60

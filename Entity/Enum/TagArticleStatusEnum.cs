@@ -26,10 +26,13 @@ namespace Entity.Enum
         [Description("审核不通过")]
         Unsanctioned = 5,
 
-        [Description("无效的")]
-        Unavail = 6,
+        [Description("跳过的文章")]
+        Skiped = 6,
 
         [Description("预处理的")]
-        PreProcessed = 7
+        PreProcessed = 7,
+
+        [Description("无效的")]
+        Unavail = 8,
     }
 }

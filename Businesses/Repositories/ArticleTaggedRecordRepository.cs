@@ -40,7 +40,8 @@ namespace Businesses.Repositories
                          TaggedArray = article.TaggedArray,
                          Review = article.Review,
                          Status = article.Status,
-                         LastRemark = audit.Remark
+                         LastRemark = audit.Remark,
+                         article.LastChangeTime
                      });
 
             var dto = new ArticleDto()
@@ -50,7 +51,8 @@ namespace Businesses.Repositories
                 Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(record.TaggedArray ?? ""),
                 Review = record.Review,
                 Status = record.Status,
-                LastRemark = record.LastRemark
+                LastRemark = record.LastRemark,
+                LastChangeTime = record.LastChangeTime
             };
 
             return dto;
@@ -159,7 +161,8 @@ namespace Businesses.Repositories
                              TaggedArray = article.TaggedArray,
                              Review = article.Review,
                              Status = article.Status,
-                             LastRemark = audit.Remark
+                             LastRemark = audit.Remark,
+                             article.LastChangeTime
                          });
 
                     var dto = new ArticleDto()
@@ -169,7 +172,8 @@ namespace Businesses.Repositories
                         Tags = JsonConvert.DeserializeObject<ICollection<Tag>>(record.TaggedArray ?? ""),
                         Review = record.Review,
                         Status = record.Status,
-                        LastRemark = record.LastRemark
+                        LastRemark = record.LastRemark,
+                        LastChangeTime = record.LastChangeTime
                     };
                     return dto;
                 }
@@ -237,7 +241,7 @@ namespace Businesses.Repositories
                .Where(s => s.ID == articleId)
                .ToOneAsync();
             return article.Status == TagArticleStatusEnum.Unaudited
-                || article.Status == TagArticleStatusEnum.Unavail;
+                || article.Status == TagArticleStatusEnum.Skiped;
         }
 
         public async Task<bool> SaveTaggedRecordAsync(ArticleRecordRequest record)
@@ -275,7 +279,7 @@ namespace Businesses.Repositories
             var article = await this.Where(s => s.ID == articleId)
                 .Include(s => s.Tagger)
                 .ToOneAsync();
-            article.Status = TagArticleStatusEnum.Unavail;
+            article.Status = TagArticleStatusEnum.Skiped;
             article.LastChangeTime = DateTime.Now;
 
             if (article.Tagger.CanSkipTimesPerDay <= 0)
@@ -369,9 +373,8 @@ namespace Businesses.Repositories
         public async Task<ArticleDto> GetCanAuditArticleByTaggerIdAsync(long taggerId)
         {
             var article = await Select
-                .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Unavail)
+                .Where(s => s.Status == TagArticleStatusEnum.Unaudited || s.Status == TagArticleStatusEnum.Skiped)
                 .Where(s => s.UserID == taggerId)
-                .OrderBy(s => s.Status)
                 .Include(s => s.Tagger)
                 .ToOneAsync();
 
@@ -412,8 +415,9 @@ namespace Businesses.Repositories
 	                tb.Unaudited,
 	                tb.Audited,
 	                tb.Unsanctioned,
-	                tb.Unavail,
-	                tb.PreProcessed
+	                tb.Skiped,
+	                tb.PreProcessed,
+	                tb.Unavail
                 FROM
 	                [User] AS a
 	                INNER JOIN (
@@ -425,11 +429,12 @@ namespace Businesses.Repositories
 		                SUM ( [3] ) AS Unaudited,
 		                SUM ( [4] ) AS Audited,
 		                SUM ( [5] ) AS Unsanctioned,
-		                SUM ( [6] ) AS Unavail,
-		                SUM ( [7] ) AS PreProcessed
+		                SUM ( [6] ) AS Skiped,
+		                SUM ( [7] ) AS PreProcessed,
+		                SUM ( [8] ) AS Unavail
 	                FROM
 	                    ( SELECT UserID, Status, ID, LastChangeTime FROM ArticleTaggedRecord {whereSql}) tb
-                    PIVOT (COUNT ( ID ) FOR Status IN ( [0], [1], [2], [3], [4], [5], [6], [7] )) AS tb
+                    PIVOT (COUNT ( ID ) FOR Status IN ( [0], [1], [2], [3], [4], [5], [6], [7], [8] )) AS tb
                     GROUP BY
 	                tb.UserID
 	                ) tb ON a.id= tb.userid

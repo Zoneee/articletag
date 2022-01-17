@@ -60,13 +60,19 @@ const TagArticleStatusEnum = {
    * value: 6
    * @const
    */
-  Unavail: 6,
+  Skiped: 6,
 
   /**
    * value: 7
    * @const
    */
   PreProcessed: 7,
+
+  /**
+   * value: 8
+   * @const
+   */
+  Unavail: 8,
 
   /**
    * Returns a <code>TagArticleStatusEnum</code> enum value from a JavaScript object name.
